@@ -1,0 +1,116 @@
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: overlayIn 0.15s ease-out;
+}
+
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.dialog {
+  background: rgba(24, 24, 44, 0.95);
+  border: 1px solid rgba(80, 80, 140, 0.25);
+  border-radius: 14px;
+  padding: 24px 28px;
+  min-width: 340px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(92, 107, 192, 0.06);
+  animation: dialogIn 0.2s ease-out;
+}
+
+@keyframes dialogIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.dialog-title {
+  margin: 0 0 16px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #e0e2ff;
+  letter-spacing: -0.3px;
+}
+
+.dialog-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(8, 8, 20, 0.8);
+  border: 1px solid rgba(80, 80, 140, 0.3);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #e8eaf6;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+}
+
+.dialog-input:focus {
+  border-color: rgba(106, 122, 255, 0.6);
+  box-shadow: 0 0 0 3px rgba(106, 122, 255, 0.1);
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.dialog .btn-primary {
+  background: linear-gradient(135deg, #5c6bc0, #7e57c2);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 22px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(92, 107, 192, 0.2);
+}
+
+.dialog .btn-primary:hover {
+  background: linear-gradient(135deg, #7986cb, #9575cd);
+  box-shadow: 0 4px 12px rgba(92, 107, 192, 0.3);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: rgba(160, 160, 200, 0.8);
+  border: 1px solid rgba(80, 80, 140, 0.3);
+  border-radius: 8px;
+  padding: 8px 22px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.btn-secondary:hover {
+  border-color: rgba(106, 122, 255, 0.4);
+  color: #e0e2ff;
+  background: rgba(60, 60, 120, 0.2);
+}

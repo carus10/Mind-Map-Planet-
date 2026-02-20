@@ -1,0 +1,138 @@
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  z-index: 200;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.settings-panel {
+  background: rgba(20, 20, 40, 0.95);
+  border-left: 1px solid rgba(80, 80, 140, 0.2);
+  width: 280px;
+  height: 100%;
+  padding: 24px;
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.4);
+  animation: slideIn 0.25s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0.5;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.settings-header h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: #e0e2ff;
+  letter-spacing: -0.3px;
+}
+
+.btn-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(60, 60, 120, 0.2);
+  border: none;
+  border-radius: 6px;
+  color: rgba(140, 140, 200, 0.6);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-close:hover {
+  color: #e0e2ff;
+  background: rgba(80, 80, 160, 0.3);
+}
+
+.settings-section {
+  margin-bottom: 24px;
+}
+
+.settings-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(120, 120, 180, 0.6);
+  margin-bottom: 12px;
+}
+
+.lang-options {
+  display: flex;
+  gap: 8px;
+}
+
+.lang-btn {
+  flex: 1;
+  background: rgba(10, 10, 25, 0.6);
+  border: 1px solid rgba(80, 80, 140, 0.25);
+  border-radius: 8px;
+  padding: 10px;
+  color: rgba(160, 160, 200, 0.7);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.lang-btn:hover {
+  border-color: rgba(106, 122, 255, 0.4);
+  color: #e0e2ff;
+}
+
+.lang-btn.active {
+  border-color: rgba(106, 122, 255, 0.5);
+  color: #8a94ff;
+  background: rgba(106, 122, 255, 0.08);
+}
+
+.instructions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(10, 10, 25, 0.4);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(80, 80, 140, 0.15);
+}
+
+.instruction-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: rgba(180, 180, 220, 0.85);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.instruction-item span {
+  font-size: 16px;
+  opacity: 0.9;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}

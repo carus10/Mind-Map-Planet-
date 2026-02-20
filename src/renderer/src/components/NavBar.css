@@ -1,0 +1,159 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 44px;
+  background: rgba(12, 12, 28, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(80, 80, 140, 0.2);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Back button */
+.btn-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: rgba(60, 60, 120, 0.3);
+  color: #a0a0cc;
+  border: 1px solid rgba(80, 80, 140, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+  background: rgba(80, 80, 160, 0.4);
+  color: #e0e0ff;
+  border-color: rgba(120, 120, 200, 0.4);
+  transform: translateX(-1px);
+}
+
+/* Breadcrumb */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.crumb-item {
+  display: flex;
+  align-items: center;
+}
+
+.crumb-sep {
+  color: rgba(100, 100, 160, 0.5);
+  font-size: 14px;
+  margin: 0 4px;
+  user-select: none;
+}
+
+.crumb-btn {
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+}
+
+.crumb-parent {
+  color: #8888bb;
+}
+
+.crumb-parent:hover {
+  color: #c0c0ff;
+  background: rgba(80, 80, 160, 0.2);
+}
+
+.crumb-active {
+  color: #e8eaff;
+  font-weight: 600;
+  cursor: default;
+}
+
+.crumb-active:disabled {
+  opacity: 1;
+}
+
+.crumb-count {
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(92, 107, 192, 0.3);
+  color: #9aa0d0;
+  padding: 1px 5px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* Vault name */
+.vault-name {
+  font-size: 12px;
+  color: rgba(120, 120, 180, 0.7);
+  display: flex;
+  align-items: center;
+  padding: 4px 10px;
+  background: rgba(40, 40, 80, 0.3);
+  border-radius: 6px;
+  border: 1px solid rgba(60, 60, 100, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vault-name:hover {
+  color: #c0c0ff;
+  background: rgba(80, 80, 160, 0.2);
+  border-color: rgba(100, 100, 180, 0.4);
+}
+
+.vault-name:active {
+  transform: scale(0.97);
+}
+
+/* Settings icon */
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  color: rgba(140, 140, 200, 0.6);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-icon:hover {
+  color: #c0c0ff;
+  background: rgba(80, 80, 160, 0.2);
+}
