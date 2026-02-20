@@ -8,16 +8,36 @@
   z-index: 200;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
+  transition: all 0.3s ease;
+}
+
+.settings-overlay.guide-mode-overlay {
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 20, 0.7);
 }
 
 .settings-panel {
   background: rgba(20, 20, 40, 0.95);
   border-left: 1px solid rgba(80, 80, 140, 0.2);
-  width: 280px;
+  width: 340px;
   height: 100%;
   padding: 24px;
   box-shadow: -8px 0 32px rgba(0, 0, 0, 0.4);
   animation: slideIn 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.settings-panel.guide-mode {
+  width: 90vw;
+  max-width: 1000px;
+  height: 90vh;
+  border-left: none;
+  border: 1px solid rgba(80, 80, 140, 0.25);
+  border-radius: 16px;
+  padding: 32px 40px;
 }
 
 @keyframes slideIn {
@@ -36,7 +56,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
+  flex-shrink: 0;
 }
 
 .settings-header h2 {
@@ -135,4 +156,151 @@
   font-size: 16px;
   opacity: 0.9;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Tabs */
+.settings-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(80, 80, 140, 0.2);
+  padding-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 8px 12px;
+  color: rgba(160, 160, 200, 0.7);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 6px;
+  font-family: inherit;
+}
+
+.tab-btn:hover {
+  color: #e0e2ff;
+  background: rgba(80, 80, 160, 0.1);
+}
+
+.tab-btn.active {
+  color: #8a94ff;
+  background: rgba(106, 122, 255, 0.1);
+  font-weight: 600;
+}
+
+.settings-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 8px;
+  /* space for scrollbar */
+  margin-right: -8px;
+  /* offset padding */
+}
+
+/* Custom scrollbar for settings content */
+.settings-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.settings-content::-webkit-scrollbar-track {
+  background: rgba(10, 10, 25, 0.3);
+  border-radius: 2px;
+}
+
+.settings-content::-webkit-scrollbar-thumb {
+  background: rgba(80, 80, 140, 0.4);
+  border-radius: 2px;
+}
+
+.settings-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(106, 122, 255, 0.6);
+}
+
+/* Guide Section */
+.guide-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.guide-mode .guide-section {
+  gap: 32px;
+}
+
+.guide-intro {
+  font-size: 13px;
+  color: rgba(180, 180, 220, 0.9);
+  line-height: 1.5;
+  margin: 0;
+  padding: 14px;
+  background: rgba(106, 122, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(106, 122, 255, 0.15);
+}
+
+.guide-mode .guide-intro {
+  font-size: 15px;
+  padding: 24px;
+  line-height: 1.6;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.guide-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.guide-block h3 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: #8a94ff;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.guide-mode .guide-block h3 {
+  font-size: 16px;
+  margin-bottom: 12px;
+  letter-spacing: 0.1em;
+}
+
+.guide-block p {
+  margin: 0 0 12px 0;
+  font-size: 12.5px;
+  color: rgba(160, 160, 200, 0.85);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.guide-mode .guide-block p {
+  font-size: 15px;
+  line-height: 1.7;
+  max-width: 100%;
+}
+
+.instructions-list.compact {
+  padding: 12px;
+  gap: 10px;
+}
+
+.guide-mode .instructions-list.compact {
+  display: none;
+  /* Hide compact bullet points when in full screen if the description covers it all, but let's actually just scale them or hide them. The user wanted full detailed descriptions which are in `p`, those bullets are somewhat redundant now but I can keep them styled larger, or remove them inside guide-mode */
+}
+
+.instructions-list.compact .instruction-item {
+  font-size: 12px;
+}
+
+.instructions-list.compact .instruction-item span {
+  font-size: 15px;
 }

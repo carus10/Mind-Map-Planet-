@@ -28,7 +28,7 @@ export function WelcomeScreen({ onVaultSelected, scanning }: Props): React.React
     <div className="welcome">
       <div className="welcome-card">
         <div className="welcome-icon">🗺️</div>
-        <h1 className="welcome-title">MindMap World</h1>
+        <h1 className="welcome-title">Mind Map Planet</h1>
         <p className="welcome-desc">{t.selectVaultDesc}</p>
         {scanning ? (
           <button className="btn-primary" disabled>Scanning...</button>

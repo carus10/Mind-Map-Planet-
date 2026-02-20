@@ -14,7 +14,7 @@
   },
   "build": {
     "appId": "com.mindmapworld.app",
-    "productName": "MindMap World",
+    "productName": "Mind Map Planet",
     "directories": {
       "output": "release"
     },
@@ -25,7 +25,7 @@
     "win": {
       "target": [
         {
-          "target": "dir",
+          "target": "nsis",
           "arch": [
             "x64"
           ]
