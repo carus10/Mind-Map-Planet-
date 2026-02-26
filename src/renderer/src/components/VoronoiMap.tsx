@@ -850,6 +850,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                                     onMouseLeave={() => setHoveredIndex(null)}
                                     style={{ cursor: isDraggingRef.current ? 'grabbing' : 'pointer', opacity: draggedNode?.id === p.node.id ? 0.4 : 1 }}
                                 >
+                                    <title>{p.node.name}</title>
                                     {/* Glow */}
                                     <circle
                                         cx={p.cx} cy={p.cy} r={p.radius + (dropTargetId === p.node.id ? 12 : 6)}
@@ -882,7 +883,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                                         className="voronoi-planet__name"
                                         fontSize={nameFontSize}
                                     >
-                                        {p.node.name}
+                                        {p.node.name.length > 12 ? p.node.name.slice(0, 12) + '...' : p.node.name}
                                     </text>
 
                                     {/* Alt klasör sayısı */}
@@ -1044,6 +1045,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                                         onPointerLeave={handleNodePointerLeave}
                                         style={{ opacity: draggedNode?.id === cell.node.id ? 0.3 : 1 }}
                                     >
+                                        <title>{cell.node.name}</title>
                                         <path className="voronoi-cell__path" d={polygonToPath(cell.polygon)}
                                             stroke={dropTargetId === cell.node.id ? '#fff' : 'none'}
                                             strokeWidth={dropTargetId === cell.node.id ? 4 : 0}
@@ -1052,7 +1054,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                                         />
                                         <text className="voronoi-cell__label" x={cell.centroid[0]}
                                             y={cell.centroid[1] - (subLabel ? labelSize * 0.3 : 0)} fontSize={labelSize}>
-                                            {cell.node.name}
+                                            {cell.node.name.length > 12 ? cell.node.name.slice(0, 12) + '...' : cell.node.name}
                                         </text>
                                         {subLabel && labelSize > 10 && (
                                             <text className="voronoi-cell__label voronoi-cell__label--sub"
