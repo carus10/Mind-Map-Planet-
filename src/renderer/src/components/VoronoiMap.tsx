@@ -252,6 +252,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
     const [transitioning, setTransitioning] = useState(false)
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+    const [hoveredLinkIdx, setHoveredLinkIdx] = useState<number | null>(null)
 
     // Solar system pan + zoom — useRef for immediate drag tracking
     const panXRef = useRef(0)
@@ -337,17 +338,41 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
         const nm = new Map<string, HierarchyNode>()
         const pm = new Map<string, HierarchyNode>()
 
-        const traverse = (node: HierarchyNode, parentCountry: HierarchyNode | null) => {
+        // rootCountry: bu node'un ait olduğu üst düzey gezegen
+        // parentCountry null ise bu node'un kendisi bir köktür → parentMap'e ekleme
+        const traverse = (node: HierarchyNode, rootCountry: HierarchyNode | null) => {
             nm.set(node.name, node)
             if (node.id) nm.set(node.id, node)
-            if (parentCountry) pm.set(node.id, parentCountry)
+            // Kök ülkeler kendi kendilerinin parent'ı OLMAMALI
+            if (rootCountry && rootCountry.id !== node.id) {
+                pm.set(node.id, rootCountry)
+            }
             if (node.children) {
-                node.children.forEach(c => traverse(c, parentCountry || node))
+                node.children.forEach(c => traverse(c, rootCountry || node))
             }
         }
 
-        hierarchy.countries.forEach(c => traverse(c, c))
+        // Kök ülkeler için null geçiyoruz ki kendi kendilerini pm'ye eklemesinler
+        hierarchy.countries.forEach(c => traverse(c, null))
         return { nodeMap: nm, parentMap: pm }
+    }, [hierarchy])
+
+    /* ── Ters Bağlantı Haritası (Gelen linkler için) ─────────── */
+    // linkText → [bu linki içeren node'lar] haritası
+    // Hedef gezegende “gelen bağlantı” çizgilerini çizmek için kullanılır
+    const reverseNodeMap = useMemo(() => {
+        const rm = new Map<string, HierarchyNode[]>()
+        const traverse = (node: HierarchyNode) => {
+            if (node.links) {
+                node.links.forEach(linkText => {
+                    const existing = rm.get(linkText) ?? []
+                    rm.set(linkText, [...existing, node])
+                })
+            }
+            node.children?.forEach(traverse)
+        }
+        hierarchy.countries.forEach(traverse)
+        return rm
     }, [hierarchy])
 
     /* ── Boyut Takibi ─────────────────────────────────────── */
@@ -607,47 +632,100 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
             target: { x: number, y: number, id: string, isForeign: boolean, index: number },
         }[] = []
 
+        // cellMap: direkt hücre adı/ID → centroid.
+        // Ayrıca hücrelerin TÜM alt notlarını da aynı hücrenin centroid'ine eşle
         const cellMap = new Map<string, { x: number, y: number, index: number }>()
+
+        const registerDescendants = (node: HierarchyNode, centroid: { x: number, y: number, index: number }) => {
+            cellMap.set(node.name, centroid)
+            if (node.id) cellMap.set(node.id, centroid)
+            node.children?.forEach(child => registerDescendants(child, centroid))
+        }
+
         cells.forEach((c, i) => {
-            cellMap.set(c.node.name, { x: c.centroid[0], y: c.centroid[1], index: i })
-            if (c.node.id) cellMap.set(c.node.id, { x: c.centroid[0], y: c.centroid[1], index: i })
+            const info = { x: c.centroid[0], y: c.centroid[1], index: i }
+            registerDescendants(c.node, info)
         })
 
+        // Duplicate engellemek için hazırlanan key formatı: "cellIndex:karsıGePlanetId"
+        const addedForeignKeys = new Set<string>()
+
+        const addForeignLink = (
+            cellIdx: number,
+            cellCentroid: [number, number],
+            foreignNodeId: string,
+        ) => {
+            // Aynı hücre için aynı yabancı gezegene birden fazla çizgi çizme
+            const foreignRoot = parentMap.get(foreignNodeId)
+            const key = `${cellIdx}:${foreignRoot?.id ?? foreignNodeId}`
+            if (addedForeignKeys.has(key)) return
+            addedForeignKeys.add(key)
+
+            const dx = cellCentroid[0] - planetGeometry.cx
+            const dy = cellCentroid[1] - planetGeometry.cy
+            const dist = Math.hypot(dx, dy) || 1
+            const spreadOut = planetGeometry.radius * 0.95
+            const edgeX = planetGeometry.cx + (dx / dist) * spreadOut
+            const edgeY = planetGeometry.cy + (dy / dist) * spreadOut
+
+            links.push({
+                source: { x: cellCentroid[0], y: cellCentroid[1], id: foreignNodeId, index: cellIdx },
+                target: { x: edgeX, y: edgeY, id: foreignNodeId, isForeign: true, index: -1 },
+            })
+        }
+
+        // ── Pass 1: GİDEN (outgoing) bağlantılar ────────────────────────
         cells.forEach((cell, i) => {
-            const node = cell.node
-            if (!node.links) return
+            const gatherLinks = (node: HierarchyNode) => {
+                if (node.links) {
+                    node.links.forEach((l) => {
+                        const targetNode = nodeMap.get(l)
+                        if (!targetNode) return
 
-            node.links.forEach((l) => {
-                const targetNode = nodeMap.get(l)
-                if (!targetNode) return
-
-                // Aynı gezegende mi?
-                if (cellMap.has(targetNode.name)) {
-                    const targetInfo = cellMap.get(targetNode.name)!
-                    links.push({
-                        source: { x: cell.centroid[0], y: cell.centroid[1], id: node.id, index: i },
-                        target: { x: targetInfo.x, y: targetInfo.y, id: targetNode.id, isForeign: false, index: targetInfo.index }
-                    })
-                } else if (parentMap.has(targetNode.id)) {
-                    // Yabancı gezegen bağlantısı (Inter-planetary)
-                    const dx = cell.centroid[0] - planetGeometry.cx
-                    const dy = cell.centroid[1] - planetGeometry.cy
-                    const dist = Math.hypot(dx, dy) || 1
-                    const spreadOut = planetGeometry.radius * 0.95
-
-                    const edgeX = planetGeometry.cx + (dx / dist) * spreadOut
-                    const edgeY = planetGeometry.cy + (dy / dist) * spreadOut
-
-                    links.push({
-                        source: { x: cell.centroid[0], y: cell.centroid[1], id: node.id, index: i },
-                        target: { x: edgeX, y: edgeY, id: targetNode.id, isForeign: true, index: -1 }
+                        // Aynı gezegende mi?
+                        if (cellMap.has(targetNode.name) || cellMap.has(targetNode.id)) {
+                            const targetInfo = cellMap.get(targetNode.name) ?? cellMap.get(targetNode.id)!
+                            if (targetInfo.index === i) return // self-loop engelle
+                            links.push({
+                                source: { x: cell.centroid[0], y: cell.centroid[1], id: node.id, index: i },
+                                target: { x: targetInfo.x, y: targetInfo.y, id: targetNode.id, isForeign: false, index: targetInfo.index },
+                            })
+                        } else if (parentMap.has(targetNode.id)) {
+                            // Yabancı gezegen → kenar noktasına çizgi (giden)
+                            addForeignLink(i, cell.centroid, targetNode.id)
+                        }
                     })
                 }
-            })
+                node.children?.forEach(gatherLinks)
+            }
+            gatherLinks(cell.node)
+        })
+
+        // ── Pass 2: GELEN (incoming) yabancı bağlantılar ──────────────
+        // Mevcut gezegenin her notuna başka bir gezegenden link var mı?
+        cells.forEach((cell, i) => {
+            const gatherIncoming = (node: HierarchyNode) => {
+                // Bu node'u linkleyen dış node'ları bul (isimle ve ID ile)
+                const keys = [node.name, node.id].filter(Boolean)
+                keys.forEach(key => {
+                    const sourcers = reverseNodeMap.get(key) ?? []
+                    sourcers.forEach(sourceNode => {
+                        // Kaynak aynı gezegende mi? Aynıysa atla (Pass 1 halletti)
+                        if (cellMap.has(sourceNode.name) || cellMap.has(sourceNode.id)) return
+                        // Kaynak gerçekten başka bir gezegende mi?
+                        if (!parentMap.has(sourceNode.id)) return
+                        // Gelen bağlantıyı hücre → kenar olarak çiz
+                        // target.id = sourceNode.id → tıklandığında kaynağa zıpla
+                        addForeignLink(i, cell.centroid, sourceNode.id)
+                    })
+                })
+                node.children?.forEach(gatherIncoming)
+            }
+            gatherIncoming(cell.node)
         })
 
         return links
-    }, [isSolarSystem, cells, nodeMap, parentMap, planetGeometry])
+    }, [isSolarSystem, cells, nodeMap, parentMap, reverseNodeMap, planetGeometry])
 
     /* ── Navigasyon ───────────────────────────────────────── */
 
@@ -947,7 +1025,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                             borderRadius: '50%',
                             background: dropTargetId ? '#63ff8c' : '#508cff',
                             boxShadow: `0 0 10px ${dropTargetId ? '#63ff8c' : '#508cff'}`,
-                            animation: 'pulse 1s infinite alternate'
+                            animation: 'voronoi-pulse 1s infinite alternate'
                         }} />
                         {dropTargetId ? '↳ Drop here' : (activeDraggedNode ? 'Hold to move' : '↑ Quick Stash')} | {(draggedNode || activeDraggedNode)?.name}
                     </div>
@@ -1033,6 +1111,17 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                                 const subLabel = isLeaf
                                     ? (cell.node.preview ? cell.node.preview.slice(0, 25) : '')
                                     : `${childCount} alt bölge`
+
+                                // Link hover olduğunda kaynak/hedef hücreler parlak, diğerleri karardı
+                                let cellOpacity = draggedNode?.id === cell.node.id ? 0.3 : 1
+                                if (hoveredLinkIdx !== null) {
+                                    const hl = localLinks[hoveredLinkIdx]
+                                    if (hl) {
+                                        const isLinked = hl.source.index === i || (!hl.target.isForeign && hl.target.index === i)
+                                        cellOpacity = isLinked ? 1 : 0.25
+                                    }
+                                }
+
                                 return (
                                     <g key={cell.node.id}
                                         className={`voronoi-cell ${isLeaf ? 'voronoi-cell--leaf' : ''}`}
@@ -1043,7 +1132,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                                         onPointerDown={(e) => handleNodePointerDown(e, cell.node)}
                                         onPointerEnter={(e) => handleNodePointerEnter(e, cell.node)}
                                         onPointerLeave={handleNodePointerLeave}
-                                        style={{ opacity: draggedNode?.id === cell.node.id ? 0.3 : 1 }}
+                                        style={{ opacity: cellOpacity, transition: 'opacity 0.25s ease' }}
                                     >
                                         <title>{cell.node.name}</title>
                                         <path className="voronoi-cell__path" d={polygonToPath(cell.polygon)}
@@ -1069,19 +1158,49 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
 
                             {/* Neon Trade Routes (Local Links) */}
                             {localLinks.map((link, idx) => {
-                                const isSourceHovered = hoveredIndex === link.source.index
-                                const isTargetHovered = !link.target.isForeign && hoveredIndex === link.target.index
-                                const isFocus = hoveredIndex === null || isSourceHovered || isTargetHovered
+                                // — Opacity Mantığı —
+                                // 1. Bir link hover'lanmışsa: yalnızca o link tam parlak, diğerleri sönük
+                                // 2. Bir hücre hover'lanmışsa: bağlı linkler parlak, diğerleri sönük
+                                // 3. Hiçbir şey hover'lanmamışsa: standart yarı şeffaf görünüm
+                                const isThisLinkHovered = hoveredLinkIdx === idx
+                                const isSourceCellHovered = hoveredIndex === link.source.index
+                                const isTargetCellHovered = !link.target.isForeign && hoveredIndex === link.target.index
 
-                                // Saydamlık: Oku veya hedefi odaklanmışsa çok parlak, yoksa normal veya çok sönük
-                                let opacity = 0.15
-                                if (hoveredIndex === null) opacity = 0.35 // Standart
-                                else if (isFocus) opacity = 0.9 // Parlak vurgu
+                                let opacity: number
+                                let strokeWidth: number
+                                let glowFilter = 'none'
+
+                                if (hoveredLinkIdx !== null) {
+                                    // Bir link aktif hover'da
+                                    if (isThisLinkHovered) {
+                                        opacity = 1
+                                        strokeWidth = 4.5
+                                        const glowColor = link.target.isForeign ? 'rgba(255,64,129,0.9)' : 'rgba(64,196,255,0.9)'
+                                        glowFilter = `drop-shadow(0 0 6px ${glowColor}) drop-shadow(0 0 12px ${glowColor})`
+                                    } else {
+                                        opacity = 0.06
+                                        strokeWidth = 2.5
+                                    }
+                                } else if (hoveredIndex !== null) {
+                                    // Bir hücre hover'da
+                                    if (isSourceCellHovered || isTargetCellHovered) {
+                                        opacity = 0.95
+                                        strokeWidth = 3.5
+                                        const glowColor = link.target.isForeign ? 'rgba(255,64,129,0.7)' : 'rgba(64,196,255,0.7)'
+                                        glowFilter = `drop-shadow(0 0 4px ${glowColor})`
+                                    } else {
+                                        opacity = 0.06
+                                        strokeWidth = 2.5
+                                    }
+                                } else {
+                                    // Standart durum — hiç hover yok
+                                    opacity = 0.35
+                                    strokeWidth = 2.5
+                                }
 
                                 // Kıvrımlı çizgi (Bezier)
                                 const mx = (link.source.x + link.target.x) / 2
                                 const my = (link.source.y + link.target.y) / 2
-                                const dist = Math.hypot(link.target.x - link.source.x, link.target.y - link.source.y)
                                 const cx = mx - (link.target.y - link.source.y) * 0.15
                                 const cy = my + (link.target.x - link.source.x) * 0.15
 
@@ -1089,32 +1208,43 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                                     ? `M ${link.source.x} ${link.source.y} L ${link.target.x} ${link.target.y}`
                                     : `M ${link.source.x} ${link.source.y} Q ${cx} ${cy} ${link.target.x} ${link.target.y}`
 
-                                const strokeColor = link.target.isForeign ? "#ff4081" : "#40c4ff"
+                                const strokeColor = link.target.isForeign ? '#ff4081' : '#40c4ff'
 
                                 return (
-                                    <g key={`local-link-${idx}`} style={{ opacity, transition: 'opacity 0.3s ease' }} className="voronoi-local-link">
-                                        {/* Tıklanabilir Görünmez Tampon Sınır (Kullanıcı isabet etsin diye kalınlaştırdık) */}
+                                    <g
+                                        key={`local-link-${idx}`}
+                                        style={{ opacity, transition: 'opacity 0.2s ease', filter: glowFilter }}
+                                        className="voronoi-local-link"
+                                    >
+                                        {/* Tıklanabilir Görünmez Tampon (geniş hit alanı) */}
                                         <path
                                             d={pathData}
                                             fill="none"
                                             stroke="transparent"
-                                            strokeWidth="15"
+                                            strokeWidth="18"
                                             strokeLinecap="round"
-                                            style={{ cursor: link.target.isForeign ? 'pointer' : 'default', pointerEvents: 'auto' }}
+                                            style={{
+                                                cursor: link.target.isForeign ? 'pointer' : 'default',
+                                                pointerEvents: 'auto'
+                                            }}
                                             onClick={() => {
                                                 if (link.target.isForeign) handleLinkJump(link.target.id)
                                             }}
-                                            onMouseEnter={() => setHoveredIndex(link.source.index)}
-                                            onMouseLeave={() => setHoveredIndex(null)}
+                                            onMouseEnter={() => {
+                                                setHoveredLinkIdx(idx)
+                                                setHoveredIndex(null) // Hücre hover'ını temizle — karışmasın
+                                            }}
+                                            onMouseLeave={() => setHoveredLinkIdx(null)}
                                         />
 
-                                        {/* Görünür Çizgi */}
+                                        {/* Görünür Ana Çizgi */}
                                         <path
                                             d={pathData}
                                             fill="none"
                                             stroke={strokeColor}
-                                            strokeWidth="2.5"
+                                            strokeWidth={strokeWidth}
                                             strokeLinecap="round"
+                                            style={{ transition: 'stroke-width 0.2s ease', pointerEvents: 'none' }}
                                             className={`voronoi-trade-route ${link.target.isForeign ? 'voronoi-trade-route--jump' : ''}`}
                                         />
 
@@ -1123,8 +1253,9 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                                             d={pathData}
                                             fill="none"
                                             stroke="#fff"
-                                            strokeWidth="1.5"
-                                            strokeDasharray="4 14"
+                                            strokeWidth={isThisLinkHovered ? 2.5 : 1.5}
+                                            strokeDasharray={isThisLinkHovered ? '6 10' : '4 14'}
+                                            style={{ pointerEvents: 'none', transition: 'stroke-width 0.2s ease' }}
                                             className="voronoi-trade-route-flow"
                                         />
                                     </g>
