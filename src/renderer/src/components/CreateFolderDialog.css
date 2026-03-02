@@ -1,0 +1,25 @@
+.create-folder-overlay {
+    z-index: 1050;
+}
+
+.create-folder-dialog {
+    width: 380px;
+    max-width: 90vw;
+    text-align: center;
+}
+
+.folder-icon-wrapper {
+    font-size: 40px;
+    margin-bottom: 8px;
+}
+
+.folder-subtitle {
+    font-size: 13px;
+    color: #8b9bb4;
+    margin: -8px 0 20px;
+}
+
+.folder-parent-name {
+    color: #c8d3f0;
+    font-weight: 600;
+}

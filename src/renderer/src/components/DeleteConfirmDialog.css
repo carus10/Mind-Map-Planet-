@@ -1,0 +1,73 @@
+.delete-overlay {
+    z-index: 1100;
+}
+
+.delete-dialog {
+    width: 400px;
+    max-width: 90vw;
+    text-align: center;
+}
+
+.delete-warning-icon {
+    font-size: 40px;
+    margin-bottom: 8px;
+    animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    20% {
+        transform: rotate(-8deg);
+    }
+
+    60% {
+        transform: rotate(8deg);
+    }
+}
+
+.delete-title {
+    color: #f87171 !important;
+    margin-bottom: 12px;
+}
+
+.delete-body {
+    font-size: 14px;
+    color: #8b9bb4;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.delete-target-name {
+    color: #e2e8f0;
+    font-weight: 600;
+}
+
+.btn-danger {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
+    font-family: inherit;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6);
+    transform: translateY(-1px);
+}
+
+.btn-danger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
