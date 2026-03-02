@@ -154,10 +154,7 @@
 }
 
 /* ── Neon Ticaret Yolları (Planet Inside Links) ───────────── */
-
-.voronoi-local-link {
-    pointer-events: none;
-}
+/* .voronoi-local-link — pointer-events kaldırıldı; içindeki tampon <path> kendi pointer-events="auto" ile kontrol edilir */
 
 .voronoi-trade-route {
     mix-blend-mode: screen;
@@ -166,7 +163,7 @@
 .voronoi-trade-route-flow {
     mix-blend-mode: screen;
     opacity: 0.9;
-    animation: dash-flow-fast linear infinite 1.5s;
+    animation: dash-flow-fast 1.5s linear infinite;
 }
 
 @keyframes dash-flow-fast {
@@ -347,4 +344,20 @@
     font-size: 14px;
     font-family: 'Outfit', sans-serif;
     user-select: none;
+}
+
+/* ── Drag Ghost Pulse Animasyonu ─────────────────────────────── */
+
+@keyframes voronoi-pulse {
+    0% {
+        opacity: 0.7;
+        transform: scale(0.9);
+        box-shadow: 0 0 6px currentColor;
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1.15);
+        box-shadow: 0 0 14px currentColor;
+    }
 }
