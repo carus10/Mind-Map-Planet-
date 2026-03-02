@@ -466,13 +466,27 @@ export function WorldMap(): React.ReactElement {
             const targetNode = globalNodesMap.current.get(targetPath)
             if (!targetNode) continue
 
-            // Hedef node'un centroid'ini bulalım (Sadece world level'da başka ülkere bağlantı çiziyoruz şimdilik)
-            // Eğer hedef başka bir ülkenin altındaysa, o ülkenin centroid'ini bul.
-            const targetCountryId = targetNode.id.split('/')[0]
-            const fTargetId = nodeToFeat.current.get(targetCountryId)
+            // Hedef node'un ülkesini bul:
+            // globalNodesMap ID'leri tam dosya yolu olduğundan split('/')[0] çalışmıyor.
+            // Bunun yerine nodeToFeat içinde doğrudan kaydı olan node'u bul.
+            // Önce targetNode'un kendisi bir ülke mi?
+            let fTargetId = nodeToFeat.current.get(targetNode.id)
+            if (!fTargetId) {
+              // Değilse vaultCountries içinde targetNode.id ile başlayan ülkeyi ara
+              for (const [countryId, featId] of nodeToFeat.current.entries()) {
+                // targetNode'un ID'si bu ülkenin path'i altında mı?
+                if (targetNode.id.startsWith(countryId + '/') || targetNode.id.startsWith(countryId + '\\')) {
+                  fTargetId = featId
+                  break
+                }
+              }
+            }
             if (!fTargetId) continue
             const ftFeat = features.find(f => f.id === fTargetId)
             if (!ftFeat) continue
+
+            // Kendine giden bağlantı çizme
+            if (ftFeat.id === feat.id) continue
 
             const p2 = geoCentroid(ftFeat.geometry as any)
             const pt2 = proj(p2)
