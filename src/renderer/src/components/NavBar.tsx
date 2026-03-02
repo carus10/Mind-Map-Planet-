@@ -7,9 +7,10 @@ interface Props {
   onSettings: () => void
   onChangeVault: () => void
   onCreateNote: () => void
+  onCreatePlanet: () => void
 }
 
-export function NavBar({ onSettings, onChangeVault, onCreateNote }: Props): React.ReactElement {
+export function NavBar({ onSettings, onChangeVault, onCreateNote, onCreatePlanet }: Props): React.ReactElement {
   const { hierarchy, language, voronoiPath, voronoiGoBack, voronoiNavigateToIndex } = useMapStore((s) => ({
     hierarchy: s.hierarchy,
     language: s.language,
@@ -66,6 +67,14 @@ export function NavBar({ onSettings, onChangeVault, onCreateNote }: Props): Reac
             {hierarchy.vaultName}
           </button>
         )}
+        <button className="btn-icon" onClick={onCreatePlanet} title="New Planet" style={{ marginRight: '4px' }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            {/* Planet circle */}
+            <circle cx="12" cy="12" r="5" />
+            {/* Ring */}
+            <ellipse cx="12" cy="12" rx="11" ry="4.5" />
+          </svg>
+        </button>
         <button className="btn-icon" onClick={onCreateNote} title="New Note" style={{ marginRight: '8px' }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"></line>

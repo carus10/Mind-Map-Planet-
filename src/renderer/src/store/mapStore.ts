@@ -12,6 +12,7 @@ interface MapStore {
   language: Language
   hoveredId: string | null
   renameTarget: HierarchyNode | null
+  contextMenuTarget: { node: HierarchyNode; x: number; y: number } | null
   error: string | null
 
   voronoiPath: HierarchyNode[]
@@ -28,6 +29,7 @@ interface MapStore {
   setLanguage: (l: Language) => void
   setHovered: (id: string | null) => void
   setRenameTarget: (node: HierarchyNode | null) => void
+  setContextMenuTarget: (target: { node: HierarchyNode; x: number; y: number } | null) => void
   setError: (msg: string | null) => void
 
   // --- Drag & Drop (Cargo Hold) ---
@@ -47,6 +49,7 @@ export const useMapStore = create<MapStore>((set) => ({
   language: 'en',
   hoveredId: null,
   renameTarget: null,
+  contextMenuTarget: null,
   error: null,
 
   // Voronoi navigasyon — klasör yolu stack'i
@@ -178,6 +181,7 @@ export const useMapStore = create<MapStore>((set) => ({
   setLanguage: (l) => set({ language: l }),
   setHovered: (id) => set({ hoveredId: id }),
   setRenameTarget: (node) => set({ renameTarget: node }),
+  setContextMenuTarget: (target) => set({ contextMenuTarget: target }),
   setError: (msg) => set({ error: msg }),
 
   // --- Drag & Drop (Cargo Hold) ---

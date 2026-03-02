@@ -270,6 +270,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
     const voronoiGoBack = useMapStore((s) => s.voronoiGoBack)
     const voronoiJumpTo = useMapStore((s) => s.voronoiJumpTo)
     const setRenameTarget = useMapStore((s) => s.setRenameTarget)
+    const setContextMenuTarget = useMapStore((s) => s.setContextMenuTarget)
     const setError = useMapStore((s) => s.setError)
     const setHierarchy = useMapStore((s) => s.setHierarchy)
     const stashNode = useMapStore((s) => s.stashNode)
@@ -771,8 +772,8 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
     const handleContextMenu = useCallback((e: React.MouseEvent, node: HierarchyNode) => {
         e.preventDefault()
         e.stopPropagation()
-        setRenameTarget(node)
-    }, [setRenameTarget])
+        setContextMenuTarget({ node, x: e.clientX, y: e.clientY })
+    }, [setContextMenuTarget])
 
     useEffect(() => {
         const handler = (e: KeyboardEvent): void => {
