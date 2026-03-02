@@ -6,6 +6,8 @@ contextBridge.exposeInMainWorld('api', {
   renameNode: (oldPath: string, newName: string) => ipcRenderer.invoke('file:rename', oldPath, newName),
   renameFile: (oldPath: string, newName: string) => ipcRenderer.invoke('file:rename', oldPath, newName),
   createNote: (folderPath: string, noteName: string) => ipcRenderer.invoke('file:create', folderPath, noteName),
+  createFolder: (parentPath: string, folderName: string) => ipcRenderer.invoke('file:createFolder', parentPath, folderName),
+  deleteNode: (targetPath: string) => ipcRenderer.invoke('file:delete', targetPath),
   moveNode: (sourcePath: string, targetFolderPath: string) => ipcRenderer.invoke('file:move', sourcePath, targetFolderPath),
   openObsidian: (url: string) => ipcRenderer.invoke('obsidian:open', url),
   storeGet: (key: string) => ipcRenderer.invoke('store:get', key),

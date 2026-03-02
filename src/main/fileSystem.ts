@@ -1,4 +1,4 @@
-import { renameSync, writeFileSync } from 'fs'
+import { renameSync, writeFileSync, mkdirSync, rmSync, unlinkSync, statSync } from 'fs'
 import { join, dirname, basename } from 'path'
 
 export interface RenameResult {
@@ -34,6 +34,32 @@ export function moveNode(sourcePath: string, targetFolderPath: string): RenameRe
     const filename = basename(sourcePath)
     const newPath = join(targetFolderPath, filename)
     renameSync(sourcePath, newPath)
+    return { success: true }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    return { success: false, error: msg }
+  }
+}
+
+export function createFolder(parentPath: string, folderName: string): RenameResult {
+  try {
+    const newPath = join(parentPath, folderName)
+    mkdirSync(newPath, { recursive: false })
+    return { success: true }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    return { success: false, error: msg }
+  }
+}
+
+export function deleteNode(targetPath: string): RenameResult {
+  try {
+    const stat = statSync(targetPath)
+    if (stat.isDirectory()) {
+      rmSync(targetPath, { recursive: true, force: true })
+    } else {
+      unlinkSync(targetPath)
+    }
     return { success: true }
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err)

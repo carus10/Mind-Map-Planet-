@@ -6,6 +6,8 @@ declare global {
       renameNode: (oldPath: string, newName: string) => Promise<{ success: boolean; error?: string }>
       renameFile: (oldPath: string, newName: string) => Promise<{ success: boolean; error?: string }>
       createNote: (folderPath: string, noteName: string) => Promise<{ success: boolean; error?: string }>
+      createFolder: (parentPath: string, folderName: string) => Promise<{ success: boolean; error?: string }>
+      deleteNode: (targetPath: string) => Promise<{ success: boolean; error?: string }>
       moveNode: (sourcePath: string, targetFolderPath: string) => Promise<{ success: boolean; error?: string }>
       openObsidian: (url: string) => Promise<{ success: boolean; error?: string }>
       storeGet: (key: string) => Promise<unknown>

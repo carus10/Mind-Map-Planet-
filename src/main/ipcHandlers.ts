@@ -2,7 +2,7 @@ import { ipcMain, dialog, shell } from 'electron'
 import { existsSync, readFileSync } from 'fs'
 import { join } from 'path'
 import { scanVault } from './vaultScanner'
-import { renameNode, createNote, moveNode } from './fileSystem'
+import { renameNode, createNote, moveNode, createFolder, deleteNode } from './fileSystem'
 import { store } from './store'
 
 export function registerIpcHandlers(): void {
@@ -32,6 +32,16 @@ export function registerIpcHandlers(): void {
   // Klasör Taşıma (Sürükle & Bırak)
   ipcMain.handle('file:move', (_e, sourcePath: string, targetFolderPath: string) => {
     return moveNode(sourcePath, targetFolderPath)
+  })
+
+  // Yeni Gezegen/Klasör Oluştur
+  ipcMain.handle('file:createFolder', (_e, parentPath: string, folderName: string) => {
+    return createFolder(parentPath, folderName)
+  })
+
+  // Dosya / Klasör Sil
+  ipcMain.handle('file:delete', (_e, targetPath: string) => {
+    return deleteNode(targetPath)
   })
 
   // Obsidian'da aç
