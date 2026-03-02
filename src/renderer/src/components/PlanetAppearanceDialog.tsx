@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback } from 'react'
 import { useMapStore } from '../store/mapStore'
 import { PLANET_APPEARANCES, getAppearance } from '../utils/planetAppearances'
 import type { HierarchyNode } from '../types/hierarchy'
+import { translations } from '../i18n/translations'
 import './PlanetAppearanceDialog.css'
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 
 function MiniPlanetPreview({ appearanceKey, size = 54 }: { appearanceKey: string; size?: number }): React.ReactElement {
     const app = getAppearance(appearanceKey)
+    const t = translations[useMapStore(s => s.language)]
     const cx = size / 2
     const cy = size / 2
     const r = size * 0.38
@@ -139,14 +141,20 @@ export function PlanetAppearanceDialog({ planet, onClose }: Props): React.ReactE
     const planetAppearances = useMapStore(s => s.planetAppearances)
     const setPlanetAppearance = useMapStore(s => s.setPlanetAppearance)
     const setCustomPlanetImage = useMapStore(s => s.setCustomPlanetImage)
+    const planetSizes = useMapStore(s => s.planetSizes)
+    const setPlanetSize = useMapStore(s => s.setPlanetSize)
+    const language = useMapStore(s => s.language)
+    const t = translations[language]
 
     const currentKey = planetAppearances[planet.id] ?? 'earth'
+    const currentSize = planetSizes[planet.id] ?? 1.0
     const [selectedKey, setSelectedKey] = useState(currentKey)
+    const [selectedSize, setSelectedSize] = useState(currentSize)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const allOptions = [
         ...PLANET_APPEARANCES,
-        { key: 'custom', name: 'Özel Görsel', emoji: '🖼️', description: 'Kendi görselinizi yükleyin' },
+        { key: 'custom', name: t.appearanceCustomName, nameEn: t.appearanceCustomName, emoji: '🖼️', description: t.appearanceCustomDesc },
     ]
 
     const handleCustomFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -156,21 +164,29 @@ export function PlanetAppearanceDialog({ planet, onClose }: Props): React.ReactE
         reader.onload = (ev) => {
             const dataUrl = ev.target?.result as string
             if (dataUrl) {
+                if (selectedSize !== currentSize) {
+                    setPlanetSize(planet.id, selectedSize)
+                }
                 setCustomPlanetImage(planet.id, dataUrl)
                 onClose()
             }
         }
         reader.readAsDataURL(file)
-    }, [planet.id, setCustomPlanetImage, onClose])
+    }, [planet.id, setCustomPlanetImage, setPlanetSize, selectedSize, currentSize, onClose])
 
     const handleApply = useCallback(() => {
+        if (selectedSize !== currentSize) {
+            setPlanetSize(planet.id, selectedSize)
+        }
         if (selectedKey === 'custom') {
             fileInputRef.current?.click()
             return
         }
-        setPlanetAppearance(planet.id, selectedKey)
+        if (selectedKey !== currentKey) {
+            setPlanetAppearance(planet.id, selectedKey)
+        }
         onClose()
-    }, [selectedKey, planet.id, setPlanetAppearance, onClose])
+    }, [selectedKey, selectedSize, currentKey, currentSize, planet.id, setPlanetAppearance, setPlanetSize, onClose])
 
     return (
         <div className="pa-overlay" onClick={onClose}>
@@ -178,10 +194,10 @@ export function PlanetAppearanceDialog({ planet, onClose }: Props): React.ReactE
                 <div className="pa-header">
                     <div className="pa-header-icon">🪐</div>
                     <div>
-                        <h2 className="pa-title">Gezegen Görünümü</h2>
+                        <h2 className="pa-title">{t.planetAppearanceTitle}</h2>
                         <p className="pa-subtitle">{planet.name}</p>
                     </div>
-                    <button className="pa-close" onClick={onClose} aria-label="Kapat">
+                    <button className="pa-close" onClick={onClose} aria-label={t.closeBtn}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                             <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
                         </svg>
@@ -202,7 +218,7 @@ export function PlanetAppearanceDialog({ planet, onClose }: Props): React.ReactE
                                 </div>
                                 <div className="pa-card-info">
                                     <span className="pa-card-emoji">{opt.emoji}</span>
-                                    <span className="pa-card-name">{opt.name}</span>
+                                    <span className="pa-card-name">{language === 'tr' ? opt.name : opt.nameEn || opt.name}</span>
                                 </div>
                                 {isSelected && (
                                     <div className="pa-card-check">✓</div>
@@ -215,19 +231,45 @@ export function PlanetAppearanceDialog({ planet, onClose }: Props): React.ReactE
                 {/* Description */}
                 <div className="pa-desc">
                     {selectedKey === 'custom'
-                        ? '📂 Dosya seçici açılır — JPG, PNG, WebP, GIF desteklenir'
+                        ? t.appearanceCustomInfo
                         : (() => {
                             const found = PLANET_APPEARANCES.find(a => a.key === selectedKey)
-                            return found ? found.description : ''
+                            return found ? (language === 'tr' ? found.description : found.descriptionEn || found.description) : ''
                         })()
                     }
                 </div>
 
+                {/* Size Slider */}
+                <div className="pa-size-slider">
+                    <label>
+                        <span>{t.planetSizeLabel} <strong>{selectedSize.toFixed(2)}x</strong></span>
+                        <input
+                            type="range"
+                            min="0.55"
+                            max="3"
+                            step="0.05"
+                            value={selectedSize}
+                            onChange={(e) => setSelectedSize(parseFloat(e.target.value))}
+                            className="pa-slider-input"
+                        />
+                    </label>
+                    <button
+                        className="pa-btn-apply"
+                        style={{ marginTop: '14px', width: '100%', padding: '8px 12px' }}
+                        onClick={() => {
+                            setPlanetSize(planet.id, selectedSize)
+                            onClose()
+                        }}
+                    >
+                        📏 {t.applySize}
+                    </button>
+                </div>
+
                 {/* Actions */}
                 <div className="pa-actions">
-                    <button className="pa-btn-cancel" onClick={onClose}>İptal</button>
+                    <button className="pa-btn-cancel" onClick={onClose}>{t.cancel}</button>
                     <button className="pa-btn-apply" onClick={handleApply}>
-                        {selectedKey === 'custom' ? '🖼️ Görsel Seç' : '✓ Uygula'}
+                        {selectedKey === 'custom' ? `🖼️ ${t.selectImage}` : `✓ ${t.apply}`}
                     </button>
                 </div>
 

@@ -6,6 +6,7 @@ import { DEFAULT_APPEARANCE_KEY } from '../utils/planetAppearances'
 /* ── LocalStorage helpers ─────────────────────────────────── */
 const LS_APPEARANCES = 'planet-appearances-v1'
 const LS_CUSTOM_IMAGES = 'planet-custom-images-v1'
+const LS_PLANET_SIZES = 'planet-sizes-v1'
 
 function loadAppearances(): Record<string, string> {
   try { return JSON.parse(localStorage.getItem(LS_APPEARANCES) ?? '{}') } catch { return {} }
@@ -18,6 +19,12 @@ function loadCustomImages(): Record<string, string> {
 }
 function saveCustomImages(data: Record<string, string>): void {
   try { localStorage.setItem(LS_CUSTOM_IMAGES, JSON.stringify(data)) } catch { }
+}
+function loadPlanetSizes(): Record<string, number> {
+  try { return JSON.parse(localStorage.getItem(LS_PLANET_SIZES) ?? '{}') } catch { return {} }
+}
+function savePlanetSizes(data: Record<string, number>): void {
+  try { localStorage.setItem(LS_PLANET_SIZES, JSON.stringify(data)) } catch { }
 }
 
 const MIN_SCALE = 0.2
@@ -70,8 +77,13 @@ interface MapStore {
    * Only set when appearance key is 'custom'.
    */
   customPlanetImages: Record<string, string>
+  /**
+   * Maps planetId → multiplier for base size (e.g. 1.0 is default, 1.5 is larger).
+   */
+  planetSizes: Record<string, number>
   setPlanetAppearance: (planetId: string, key: string) => void
   setCustomPlanetImage: (planetId: string, dataUrl: string) => void
+  setPlanetSize: (planetId: string, size: number) => void
   ensurePlanetAppearance: (planetId: string) => void
   // ---------------------------
 }
@@ -91,6 +103,7 @@ export const useMapStore = create<MapStore>((set) => ({
   stashedNodes: [],
   planetAppearances: loadAppearances(),
   customPlanetImages: loadCustomImages(),
+  planetSizes: loadPlanetSizes(),
   activeDraggedNode: null,
 
   voronoiDrillDown: (node) => set((state) => ({
@@ -249,6 +262,12 @@ export const useMapStore = create<MapStore>((set) => ({
     const nextApp = { ...state.planetAppearances, [planetId]: 'custom' }
     saveAppearances(nextApp)
     return { planetAppearances: nextApp, customPlanetImages: nextImages }
+  }),
+
+  setPlanetSize: (planetId, size) => set((state) => {
+    const nextKeys = { ...state.planetSizes, [planetId]: size }
+    savePlanetSizes(nextKeys)
+    return { planetSizes: nextKeys }
   }),
 
   ensurePlanetAppearance: (planetId) => set((state) => {

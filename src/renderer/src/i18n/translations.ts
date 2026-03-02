@@ -49,7 +49,25 @@ export const translations = {
     guideQuickNotesDesc: 'Whenever inspiration strikes, you can quickly add a new note to your current solar system (folder). Click the \'New Note\' (+) button in the top navigation bar. Type your note title, and a new planet will be born in your current system. A new markdown file will automatically be created in your Obsidian vault.',
 
     guideDragDrop: 'Drag and Drop & Cargo Hold',
-    guideDragDropDesc: 'Mind Map Planet features a unique inventory system called the \'Cargo Hold\' (bottom left of the screen). \n\n• You can Right-Click and drag any planet or folder into the Cargo Hold to temporarily store it there. \n• Travel to a different star system (folder) using the camera or navigation. \n• Drag the item out of your Cargo Hold and drop it into the new empty space. \nThis will physically move the markdown file or folder within your Obsidian vault to the new location.'
+    guideDragDropDesc: 'Mind Map Planet features a unique inventory system called the \'Cargo Hold\' (bottom left of the screen). \n\n• You can Right-Click and drag any planet or folder into the Cargo Hold to temporarily store it there. \n• Travel to a different star system (folder) using the camera or navigation. \n• Drag the item out of your Cargo Hold and drop it into the new empty space. \nThis will physically move the markdown file or folder within your Obsidian vault to the new location.',
+
+    // Planet Appearance Dialog
+    planetAppearanceTitle: 'Planet Appearance',
+    closeBtn: 'Close',
+    appearanceCustomName: 'Custom Image',
+    appearanceCustomDesc: 'Upload your own image',
+    appearanceCustomInfo: '📂 File picker opens — JPG, PNG, WebP, GIF supported',
+    planetSizeLabel: 'Planet Size:',
+    cancel: 'Cancel',
+    apply: 'Apply',
+    applySize: 'Apply Size',
+    selectImage: 'Select Image',
+
+    // Context Menu
+    contextMenuAppearance: 'Appearance',
+    contextMenuRename: 'Rename',
+    contextMenuNewFolder: 'New Subfolder',
+    contextMenuDelete: 'Delete'
   },
   tr: {
     selectVault: 'Vault Klasörü Seç',
@@ -99,7 +117,25 @@ export const translations = {
     guideQuickNotesDesc: 'İlham geldiği anda bulunduğunuz güneş sistemine (klasöre) hızlıca yeni bir not ekleyebilirsiniz. Üst menü çubuğundaki \'Yeni Not\' (+) düğmesine tıklayın. Notunuzun başlığını yazın; bulunduğunuz sistemde yeni bir gezegen doğacak ve Obsidian kasanızda otomatik olarak yeni bir markdown dosyası oluşturulacaktır.',
 
     guideDragDrop: 'Sürükle-Bırak ve Kargo Alanı (Cargo Hold)',
-    guideDragDropDesc: 'Mind Map Planet, \'Kargo Alanı\' (Cargo Hold) adında benzersiz bir envanter sistemine sahiptir (ekranın sol alt köşesi).\n\n• Herhangi bir gezegeni veya klasörü Sağ Tıklayıp sürükleyerek Kargo Alanı\'na bırakabilir ve geçici olarak orada saklayabilirsiniz.\n• Kamera veya navigasyon ile tamamen farklı bir yıldız sistemine (klasöre) seyahat edin.\n• Kargo Alanı\'ndaki öğeyi sürükleyip yeni sistemdeki boş uzay alanına bırakın.\nBu işlem, Obsidian kasanızdaki ilgili markdown dosyasını veya klasörünü fiziksel olarak yeni konumuna taşıyacaktır.'
+    guideDragDropDesc: 'Mind Map Planet, \'Kargo Alanı\' (Cargo Hold) adında benzersiz bir envanter sistemine sahiptir (ekranın sol alt köşesi).\n\n• Herhangi bir gezegeni veya klasörü Sağ Tıklayıp sürükleyerek Kargo Alanı\'na bırakabilir ve geçici olarak orada saklayabilirsiniz.\n• Kamera veya navigasyon ile tamamen farklı bir yıldız sistemine (klasöre) seyahat edin.\n• Kargo Alanı\'ndaki öğeyi sürükleyip yeni sistemdeki boş uzay alanına bırakın.\nBu işlem, Obsidian kasanızdaki ilgili markdown dosyasını veya klasörünü fiziksel olarak yeni konumuna taşıyacaktır.',
+
+    // Planet Appearance Dialog
+    planetAppearanceTitle: 'Gezegen Görünümü',
+    closeBtn: 'Kapat',
+    appearanceCustomName: 'Özel Görsel',
+    appearanceCustomDesc: 'Kendi görselinizi yükleyin',
+    appearanceCustomInfo: '📂 Dosya seçici açılır — JPG, PNG, WebP, GIF desteklenir',
+    planetSizeLabel: 'Gezegen Boyutu:',
+    cancel: 'İptal',
+    apply: 'Uygula',
+    applySize: 'Boyutu Uygula',
+    selectImage: 'Görsel Seç',
+
+    // Context Menu
+    contextMenuAppearance: 'Görünüm',
+    contextMenuRename: 'Yeniden Adlandır',
+    contextMenuNewFolder: 'Yeni Alt Klasör',
+    contextMenuDelete: 'Sil'
   }
 } as const
 

@@ -280,6 +280,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
     const setActiveDraggedNode = useMapStore((s) => s.setActiveDraggedNode)
     const planetAppearances = useMapStore((s) => s.planetAppearances)
     const customPlanetImages = useMapStore((s) => s.customPlanetImages)
+    const planetSizes = useMapStore((s) => s.planetSizes)
     const ensurePlanetAppearance = useMapStore((s) => s.ensurePlanetAppearance)
 
     const depth = voronoiPath.length
@@ -424,7 +425,8 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
             // Ek küçük ayar: çok az çocuğu olan gezegenler biraz küçülür
             const childCount = node.children?.length || 0
             const contentBonus = 0.85 + 0.3 * Math.min(childCount / 20, 1)
-            const radius = baseRadius * appearance.sizeRatio * contentBonus
+            const customSizeMultiplier = planetSizes[node.id] ?? 1.0
+            const radius = baseRadius * appearance.sizeRatio * contentBonus * customSizeMultiplier
 
             const angle = i * 2.39996 // Altın açı (137.5 derece)
             const distance = i === 0 ? 0 : Math.sqrt(i) * spreadFactor
@@ -439,7 +441,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
 
             return { node, cx, cy, radius, colorSet, appearance, appearanceKey }
         })
-    }, [isSolarSystem, hierarchy.countries, dimensions, planetAppearances, ensurePlanetAppearance])
+    }, [isSolarSystem, hierarchy.countries, dimensions, planetAppearances, planetSizes, ensurePlanetAppearance])
 
     /* ── Solar System: Global Link Hesaplaması ──────────────── */
     const globalLinks = useMemo(() => {

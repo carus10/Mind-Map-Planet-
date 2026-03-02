@@ -7,39 +7,35 @@
 export interface PlanetAppearance {
     key: string
     name: string
+    nameEn?: string
     emoji: string
     sizeRatio: number  // relative to Earth (1.0)
     /** Render type: 'preset' uses SVG gradients, 'custom' uses user image */
     type: 'preset' | 'custom'
     description: string
-    /** Primary body color for gradient center */
+    descriptionEn?: string
     colorCenter: string
-    /** Edge/dark side color */
     colorEdge: string
-    /** Atmospheric glow color */
     glowColor: string
-    /** Optional ring for Saturn */
     hasRing?: boolean
     ringColor?: string
-    /** Band stripes (Jupiter-like) */
     bands?: string[]
-    /** Crater overlay for rocky bodies */
+    featureColor?: string
     hasCraters?: boolean
-    /** Polar ice cap */
     hasPolarCap?: boolean
     polarCapColor?: string
-    /** Surface feature color (continents, patches) */
-    featureColor?: string
 }
 
 export const PLANET_APPEARANCES: PlanetAppearance[] = [
     {
         key: 'earth',
         name: 'Dünya',
+        nameEn: 'Earth',
         emoji: '🌍',
         sizeRatio: 1.0,
         type: 'preset',
         description: 'Mavi okyanuslar ve yeşil kıtalar',
+        descriptionEn: 'Blue oceans and green continents',
         colorCenter: '#1a6fa8',
         colorEdge: '#0a2d4a',
         glowColor: 'rgba(40,140,255,0.35)',
@@ -50,10 +46,12 @@ export const PLANET_APPEARANCES: PlanetAppearance[] = [
     {
         key: 'mars',
         name: 'Mars',
+        nameEn: 'Mars',
         emoji: '🔴',
         sizeRatio: 0.8,
         type: 'preset',
         description: 'Kızıl gezegen, toz fırtınaları',
+        descriptionEn: 'Red planet, dust storms',
         colorCenter: '#c1440e',
         colorEdge: '#5a1a06',
         glowColor: 'rgba(200,80,40,0.35)',
@@ -65,10 +63,12 @@ export const PLANET_APPEARANCES: PlanetAppearance[] = [
     {
         key: 'moon',
         name: 'Ay',
+        nameEn: 'Moon',
         emoji: '🌕',
         sizeRatio: 0.65,
         type: 'preset',
-        description: 'Gri kraterlü uydu',
+        description: 'Gri kraterli uydu',
+        descriptionEn: 'Grey cratered moon',
         colorCenter: '#b0b0b0',
         colorEdge: '#3a3a3a',
         glowColor: 'rgba(200,200,210,0.25)',
@@ -78,10 +78,12 @@ export const PLANET_APPEARANCES: PlanetAppearance[] = [
     {
         key: 'jupiter',
         name: 'Jüpiter',
+        nameEn: 'Jupiter',
         emoji: '🟤',
         sizeRatio: 1.45,
         type: 'preset',
         description: 'Dev gezegen, fırtına bantları',
+        descriptionEn: 'Giant planet, storm bands',
         colorCenter: '#c88b4a',
         colorEdge: '#5a3010',
         glowColor: 'rgba(200,140,80,0.35)',
@@ -91,10 +93,12 @@ export const PLANET_APPEARANCES: PlanetAppearance[] = [
     {
         key: 'saturn',
         name: 'Satürn',
+        nameEn: 'Saturn',
         emoji: '🪐',
         sizeRatio: 1.35,
         type: 'preset',
         description: 'Halkalı sarı dev',
+        descriptionEn: 'Ringed yellow giant',
         colorCenter: '#d4b96a',
         colorEdge: '#6a5020',
         glowColor: 'rgba(220,190,100,0.35)',
@@ -106,10 +110,12 @@ export const PLANET_APPEARANCES: PlanetAppearance[] = [
     {
         key: 'uranus',
         name: 'Uranüs',
+        nameEn: 'Uranus',
         emoji: '🔵',
         sizeRatio: 1.25,
         type: 'preset',
         description: 'Buz devi, açık mavi',
+        descriptionEn: 'Ice giant, light blue',
         colorCenter: '#7de8e8',
         colorEdge: '#1a6868',
         glowColor: 'rgba(100,220,230,0.35)',
@@ -120,10 +126,12 @@ export const PLANET_APPEARANCES: PlanetAppearance[] = [
     {
         key: 'neptune',
         name: 'Neptün',
+        nameEn: 'Neptune',
         emoji: '💙',
         sizeRatio: 1.2,
         type: 'preset',
         description: 'Derin mavi buz devi',
+        descriptionEn: 'Deep blue ice giant',
         colorCenter: '#2060d8',
         colorEdge: '#08144a',
         glowColor: 'rgba(50,100,255,0.4)',
@@ -133,10 +141,12 @@ export const PLANET_APPEARANCES: PlanetAppearance[] = [
     {
         key: 'venus',
         name: 'Venüs',
+        nameEn: 'Venus',
         emoji: '☁️',
         sizeRatio: 0.95,
         type: 'preset',
         description: 'Sarı bulut örtüsü',
+        descriptionEn: 'Yellow cloud cover',
         colorCenter: '#e8c860',
         colorEdge: '#8a6010',
         glowColor: 'rgba(240,200,80,0.4)',
@@ -145,10 +155,12 @@ export const PLANET_APPEARANCES: PlanetAppearance[] = [
     {
         key: 'mercury',
         name: 'Merkür',
+        nameEn: 'Mercury',
         emoji: '⚫',
         sizeRatio: 0.6,
         type: 'preset',
         description: 'Küçük metalik kaya',
+        descriptionEn: 'Small metallic rock',
         colorCenter: '#909090',
         colorEdge: '#282828',
         glowColor: 'rgba(150,150,160,0.2)',
@@ -158,10 +170,12 @@ export const PLANET_APPEARANCES: PlanetAppearance[] = [
     {
         key: 'pluto',
         name: 'Plüton',
+        nameEn: 'Pluto',
         emoji: '❄️',
         sizeRatio: 0.55,
         type: 'preset',
         description: 'Cüce gezegen, buz dünyası',
+        descriptionEn: 'Dwarf planet, ice world',
         colorCenter: '#b8d0e8',
         colorEdge: '#304858',
         glowColor: 'rgba(160,200,240,0.25)',
@@ -179,6 +193,7 @@ export function getAppearance(key: string): PlanetAppearance {
         return {
             key: 'custom',
             name: 'Özel Görsel',
+            nameEn: 'Custom Image',
             emoji: '🖼️',
             sizeRatio: 1.0,
             type: 'custom',
