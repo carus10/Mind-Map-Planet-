@@ -59,11 +59,21 @@
 /* ── Gezegen — Solar System ───────────────────────────────── */
 
 .voronoi-planet {
-    transition: transform 0.3s ease;
+    transition: transform 0.2s ease-out;
+}
+
+/* Tüm iç öğeler (surface, glow, atmo, highlight vb.) fare olaylarına kapalı */
+.voronoi-planet * {
+    pointer-events: none;
+}
+
+/* Sadece ana hitbox fare olaylarına açık */
+.voronoi-planet .voronoi-planet__hitbox {
+    pointer-events: auto;
 }
 
 .voronoi-planet:hover {
-    transform: scale(1.06);
+    transform: scale(1.02);
 }
 
 .voronoi-planet__glow {

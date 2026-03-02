@@ -1,6 +1,24 @@
 import { create } from 'zustand'
 import type { VaultHierarchy, NavigationState, CameraState, HierarchyNode } from '../types/hierarchy'
 import type { Language } from '../i18n/translations'
+import { DEFAULT_APPEARANCE_KEY } from '../utils/planetAppearances'
+
+/* ── LocalStorage helpers ─────────────────────────────────── */
+const LS_APPEARANCES = 'planet-appearances-v1'
+const LS_CUSTOM_IMAGES = 'planet-custom-images-v1'
+
+function loadAppearances(): Record<string, string> {
+  try { return JSON.parse(localStorage.getItem(LS_APPEARANCES) ?? '{}') } catch { return {} }
+}
+function saveAppearances(data: Record<string, string>): void {
+  try { localStorage.setItem(LS_APPEARANCES, JSON.stringify(data)) } catch { }
+}
+function loadCustomImages(): Record<string, string> {
+  try { return JSON.parse(localStorage.getItem(LS_CUSTOM_IMAGES) ?? '{}') } catch { return {} }
+}
+function saveCustomImages(data: Record<string, string>): void {
+  try { localStorage.setItem(LS_CUSTOM_IMAGES, JSON.stringify(data)) } catch { }
+}
 
 const MIN_SCALE = 0.2
 const MAX_SCALE = 8
@@ -12,7 +30,7 @@ interface MapStore {
   language: Language
   hoveredId: string | null
   renameTarget: HierarchyNode | null
-  contextMenuTarget: { node: HierarchyNode; x: number; y: number } | null
+  contextMenuTarget: { node: HierarchyNode; x: number; y: number; isPlanet?: boolean } | null
   error: string | null
 
   voronoiPath: HierarchyNode[]
@@ -29,7 +47,7 @@ interface MapStore {
   setLanguage: (l: Language) => void
   setHovered: (id: string | null) => void
   setRenameTarget: (node: HierarchyNode | null) => void
-  setContextMenuTarget: (target: { node: HierarchyNode; x: number; y: number } | null) => void
+  setContextMenuTarget: (target: { node: HierarchyNode; x: number; y: number; isPlanet?: boolean } | null) => void
   setError: (msg: string | null) => void
 
   // --- Drag & Drop (Cargo Hold) ---
@@ -40,6 +58,22 @@ interface MapStore {
   unstashNode: (nodeId: string) => void
   clearStash: () => void
   // --------------------------------
+
+  // --- Planet Appearances ---
+  /**
+   * Maps planetId → appearance key (e.g. 'earth', 'mars', 'custom').
+   * Persisted in localStorage so it survives app restarts.
+   */
+  planetAppearances: Record<string, string>
+  /**
+   * Maps planetId → custom image data URL (base64).
+   * Only set when appearance key is 'custom'.
+   */
+  customPlanetImages: Record<string, string>
+  setPlanetAppearance: (planetId: string, key: string) => void
+  setCustomPlanetImage: (planetId: string, dataUrl: string) => void
+  ensurePlanetAppearance: (planetId: string) => void
+  // ---------------------------
 }
 
 export const useMapStore = create<MapStore>((set) => ({
@@ -55,6 +89,8 @@ export const useMapStore = create<MapStore>((set) => ({
   // Voronoi navigasyon — klasör yolu stack'i
   voronoiPath: [],
   stashedNodes: [],
+  planetAppearances: loadAppearances(),
+  customPlanetImages: loadCustomImages(),
   activeDraggedNode: null,
 
   voronoiDrillDown: (node) => set((state) => ({
@@ -197,6 +233,30 @@ export const useMapStore = create<MapStore>((set) => ({
   unstashNode: (nodeId) => set((state) => ({
     stashedNodes: state.stashedNodes.filter(n => n.id !== nodeId)
   })),
-  clearStash: () => set({ stashedNodes: [] })
+  clearStash: () => set({ stashedNodes: [] }),
+
+  // --- Planet Appearances ---
+  setPlanetAppearance: (planetId, key) => set((state) => {
+    const next = { ...state.planetAppearances, [planetId]: key }
+    saveAppearances(next)
+    return { planetAppearances: next }
+  }),
+
+  setCustomPlanetImage: (planetId, dataUrl) => set((state) => {
+    const nextImages = { ...state.customPlanetImages, [planetId]: dataUrl }
+    saveCustomImages(nextImages)
+    // Also mark appearance as custom
+    const nextApp = { ...state.planetAppearances, [planetId]: 'custom' }
+    saveAppearances(nextApp)
+    return { planetAppearances: nextApp, customPlanetImages: nextImages }
+  }),
+
+  ensurePlanetAppearance: (planetId) => set((state) => {
+    if (state.planetAppearances[planetId]) return {}
+    const next = { ...state.planetAppearances, [planetId]: DEFAULT_APPEARANCE_KEY }
+    saveAppearances(next)
+    return { planetAppearances: next }
+  }),
+  // ---------------------------
 }))
 

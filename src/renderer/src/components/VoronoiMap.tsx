@@ -10,6 +10,7 @@ import { Delaunay } from 'd3-delaunay'
 import { polygonCentroid, polygonArea, polygonContains } from 'd3-polygon'
 import { useMapStore } from '../store/mapStore'
 import { buildObsidianUrl } from '../utils/obsidianUrl'
+import { getAppearance, DEFAULT_APPEARANCE_KEY } from '../utils/planetAppearances'
 import type { HierarchyNode, VaultHierarchy } from '../types/hierarchy'
 import './VoronoiMap.css'
 
@@ -277,6 +278,9 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
     const unstashNode = useMapStore((s) => s.unstashNode)
     const activeDraggedNode = useMapStore((s) => s.activeDraggedNode)
     const setActiveDraggedNode = useMapStore((s) => s.setActiveDraggedNode)
+    const planetAppearances = useMapStore((s) => s.planetAppearances)
+    const customPlanetImages = useMapStore((s) => s.customPlanetImages)
+    const ensurePlanetAppearance = useMapStore((s) => s.ensurePlanetAppearance)
 
     const depth = voronoiPath.length
     const isSolarSystem = depth === 0
@@ -404,29 +408,38 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
         if (countries.length === 0) return []
 
         const { width, height } = dimensions
-        const baseRadius = Math.min(width, height) * 0.14
-        const spreadFactor = baseRadius * 4.5 // Gezegenler arası ortalama mesafe
+        // baseRadius: her zaman appearance sizeRatio ile çarpılacak
+        // Earth (sizeRatio=1.0) için baz boyut
+        const baseRadius = Math.min(width, height) * 0.09
+        const spreadFactor = baseRadius * 6.5
 
         return countries.map((node, i) => {
-            const childCount = node.children?.length || 0
-            const radius = baseRadius * (0.7 + 0.5 * Math.min(childCount / 15, 1))
+            // Varsayılan earth görünümünü ata (yeni gezegen ise)
+            ensurePlanetAppearance(node.id)
 
-            // Dağınık, galaksi benzeri yerleşim (Phyllotaxis spiral tabanlı)
-            // İlk gezegen merkezde, diğerleri dışa doğru açılır
+            const appearanceKey = planetAppearances[node.id] ?? DEFAULT_APPEARANCE_KEY
+            const appearance = getAppearance(appearanceKey)
+
+            // Boyut: appearance.sizeRatio × baseRadius
+            // Ek küçük ayar: çok az çocuğu olan gezegenler biraz küçülür
+            const childCount = node.children?.length || 0
+            const contentBonus = 0.85 + 0.3 * Math.min(childCount / 20, 1)
+            const radius = baseRadius * appearance.sizeRatio * contentBonus
+
             const angle = i * 2.39996 // Altın açı (137.5 derece)
             const distance = i === 0 ? 0 : Math.sqrt(i) * spreadFactor
-
-            // Hafif rastgelelik ekle (çok uzaklaşmamaları için distance'ın %20'si kadar)
             const randDist = (hashStr(node.name) % 100) / 100 * distance * 0.2
             const finalDist = distance + randDist
 
             const cx = width / 2 + Math.cos(angle) * finalDist
             const cy = height / 2 + Math.sin(angle) * finalDist
 
+            // colorSet fallback (enerji köprüleri için still gerekli)
             const colorSet = PLANET_COLORS[hashStr(node.name) % PLANET_COLORS.length]
-            return { node, cx, cy, radius, colorSet }
+
+            return { node, cx, cy, radius, colorSet, appearance, appearanceKey }
         })
-    }, [isSolarSystem, hierarchy.countries, dimensions])
+    }, [isSolarSystem, hierarchy.countries, dimensions, planetAppearances, ensurePlanetAppearance])
 
     /* ── Solar System: Global Link Hesaplaması ──────────────── */
     const globalLinks = useMemo(() => {
@@ -769,10 +782,10 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
         }, 350)
     }, [nodeMap, hierarchy.countries, voronoiJumpTo])
 
-    const handleContextMenu = useCallback((e: React.MouseEvent, node: HierarchyNode) => {
+    const handleContextMenu = useCallback((e: React.MouseEvent, node: HierarchyNode, isPlanet = false) => {
         e.preventDefault()
         e.stopPropagation()
-        setContextMenuTarget({ node, x: e.clientX, y: e.clientY })
+        setContextMenuTarget({ node, x: e.clientX, y: e.clientY, isPlanet })
     }, [setContextMenuTarget])
 
     useEffect(() => {
@@ -817,24 +830,30 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                             <stop offset="100%" stopColor="#02030a" />
                         </radialGradient>
 
-                        {/* Gezegen yüzey gradientleri */}
-                        {planets.map((p, i) => (
-                            <React.Fragment key={`planet-defs-${i}`}>
-                                <radialGradient id={`planet-surface-${i}`} cx="35%" cy="30%" r="65%">
-                                    <stop offset="0%" stopColor={p.colorSet.accent} stopOpacity="0.9" />
-                                    <stop offset="50%" stopColor={p.colorSet.base} stopOpacity="0.85" />
-                                    <stop offset="100%" stopColor="#0a0e18" stopOpacity="0.7" />
-                                </radialGradient>
-                                <radialGradient id={`planet-atmo-${i}`} cx="50%" cy="50%" r="50%">
-                                    <stop offset="80%" stopColor="transparent" />
-                                    <stop offset="92%" stopColor={p.colorSet.glow} />
-                                    <stop offset="100%" stopColor="transparent" />
-                                </radialGradient>
-                                <filter id={`planet-glow-${i}`} x="-60%" y="-60%" width="220%" height="220%">
-                                    <feGaussianBlur in="SourceGraphic" stdDeviation="8" />
-                                </filter>
-                            </React.Fragment>
-                        ))}
+                        {/* Gezegen appearance'a göre dinamik gradyanlar */}
+                        {planets.map((p, i) => {
+                            const app = p.appearance
+                            return (
+                                <React.Fragment key={`planet-defs-${i}`}>
+                                    <radialGradient id={`planet-surface-${i}`} cx="35%" cy="30%" r="65%">
+                                        <stop offset="0%" stopColor={app.colorCenter} stopOpacity="1" />
+                                        <stop offset="55%" stopColor={app.colorCenter} stopOpacity="0.9" />
+                                        <stop offset="100%" stopColor={app.colorEdge} stopOpacity="1" />
+                                    </radialGradient>
+                                    <radialGradient id={`planet-atmo-${i}`} cx="50%" cy="50%" r="50%">
+                                        <stop offset="78%" stopColor="transparent" />
+                                        <stop offset="90%" stopColor={app.glowColor} />
+                                        <stop offset="100%" stopColor="transparent" />
+                                    </radialGradient>
+                                    <filter id={`planet-glow-${i}`} x="-70%" y="-70%" width="240%" height="240%">
+                                        <feGaussianBlur in="SourceGraphic" stdDeviation={Math.max(6, p.radius * 0.2)} />
+                                    </filter>
+                                    <clipPath id={`planet-clip-${i}`}>
+                                        <circle cx={p.cx} cy={p.cy} r={p.radius} />
+                                    </clipPath>
+                                </React.Fragment>
+                            )
+                        })}
                     </defs>
 
                     {/* Uzay arka planı */}
@@ -908,51 +927,214 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                         {planets.map((p, i) => {
                             const isHovered = hoveredIndex === i
                             const childCount = p.node.children?.length || 0
+                            const app = p.appearance
 
                             // Zoom out yapıldığında yazıların okunabilir kalması için ters ölçekleme
                             const scaleFactor = Math.max(0.3, zoom)
-                            const nameFontSize = Math.max(11, Math.min(16, p.radius * 0.18)) / scaleFactor
-                            const countFontSize = 10 / scaleFactor
-                            const nameYOffset = 24 / scaleFactor
-                            const countYOffset = 40 / scaleFactor
+                            const nameFontSize = Math.max(9, Math.min(15, p.radius * 0.22)) / scaleFactor
+                            const countFontSize = 9 / scaleFactor
+                            const nameYOffset = Math.max(16, p.radius * 0.3) / scaleFactor
+                            const countYOffset = nameYOffset + 14 / scaleFactor
+
+                            // Özel görsel var mı?
+                            const customImg = p.appearanceKey === 'custom' ? customPlanetImages[p.node.id] : null
 
                             return (
                                 <g
                                     key={p.node.id}
                                     className="voronoi-planet"
-                                    onClick={() => { if (!didDrag) drillIntoPlanet(p.node) }}
-                                    onContextMenu={(e) => handleContextMenu(e, p.node)}
-                                    onPointerDown={(e) => handleNodePointerDown(e, p.node)}
-                                    onPointerEnter={(e) => handleNodePointerEnter(e, p.node)}
-                                    onPointerLeave={handleNodePointerLeave}
-                                    onMouseEnter={() => setHoveredIndex(i)}
-                                    onMouseLeave={() => setHoveredIndex(null)}
-                                    style={{ cursor: isDraggingRef.current ? 'grabbing' : 'pointer', opacity: draggedNode?.id === p.node.id ? 0.4 : 1 }}
+                                    style={{ opacity: draggedNode?.id === p.node.id ? 0.4 : 1 }}
                                 >
-                                    <title>{p.node.name}</title>
+                                    <title>{p.node.name} ({app.name})</title>
+
+                                    {/* Satürn halkası — gezegen arkasında */}
+                                    {app.hasRing && app.key === 'saturn' && (
+                                        <ellipse
+                                            cx={p.cx} cy={p.cy + p.radius * 0.08}
+                                            rx={p.radius * 1.75} ry={p.radius * 0.38}
+                                            fill="none"
+                                            stroke={app.ringColor ?? 'rgba(210,180,100,0.5)'}
+                                            strokeWidth={p.radius * 0.3}
+                                            opacity={0.55}
+                                            pointerEvents="none"
+                                        />
+                                    )}
+
                                     {/* Glow */}
                                     <circle
-                                        cx={p.cx} cy={p.cy} r={p.radius + (dropTargetId === p.node.id ? 12 : 6)}
-                                        fill={dropTargetId === p.node.id ? '#fff' : p.colorSet.glow}
+                                        cx={p.cx} cy={p.cy}
+                                        r={p.radius + (dropTargetId === p.node.id ? 14 : isHovered ? 10 : 5)}
+                                        fill={dropTargetId === p.node.id ? 'rgba(255,255,255,0.15)' : app.glowColor}
                                         filter={`url(#planet-glow-${i})`}
                                         className="voronoi-planet__glow"
-                                        style={{ transition: 'all 0.2s ease' }}
+                                        style={{ transition: 'all 0.25s ease' }}
+                                        pointerEvents="none"
                                     />
 
-                                    {/* Gezegen yüzeyi */}
-                                    <circle
-                                        cx={p.cx} cy={p.cy} r={p.radius}
-                                        fill={`url(#planet-surface-${i})`}
-                                        stroke={isHovered ? p.colorSet.accent : 'rgba(100,160,255,0.12)'}
-                                        strokeWidth={isHovered ? 2 : 1}
-                                        className="voronoi-planet__surface"
-                                    />
+                                    {/* Özel görsel (custom image) */}
+                                    {customImg ? (
+                                        <>
+                                            <circle cx={p.cx} cy={p.cy} r={p.radius} fill={app.colorEdge} />
+                                            <image
+                                                href={customImg}
+                                                x={p.cx - p.radius} y={p.cy - p.radius}
+                                                width={p.radius * 2} height={p.radius * 2}
+                                                clipPath={`url(#planet-clip-${i})`}
+                                                preserveAspectRatio="xMidYMid slice"
+                                            />
+                                        </>
+                                    ) : (
+                                        <>
+                                            {/* Gezegen yüzeyi — temel gradient */}
+                                            <circle
+                                                cx={p.cx} cy={p.cy} r={p.radius}
+                                                fill={`url(#planet-surface-${i})`}
+                                                className="voronoi-planet__surface"
+                                            />
 
-                                    {/* Atmosfer */}
+                                            {/* Bantlar (Jüpiter, Satürn, Neptün) */}
+                                            {app.bands && (
+                                                <g clipPath={`url(#planet-clip-${i})`} pointerEvents="none">
+                                                    {app.bands.map((band, bi) => {
+                                                        const bandH = (p.radius * 2) / app.bands!.length
+                                                        const yy = p.cy - p.radius + bi * bandH
+                                                        return (
+                                                            <rect key={bi}
+                                                                x={p.cx - p.radius} y={yy}
+                                                                width={p.radius * 2} height={bandH}
+                                                                fill={band}
+                                                                opacity={0.32 + (bi % 2) * 0.14}
+                                                            />
+                                                        )
+                                                    })}
+                                                </g>
+                                            )}
+
+                                            {/* Dünya kıtaları */}
+                                            {app.key === 'earth' && (
+                                                <g clipPath={`url(#planet-clip-${i})`} opacity={0.65} pointerEvents="none">
+                                                    <ellipse cx={p.cx - p.radius * 0.15} cy={p.cy - p.radius * 0.05}
+                                                        rx={p.radius * 0.25} ry={p.radius * 0.35} fill={app.featureColor ?? '#2d8a4a'} />
+                                                    <ellipse cx={p.cx + p.radius * 0.22} cy={p.cy + p.radius * 0.18}
+                                                        rx={p.radius * 0.32} ry={p.radius * 0.22} fill={app.featureColor ?? '#2d8a4a'} />
+                                                    <ellipse cx={p.cx - p.radius * 0.28} cy={p.cy + p.radius * 0.35}
+                                                        rx={p.radius * 0.18} ry={p.radius * 0.13} fill={app.featureColor ?? '#2d8a4a'} />
+                                                    <ellipse cx={p.cx + p.radius * 0.05} cy={p.cy - p.radius * 0.42}
+                                                        rx={p.radius * 0.12} ry={p.radius * 0.08} fill={app.featureColor ?? '#2d8a4a'} />
+                                                </g>
+                                            )}
+
+                                            {/* Mars leke ve patch */}
+                                            {app.key === 'mars' && (
+                                                <g clipPath={`url(#planet-clip-${i})`} opacity={0.5} pointerEvents="none">
+                                                    <ellipse cx={p.cx + p.radius * 0.1} cy={p.cy - p.radius * 0.18}
+                                                        rx={p.radius * 0.28} ry={p.radius * 0.2} fill={app.featureColor ?? '#8b3612'} />
+                                                    <ellipse cx={p.cx - p.radius * 0.3} cy={p.cy + p.radius * 0.22}
+                                                        rx={p.radius * 0.2} ry={p.radius * 0.15} fill={app.featureColor ?? '#8b3612'} />
+                                                    <ellipse cx={p.cx + p.radius * 0.35} cy={p.cy + p.radius * 0.1}
+                                                        rx={p.radius * 0.12} ry={p.radius * 0.1} fill={app.featureColor ?? '#8b3612'} />
+                                                </g>
+                                            )}
+
+                                            {/* Kraterlery (Ay, Merkür, Plüton) */}
+                                            {app.hasCraters && (
+                                                <g clipPath={`url(#planet-clip-${i})`} opacity={0.5} pointerEvents="none">
+                                                    {[
+                                                        [p.cx - p.radius * 0.3, p.cy - p.radius * 0.2, p.radius * 0.14],
+                                                        [p.cx + p.radius * 0.22, p.cy + p.radius * 0.3, p.radius * 0.1],
+                                                        [p.cx + p.radius * 0.38, p.cy - p.radius * 0.1, p.radius * 0.08],
+                                                        [p.cx - p.radius * 0.12, p.cy + p.radius * 0.12, p.radius * 0.09],
+                                                        [p.cx + p.radius * 0.05, p.cy - p.radius * 0.38, p.radius * 0.07],
+                                                        [p.cx - p.radius * 0.4, p.cy + p.radius * 0.3, p.radius * 0.06],
+                                                    ].map(([px, py, pr], ci) => (
+                                                        <circle key={ci}
+                                                            cx={px} cy={py} r={pr}
+                                                            fill="none"
+                                                            stroke={app.colorEdge}
+                                                            strokeWidth={Math.max(1, pr * 0.4)}
+                                                        />
+                                                    ))}
+                                                </g>
+                                            )}
+
+                                            {/* Kutup buzu (Dünya, Mars, Plüton) */}
+                                            {app.hasPolarCap && app.polarCapColor && (
+                                                <g clipPath={`url(#planet-clip-${i})`} pointerEvents="none">
+                                                    <ellipse
+                                                        cx={p.cx} cy={p.cy - p.radius * 0.82}
+                                                        rx={p.radius * 0.42} ry={p.radius * 0.2}
+                                                        fill={app.polarCapColor}
+                                                    />
+                                                </g>
+                                            )}
+                                        </>
+                                    )}
+
+                                    {/* Uranüs halkası */}
+                                    {app.hasRing && app.key === 'uranus' && (
+                                        <ellipse
+                                            cx={p.cx} cy={p.cy}
+                                            rx={p.radius * 1.55} ry={p.radius * 0.28}
+                                            fill="none"
+                                            stroke={app.ringColor ?? 'rgba(140,230,240,0.3)'}
+                                            strokeWidth={p.radius * 0.2}
+                                            opacity={0.5}
+                                            pointerEvents="none"
+                                        />
+                                    )}
+
+                                    {/* Atmosfer overlay */}
                                     <circle
                                         cx={p.cx} cy={p.cy} r={p.radius}
                                         fill={`url(#planet-atmo-${i})`}
                                         pointerEvents="none"
+                                    />
+
+                                    {/* Aydınlatma highlight (sol üst) */}
+                                    <circle
+                                        cx={p.cx - p.radius * 0.28} cy={p.cy - p.radius * 0.28}
+                                        r={p.radius * 0.22}
+                                        fill="rgba(255,255,255,0.07)"
+                                        pointerEvents="none"
+                                    />
+
+                                    {/* Hover kenarlık */}
+                                    {isHovered && (
+                                        <circle
+                                            cx={p.cx} cy={p.cy} r={p.radius}
+                                            fill="none"
+                                            stroke={app.colorCenter}
+                                            strokeWidth={2.5}
+                                            opacity={0.7}
+                                            pointerEvents="none"
+                                        />
+                                    )}
+
+                                    {/* Drop target ring */}
+                                    {dropTargetId === p.node.id && (
+                                        <circle
+                                            cx={p.cx} cy={p.cy} r={p.radius + 6}
+                                            fill="none"
+                                            stroke="rgba(255,255,255,0.7)"
+                                            strokeWidth={2}
+                                            strokeDasharray="6 4"
+                                            pointerEvents="none"
+                                        />
+                                    )}
+
+                                    {/* Hitbox: Gezegen etrafında tüm etkileşimleri tek noktada yakalayan şeffaf alan */}
+                                    <circle
+                                        cx={p.cx} cy={p.cy} r={p.radius + (dropTargetId === p.node.id ? 14 : 6)}
+                                        fill="transparent"
+                                        className="voronoi-planet__hitbox"
+                                        style={{ cursor: isDraggingRef.current ? 'grabbing' : 'pointer' }}
+                                        onClick={() => { if (!didDrag) drillIntoPlanet(p.node) }}
+                                        onContextMenu={(e) => handleContextMenu(e, p.node, true)}
+                                        onPointerDown={(e) => handleNodePointerDown(e, p.node)}
+                                        onPointerEnter={(e) => handleNodePointerEnter(e, p.node)}
+                                        onPointerLeave={handleNodePointerLeave}
+                                        onMouseEnter={() => setHoveredIndex(i)}
+                                        onMouseLeave={() => setHoveredIndex(null)}
                                     />
 
                                     {/* İsim */}
@@ -962,7 +1144,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                                         className="voronoi-planet__name"
                                         fontSize={nameFontSize}
                                     >
-                                        {p.node.name.length > 12 ? p.node.name.slice(0, 12) + '...' : p.node.name}
+                                        {p.node.name.length > 14 ? p.node.name.slice(0, 14) + '…' : p.node.name}
                                     </text>
 
                                     {/* Alt klasör sayısı */}

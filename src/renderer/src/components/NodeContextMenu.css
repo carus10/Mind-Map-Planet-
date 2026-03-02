@@ -94,3 +94,12 @@
     background: rgba(239, 68, 68, 0.15);
     color: #fca5a5;
 }
+
+.ctx-item-appearance {
+    color: #7dd3fc;
+}
+
+.ctx-item-appearance:hover {
+    background: rgba(56, 189, 248, 0.18);
+    color: #bae6fd;
+}

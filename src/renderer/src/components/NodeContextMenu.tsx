@@ -11,14 +11,16 @@ interface Props {
     onRename: () => void
     onDelete: () => void
     onCreateFolder: () => void
+    onAppearance?: () => void
+    isPlanet?: boolean
 }
 
-export function NodeContextMenu({ node, x, y, onClose, onRename, onDelete, onCreateFolder }: Props): React.ReactElement {
+export function NodeContextMenu({ node, x, y, onClose, onRename, onDelete, onCreateFolder, onAppearance, isPlanet }: Props): React.ReactElement {
     const isFolder = node.type !== 'home'
 
     // Clamp so menu never goes offscreen
-    const clampedX = Math.min(x, window.innerWidth - 200)
-    const clampedY = Math.min(y, window.innerHeight - 160)
+    const clampedX = Math.min(x, window.innerWidth - 220)
+    const clampedY = Math.min(y, window.innerHeight - 200)
 
     return (
         <>
@@ -30,10 +32,29 @@ export function NodeContextMenu({ node, x, y, onClose, onRename, onDelete, onCre
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="ctx-header">
-                    <span className="ctx-icon">{isFolder ? '📁' : '📄'}</span>
+                    <span className="ctx-icon">{isPlanet ? '🪐' : isFolder ? '📁' : '📄'}</span>
                     <span className="ctx-name" title={node.name}>{node.name}</span>
                 </div>
                 <div className="ctx-divider" />
+
+                {/* Görünüm — sadece gezegenlerde görünür */}
+                {isPlanet && onAppearance && (
+                    <>
+                        <button className="ctx-item ctx-item-appearance" onClick={onAppearance}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <circle cx="12" cy="12" r="4" />
+                                <line x1="12" y1="2" x2="12" y2="6" />
+                                <line x1="12" y1="18" x2="12" y2="22" />
+                                <line x1="2" y1="12" x2="6" y2="12" />
+                                <line x1="18" y1="12" x2="22" y2="12" />
+                            </svg>
+                            Görünüm
+                        </button>
+                        <div className="ctx-divider" />
+                    </>
+                )}
+
                 <button className="ctx-item" onClick={() => { onRename(); onClose() }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                     Rename

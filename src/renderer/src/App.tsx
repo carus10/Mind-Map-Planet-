@@ -11,6 +11,7 @@ import { CreatePlanetDialog } from './components/CreatePlanetDialog'
 import { CreateFolderDialog } from './components/CreateFolderDialog'
 import { DeleteConfirmDialog } from './components/DeleteConfirmDialog'
 import { NodeContextMenu } from './components/NodeContextMenu'
+import { PlanetAppearanceDialog } from './components/PlanetAppearanceDialog'
 import { OmniSearch } from './components/OmniSearch'
 import { CargoHold } from './components/CargoHold'
 import { ErrorBoundary } from './components/ErrorBoundary'
@@ -32,6 +33,7 @@ export function App(): React.ReactElement {
   const [showDelete, setShowDelete] = useState(false)
   const [showCreateFolder, setShowCreateFolder] = useState(false)
   const [showOmniSearch, setShowOmniSearch] = useState(false)
+  const [showAppearance, setShowAppearance] = useState(false)
   const [vaultPath, setVaultPath] = useState<string | null>(null)
   const [scanning, setScanning] = useState(false)
 
@@ -135,15 +137,23 @@ export function App(): React.ReactElement {
             onRescan={doScan}
           />
         )}
-        {contextMenuTarget && !showDelete && !showCreateFolder && (
+        {contextMenuTarget && !showDelete && !showCreateFolder && !showAppearance && (
           <NodeContextMenu
             node={contextMenuTarget.node}
             x={contextMenuTarget.x}
             y={contextMenuTarget.y}
+            isPlanet={contextMenuTarget.isPlanet}
             onClose={() => setContextMenuTarget(null)}
             onRename={() => { setRenameTarget(contextMenuTarget.node); setContextMenuTarget(null) }}
             onDelete={() => setShowDelete(true)}
             onCreateFolder={() => setShowCreateFolder(true)}
+            onAppearance={contextMenuTarget.isPlanet ? () => setShowAppearance(true) : undefined}
+          />
+        )}
+        {showAppearance && contextMenuTarget?.isPlanet && (
+          <PlanetAppearanceDialog
+            planet={contextMenuTarget.node}
+            onClose={() => { setShowAppearance(false); setContextMenuTarget(null) }}
           />
         )}
         {showOmniSearch && hierarchy && <OmniSearch onClose={() => setShowOmniSearch(false)} />}
