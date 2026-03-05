@@ -20,9 +20,35 @@ export function NavBar({ onSettings, onChangeVault, onCreateNote, onCreatePlanet
   }))
   const t = translations[language]
 
+  // Crumb icon based on depth
+  const crumbIcon = (depth: number): React.ReactElement => {
+    if (depth === 0) {
+      // Root — universe/galaxy icon
+      return (
+        <svg className="crumb-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <ellipse cx="12" cy="12" rx="10" ry="4" />
+          <line x1="12" y1="2" x2="12" y2="22" />
+        </svg>
+      )
+    }
+    // Deeper levels — folder icon
+    return (
+      <svg className="crumb-icon" width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M1 3.5A1.5 1.5 0 012.5 2h3.879a1.5 1.5 0 011.06.44l1.122 1.12A1.5 1.5 0 009.62 4H13.5A1.5 1.5 0 0115 5.5v7a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12.5v-9z" />
+      </svg>
+    )
+  }
+
+  const chevronSep = (
+    <svg className="crumb-chevron" width="12" height="12" viewBox="0 0 16 16" fill="none">
+      <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+
   // Voronoi breadcrumb: root (vault) + her path seviyesi
   const crumbs: { label: string; index: number }[] = [
-    { label: '🗺️ ' + (hierarchy?.vaultName || t.world), index: -1 },
+    { label: hierarchy?.vaultName || t.world, index: -1 },
   ]
   for (let i = 0; i < voronoiPath.length; i++) {
     crumbs.push({ label: voronoiPath[i].name, index: i })
@@ -41,11 +67,12 @@ export function NavBar({ onSettings, onChangeVault, onCreateNote, onCreatePlanet
         <nav className="breadcrumb">
           {crumbs.map((c, i) => (
             <span key={i} className="crumb-item">
-              {i > 0 && <span className="crumb-sep">/</span>}
+              {i > 0 && chevronSep}
               <button
                 className={`crumb-btn ${i === crumbs.length - 1 ? 'crumb-active' : 'crumb-parent'}`}
                 onClick={() => voronoiNavigateToIndex(c.index)}
               >
+                {crumbIcon(i)}
                 {c.label}
                 {i === 0 && hierarchy && (
                   <span className="crumb-count">{hierarchy.countries.length}</span>
@@ -60,11 +87,11 @@ export function NavBar({ onSettings, onChangeVault, onCreateNote, onCreatePlanet
       </div>
       <div className="navbar-right">
         {hierarchy && (
-          <button className="vault-name clickable" onClick={onChangeVault} title="Kasayı Değiştir">
+          <button className="vault-name clickable" onClick={onChangeVault} title={hierarchy?.vaultName || ''}>
             <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style={{ marginRight: 4, verticalAlign: -2 }}>
               <path d="M1 3.5A1.5 1.5 0 012.5 2h3.879a1.5 1.5 0 011.06.44l1.122 1.12A1.5 1.5 0 009.62 4H13.5A1.5 1.5 0 0115 5.5v7a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12.5v-9z" />
             </svg>
-            {hierarchy.vaultName}
+            {t.selectVault}
           </button>
         )}
         <button className="btn-icon" onClick={onCreatePlanet} title="New Planet" style={{ marginRight: '4px' }}>

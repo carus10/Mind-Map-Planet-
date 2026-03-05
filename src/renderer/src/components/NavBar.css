@@ -53,7 +53,7 @@
 .breadcrumb {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 1px;
 }
 
 .crumb-item {
@@ -61,11 +61,15 @@
   align-items: center;
 }
 
-.crumb-sep {
-  color: rgba(100, 100, 160, 0.5);
-  font-size: 14px;
-  margin: 0 4px;
-  user-select: none;
+.crumb-chevron {
+  color: rgba(100, 100, 160, 0.35);
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+.crumb-icon {
+  flex-shrink: 0;
+  opacity: 0.55;
 }
 
 .crumb-btn {
@@ -74,13 +78,14 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: all 0.15s ease;
+  padding: 5px 10px;
+  border-radius: 8px;
+  transition: all 0.18s ease;
   display: flex;
   align-items: center;
   gap: 6px;
   font-family: inherit;
+  white-space: nowrap;
 }
 
 .crumb-parent {
@@ -89,13 +94,22 @@
 
 .crumb-parent:hover {
   color: #c0c0ff;
-  background: rgba(80, 80, 160, 0.2);
+  background: rgba(80, 80, 160, 0.15);
+}
+
+.crumb-parent:hover .crumb-icon {
+  opacity: 0.85;
 }
 
 .crumb-active {
   color: #e8eaff;
   font-weight: 600;
+  background: rgba(92, 107, 192, 0.1);
   cursor: default;
+}
+
+.crumb-active .crumb-icon {
+  opacity: 0.9;
 }
 
 .crumb-active:disabled {
@@ -105,9 +119,9 @@
 .crumb-count {
   font-size: 10px;
   font-weight: 700;
-  background: rgba(92, 107, 192, 0.3);
+  background: rgba(92, 107, 192, 0.25);
   color: #9aa0d0;
-  padding: 1px 5px;
+  padding: 1px 6px;
   border-radius: 10px;
   min-width: 18px;
   text-align: center;
