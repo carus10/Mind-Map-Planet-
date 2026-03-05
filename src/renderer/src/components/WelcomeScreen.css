@@ -1,89 +1,381 @@
+/* ==================== Welcome Screen ==================== */
 .welcome {
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background: radial-gradient(ellipse at 30% 20%, rgba(40, 30, 100, 0.4) 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 80%, rgba(20, 60, 80, 0.3) 0%, transparent 50%),
-    #0a0a14;
-  animation: bgShift 12s ease-in-out infinite alternate;
+  background: #060612;
+  position: relative;
+  overflow: hidden;
 }
 
-@keyframes bgShift {
+/* ---------- Animated star field ---------- */
+.welcome-stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.welcome-star {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  animation: starTwinkle ease-in-out infinite alternate;
+  opacity: 0.3;
+}
+
+@keyframes starTwinkle {
   0% {
-    background-position: 0% 0%;
+    opacity: 0.15;
+    transform: scale(0.8);
   }
 
   100% {
-    background-position: 100% 100%;
+    opacity: 1;
+    transform: scale(1.2);
   }
 }
 
-.welcome-card {
-  background: rgba(20, 20, 40, 0.7);
-  border: 1px solid rgba(80, 80, 140, 0.25);
-  border-radius: 20px;
-  padding: 52px 60px;
-  text-align: center;
-  max-width: 440px;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5),
-    0 0 80px rgba(92, 107, 192, 0.08);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  animation: cardIn 0.5s ease-out;
+/* ---------- Nebula glow overlays ---------- */
+.welcome-nebula {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: 0;
 }
 
-@keyframes cardIn {
+.welcome-nebula-1 {
+  width: 600px;
+  height: 600px;
+  top: -15%;
+  left: -10%;
+  background: radial-gradient(circle, rgba(92, 107, 192, 0.25) 0%, transparent 70%);
+  animation: nebulaFloat 16s ease-in-out infinite alternate;
+}
+
+.welcome-nebula-2 {
+  width: 500px;
+  height: 500px;
+  bottom: -10%;
+  right: -8%;
+  background: radial-gradient(circle, rgba(126, 87, 194, 0.2) 0%, transparent 70%);
+  animation: nebulaFloat 20s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes nebulaFloat {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  100% {
+    transform: translate(30px, -20px) scale(1.15);
+  }
+}
+
+/* ---------- Main card ---------- */
+.welcome-card {
+  position: relative;
+  z-index: 1;
+  background: rgba(14, 14, 30, 0.85);
+  border: 1px solid rgba(92, 107, 192, 0.2);
+  border-radius: 24px;
+  padding: 48px 52px;
+  text-align: center;
+  max-width: 480px;
+  width: 90vw;
+  box-shadow:
+    0 8px 60px rgba(0, 0, 0, 0.6),
+    0 0 120px rgba(92, 107, 192, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  animation: cardReveal 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes cardReveal {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.97);
+    transform: translateY(24px) scale(0.96);
+    filter: blur(4px);
   }
 
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+    filter: blur(0);
   }
 }
 
-.welcome-icon {
-  font-size: 52px;
+/* ---------- Planet icon ---------- */
+.welcome-planet {
+  position: relative;
+  display: inline-block;
   margin-bottom: 16px;
-  filter: drop-shadow(0 4px 12px rgba(92, 107, 192, 0.3));
 }
 
+.welcome-planet-body {
+  font-size: 64px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 20px rgba(126, 87, 194, 0.4));
+  animation: planetBob 4s ease-in-out infinite;
+}
+
+@keyframes planetBob {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.welcome-planet-ring {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: none;
+  box-shadow:
+    0 0 30px rgba(92, 107, 192, 0.15),
+    0 0 60px rgba(126, 87, 194, 0.08);
+  animation: ringPulse 3s ease-in-out infinite;
+}
+
+@keyframes ringPulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 30px rgba(92, 107, 192, 0.15), 0 0 60px rgba(126, 87, 194, 0.08);
+  }
+
+  50% {
+    box-shadow: 0 0 50px rgba(92, 107, 192, 0.25), 0 0 80px rgba(126, 87, 194, 0.15);
+  }
+}
+
+/* ---------- Title & Subtitle ---------- */
 .welcome-title {
-  font-size: 26px;
+  font-size: 30px;
   font-weight: 700;
-  color: #e4e6ff;
-  margin: 0 0 10px;
+  color: #e8eaf6;
+  margin: 0 0 8px;
   letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #c5cae9, #9fa8da, #b39ddb);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.welcome-desc {
-  color: rgba(140, 140, 180, 0.8);
+.welcome-subtitle {
+  color: rgba(156, 156, 200, 0.8);
   font-size: 14px;
-  line-height: 1.7;
-  margin: 0 0 32px;
+  line-height: 1.6;
+  margin: 0;
 }
 
+/* ---------- Divider ---------- */
+.welcome-divider {
+  height: 1px;
+  margin: 28px 0;
+  background: linear-gradient(90deg, transparent, rgba(92, 107, 192, 0.3), transparent);
+}
+
+/* ---------- Detecting spinner ---------- */
+.welcome-detecting {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: rgba(156, 156, 200, 0.7);
+  font-size: 14px;
+  padding: 20px 0;
+}
+
+.welcome-spinner {
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid rgba(92, 107, 192, 0.2);
+  border-top-color: #7c4dff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.welcome-spinner-sm {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- No vaults ---------- */
+.welcome-no-vaults {
+  padding: 8px 0;
+}
+
+.welcome-no-vaults-text {
+  color: rgba(156, 156, 200, 0.6);
+  font-size: 13px;
+  margin: 0 0 24px;
+}
+
+/* ---------- Single vault ---------- */
+.welcome-single-vault {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---------- Multi vault ---------- */
+.welcome-multi-vault {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.welcome-vault-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: rgba(200, 200, 230, 0.9);
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.welcome-vault-count {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(156, 156, 200, 0.5);
+}
+
+/* ---------- Vault list ---------- */
+.vault-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* ---------- Vault card ---------- */
+.vault-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(20, 20, 44, 0.6);
+  border: 1px solid rgba(80, 80, 140, 0.15);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: left;
+}
+
+.vault-card:hover {
+  background: rgba(30, 30, 60, 0.8);
+  border-color: rgba(92, 107, 192, 0.3);
+  transform: translateX(3px);
+}
+
+.vault-card-selected {
+  background: rgba(92, 107, 192, 0.12) !important;
+  border-color: rgba(92, 107, 192, 0.45) !important;
+  box-shadow: 0 0 20px rgba(92, 107, 192, 0.08);
+}
+
+.vault-card-icon {
+  font-size: 26px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.vault-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.vault-card-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #c5cae9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vault-card-path {
+  font-size: 11px;
+  color: rgba(140, 140, 180, 0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.vault-card-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #5c6bc0, #7c4dff);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  animation: checkPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes checkPop {
+  from {
+    transform: scale(0);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+/* ---------- Buttons ---------- */
 .btn-primary {
   background: linear-gradient(135deg, #5c6bc0, #7e57c2);
   color: #fff;
   border: none;
-  border-radius: 10px;
-  padding: 12px 32px;
+  border-radius: 12px;
+  padding: 13px 32px;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s ease;
-  box-shadow: 0 4px 16px rgba(92, 107, 192, 0.25);
+  box-shadow: 0 4px 20px rgba(92, 107, 192, 0.25);
   font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .btn-primary:hover {
   background: linear-gradient(135deg, #7986cb, #9575cd);
-  box-shadow: 0 6px 24px rgba(92, 107, 192, 0.35);
-  transform: translateY(-1px);
+  box-shadow: 0 6px 28px rgba(92, 107, 192, 0.35);
+  transform: translateY(-2px);
 }
 
 .btn-primary:active {
@@ -92,17 +384,49 @@
 }
 
 .btn-primary:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none;
 }
 
+.btn-continue {
+  margin-top: 4px;
+  font-size: 16px;
+  padding: 14px 36px;
+}
+
+.btn-browse {
+  font-size: 14px;
+}
+
+.btn-icon {
+  font-size: 18px;
+}
+
+.btn-ghost {
+  background: none;
+  border: none;
+  color: rgba(156, 156, 200, 0.5);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 8px;
+  transition: color 0.2s ease;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.btn-ghost:hover {
+  color: rgba(200, 200, 230, 0.8);
+}
+
+/* ---------- Error ---------- */
 .welcome-error {
   color: #ef5350;
   font-size: 13px;
   margin-top: 16px;
   padding: 8px 12px;
   background: rgba(239, 83, 80, 0.08);
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid rgba(239, 83, 80, 0.15);
 }

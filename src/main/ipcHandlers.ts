@@ -1,9 +1,53 @@
-import { ipcMain, dialog, shell } from 'electron'
+import { ipcMain, dialog, shell, app } from 'electron'
 import { existsSync, readFileSync } from 'fs'
-import { join } from 'path'
+import { join, basename } from 'path'
 import { scanVault } from './vaultScanner'
 import { renameNode, createNote, moveNode, createFolder, deleteNode } from './fileSystem'
 import { store } from './store'
+
+interface ObsidianVaultInfo {
+  path: string
+  name: string
+}
+
+function detectObsidianVaults(): ObsidianVaultInfo[] {
+  try {
+    // Obsidian stores vault list in obsidian.json
+    // Windows: %APPDATA%/Obsidian/obsidian.json
+    // macOS:   ~/Library/Application Support/Obsidian/obsidian.json
+    // Linux:   ~/.config/Obsidian/obsidian.json
+    const appData = app.getPath('appData')
+    const obsidianJsonPath = join(appData, 'Obsidian', 'obsidian.json')
+
+    if (!existsSync(obsidianJsonPath)) {
+      console.log('[detectObsidianVaults] obsidian.json not found at:', obsidianJsonPath)
+      return []
+    }
+
+    const raw = readFileSync(obsidianJsonPath, 'utf8')
+    const data = JSON.parse(raw)
+
+    // obsidian.json has a "vaults" object: { "hash": { "path": "...", "ts": ... }, ... }
+    const vaults: ObsidianVaultInfo[] = []
+    if (data.vaults && typeof data.vaults === 'object') {
+      for (const key of Object.keys(data.vaults)) {
+        const entry = data.vaults[key]
+        if (entry && entry.path && existsSync(entry.path)) {
+          vaults.push({
+            path: entry.path,
+            name: basename(entry.path)
+          })
+        }
+      }
+    }
+
+    console.log('[detectObsidianVaults] Found', vaults.length, 'vaults')
+    return vaults
+  } catch (err) {
+    console.error('[detectObsidianVaults] Error:', err)
+    return []
+  }
+}
 
 export function registerIpcHandlers(): void {
   // Vault klasörü seç
@@ -84,4 +128,9 @@ export function registerIpcHandlers(): void {
   // Store get/set
   ipcMain.handle('store:get', (_e, key: string) => store.get(key))
   ipcMain.handle('store:set', (_e, key: string, value: unknown) => { store.set(key, value) })
+
+  // Obsidian vault'larını otomatik algıla
+  ipcMain.handle('vault:detectObsidianVaults', () => {
+    return detectObsidianVaults()
+  })
 }

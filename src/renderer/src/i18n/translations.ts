@@ -71,7 +71,17 @@ export const translations = {
     contextMenuNewFolder: 'New Subfolder',
     contextMenuDelete: 'Delete',
     cannotDropIntoNote: 'Files cannot be dropped into a note.',
-    cannotDropNoteToPlanet: 'Notes cannot be dropped directly onto planets. Please drop into a folder.'
+    cannotDropNoteToPlanet: 'Notes cannot be dropped directly onto planets. Please drop into a folder.',
+
+    // Welcome Screen
+    welcomeSubtitle: 'Transform your Obsidian vault into an interactive universe',
+    continueBtn: 'Continue',
+    selectVaultLabel: 'Select your vault',
+    noVaultsFound: 'No Obsidian vaults found on this computer.',
+    browseManually: 'Browse Manually',
+    detectingVaults: 'Detecting vaults...',
+    vaultCount: 'vault found',
+    vaultCountPlural: 'vaults found'
   },
   tr: {
     selectVault: 'Vault Klasörü Seç',
@@ -143,7 +153,17 @@ export const translations = {
     contextMenuNewFolder: 'Yeni Alt Klasör',
     contextMenuDelete: 'Sil',
     cannotDropIntoNote: 'Notların içine dosya bırakılamaz.',
-    cannotDropNoteToPlanet: 'Gezegenlere doğrudan not eklenemez. Lütfen bir klasöre bırakın.'
+    cannotDropNoteToPlanet: 'Gezegenlere doğrudan not eklenemez. Lütfen bir klasöre bırakın.',
+
+    // Welcome Screen
+    welcomeSubtitle: 'Obsidian kasanızı etkileşimli bir evrene dönüştürün',
+    continueBtn: 'Devam Et',
+    selectVaultLabel: 'Vault seçin',
+    noVaultsFound: 'Bu bilgisayarda Obsidian vault bulunamadı.',
+    browseManually: 'Manuel Seç',
+    detectingVaults: 'Vault\'lar algılanıyor...',
+    vaultCount: 'vault bulundu',
+    vaultCountPlural: 'vault bulundu'
   }
 } as const
 

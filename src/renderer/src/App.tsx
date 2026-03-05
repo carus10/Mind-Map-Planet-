@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useMapStore } from './store/mapStore'
 import { WelcomeScreen } from './components/WelcomeScreen'
+import { VaultSwitcher } from './components/VaultSwitcher'
 import { VoronoiMap } from './components/VoronoiMap'
 import { NavBar } from './components/NavBar'
 import { RenameDialog } from './components/RenameDialog'
@@ -34,8 +35,12 @@ export function App(): React.ReactElement {
   const [showCreateFolder, setShowCreateFolder] = useState(false)
   const [showOmniSearch, setShowOmniSearch] = useState(false)
   const [showAppearance, setShowAppearance] = useState(false)
+  const [showVaultSwitcher, setShowVaultSwitcher] = useState(false)
   const [vaultPath, setVaultPath] = useState<string | null>(null)
   const [scanning, setScanning] = useState(false)
+  // Controls whether WelcomeScreen is shown (only on first launch or no saved vault)
+  const [showWelcome, setShowWelcome] = useState(true)
+  const [initialLoading, setInitialLoading] = useState(true)
 
   const doScan = async (path: string): Promise<void> => {
     setScanning(true)
@@ -53,15 +58,22 @@ export function App(): React.ReactElement {
     }
   }
 
-  // Load persisted vault path on startup
+  // On startup: check if a vault was previously saved
+  // If yes → auto-load it (skip WelcomeScreen)
+  // If no → show WelcomeScreen (first launch)
   useEffect(() => {
     window.api.storeGet('vaultPath').then((saved) => {
       const path = saved as string | null
       if (path) {
+        // Returning user — auto-load saved vault
         setVaultPath(path)
+        setShowWelcome(false)
         doScan(path)
       }
-    }).catch(() => { })
+      // else: first launch — showWelcome stays true
+    }).catch(() => { }).finally(() => {
+      setInitialLoading(false)
+    })
   }, [])
 
   // Periodic rescan
@@ -86,30 +98,28 @@ export function App(): React.ReactElement {
   const handleVaultSelected = (path: string): void => {
     window.api.storeSet('vaultPath', path)
     setVaultPath(path)
+    setShowWelcome(false)
     doScan(path)
   }
 
-  const handleChangeVault = async (): Promise<void> => {
-    try {
-      const selectedPath = await window.api.selectVault()
-      if (selectedPath) {
-        handleVaultSelected(selectedPath)
-      }
-    } catch (e) {
-      setError('Could not select vault folder: ' + String(e))
-    }
+  // If still loading saved vault, show nothing
+  if (initialLoading) {
+    return <div className="app" />
   }
 
   return (
     <ErrorBoundary>
       <div className="app">
-        {!hierarchy ? (
+        {showWelcome && !hierarchy ? (
           <WelcomeScreen onVaultSelected={handleVaultSelected} scanning={scanning} />
+        ) : !hierarchy ? (
+          // Loading state after auto-load
+          <div className="app" />
         ) : (
           <>
             <NavBar
               onSettings={() => setShowSettings(true)}
-              onChangeVault={handleChangeVault}
+              onChangeVault={() => setShowVaultSwitcher(true)}
               onCreateNote={() => setShowCreateNote(true)}
               onCreatePlanet={() => setShowCreatePlanet(true)}
             />
@@ -158,6 +168,12 @@ export function App(): React.ReactElement {
         )}
         {showOmniSearch && hierarchy && <OmniSearch onClose={() => setShowOmniSearch(false)} />}
         {hierarchy && <CargoHold />}
+        {showVaultSwitcher && (
+          <VaultSwitcher
+            onVaultSelected={handleVaultSelected}
+            onClose={() => setShowVaultSwitcher(false)}
+          />
+        )}
       </div>
     </ErrorBoundary>
   )
