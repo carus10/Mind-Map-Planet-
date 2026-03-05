@@ -11,6 +11,7 @@ import { polygonCentroid, polygonArea, polygonContains } from 'd3-polygon'
 import { useMapStore } from '../store/mapStore'
 import { buildObsidianUrl } from '../utils/obsidianUrl'
 import { getAppearance, DEFAULT_APPEARANCE_KEY } from '../utils/planetAppearances'
+import { translations } from '../i18n/translations'
 import type { HierarchyNode, VaultHierarchy } from '../types/hierarchy'
 import './VoronoiMap.css'
 
@@ -561,6 +562,32 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                 }
 
                 if (src && dst && src.id !== dst.id) {
+                    const t = translations[useMapStore.getState().language]
+
+                    if (dst.type === 'home') {
+                        setError(t.cannotDropIntoNote)
+                        draggedNodeRef.current = null
+                        dropTargetRef.current = null
+                        setDraggedNode(null)
+                        setDropTargetId(null)
+                        setActiveDraggedNode(null)
+                        isDraggingRef.current = false
+                        if (isSolarRef.current && el) el.style.cursor = 'grab'
+                        return
+                    }
+
+                    if (src.type === 'home' && dst.type === 'country') {
+                        setError(t.cannotDropNoteToPlanet)
+                        draggedNodeRef.current = null
+                        dropTargetRef.current = null
+                        setDraggedNode(null)
+                        setDropTargetId(null)
+                        setActiveDraggedNode(null)
+                        isDraggingRef.current = false
+                        if (isSolarRef.current && el) el.style.cursor = 'grab'
+                        return
+                    }
+
                     const wasFromCargo = !!activeDraggedRef.current
                     // Yöntem 2 için (Kargo'dan çıkarılan dosyanın hedefe taşınması)
                     window.api.moveNode(src.absolutePath, dst.absolutePath).then(res => {

@@ -14,6 +14,8 @@ export const translations = {
     renameError: 'Could not rename. Please try again.',
     settings: 'Settings',
     language: 'Language',
+    randomizePlanetsBtn: 'Randomize All Planets',
+    randomizePlanetsDesc: 'Warning: This will clear all your currently assigned planet appearances and randomly generate new ones. Custom images are not affected.',
     english: 'English',
     turkish: 'Turkish',
     empty: 'Empty',
@@ -67,7 +69,9 @@ export const translations = {
     contextMenuAppearance: 'Appearance',
     contextMenuRename: 'Rename',
     contextMenuNewFolder: 'New Subfolder',
-    contextMenuDelete: 'Delete'
+    contextMenuDelete: 'Delete',
+    cannotDropIntoNote: 'Files cannot be dropped into a note.',
+    cannotDropNoteToPlanet: 'Notes cannot be dropped directly onto planets. Please drop into a folder.'
   },
   tr: {
     selectVault: 'Vault Klasörü Seç',
@@ -82,6 +86,8 @@ export const translations = {
     renameError: 'Yeniden adlandırılamadı. Lütfen tekrar deneyin.',
     settings: 'Ayarlar',
     language: 'Dil',
+    randomizePlanetsBtn: 'Tüm Gezegenleri Rastgele Yap',
+    randomizePlanetsDesc: 'Uyarı: Bu işlem mevcut tüm gezegen görünümlerinizi sıfırlayacak ve yerlerine yenilerini atayacaktır. Özel yüklediğiniz görseller etkilenmez.',
     english: 'İngilizce',
     turkish: 'Türkçe',
     empty: 'Boş',
@@ -135,7 +141,9 @@ export const translations = {
     contextMenuAppearance: 'Görünüm',
     contextMenuRename: 'Yeniden Adlandır',
     contextMenuNewFolder: 'Yeni Alt Klasör',
-    contextMenuDelete: 'Sil'
+    contextMenuDelete: 'Sil',
+    cannotDropIntoNote: 'Notların içine dosya bırakılamaz.',
+    cannotDropNoteToPlanet: 'Gezegenlere doğrudan not eklenemez. Lütfen bir klasöre bırakın.'
   }
 } as const
 
