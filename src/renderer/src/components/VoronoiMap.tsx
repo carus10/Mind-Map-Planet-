@@ -291,6 +291,8 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
     hierarchyRef.current = hierarchy
     const activeDraggedRef = useRef(activeDraggedNode)
     activeDraggedRef.current = activeDraggedNode
+    const voronoiPathRef = useRef(voronoiPath)
+    voronoiPathRef.current = voronoiPath
 
     // Drag & Drop
     const dragTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -488,7 +490,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
         const el = containerRef.current
         if (!el) return
 
-        const onMouseDown = (e: MouseEvent): void => {
+        const onPointerDown = (e: PointerEvent): void => {
             if (!isSolarRef.current) return
             isDraggingRef.current = true
             setDidDrag(false)
@@ -496,7 +498,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
             el.style.cursor = 'grabbing'
         }
 
-        const onMouseMove = (e: MouseEvent): void => {
+        const onPointerMove = (e: PointerEvent): void => {
             if (activeDraggedRef.current) {
                 setDragPos({ x: e.clientX, y: e.clientY })
                 return
@@ -542,7 +544,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
             setPanY(newPanY)
         }
 
-        const onMouseUp = (): void => {
+        const onPointerUp = (): void => {
             if (dragTimerRef.current) {
                 clearTimeout(dragTimerRef.current)
                 dragTimerRef.current = null
@@ -550,13 +552,23 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
 
             if (draggedNodeRef.current || activeDraggedRef.current) {
                 const src = draggedNodeRef.current || activeDraggedRef.current
-                const dst = dropTargetRef.current
+                let dst = dropTargetRef.current
+
+                // If dropping active cargo item into empty space inside a planet, default to that planet's folder
+                if (!dst && !isSolarRef.current && activeDraggedRef.current) {
+                    const p = voronoiPathRef.current
+                    if (p.length > 0) dst = p[p.length - 1]
+                }
 
                 if (src && dst && src.id !== dst.id) {
+                    const wasFromCargo = !!activeDraggedRef.current
                     // Yöntem 2 için (Kargo'dan çıkarılan dosyanın hedefe taşınması)
                     window.api.moveNode(src.absolutePath, dst.absolutePath).then(res => {
                         if (res && res.success) {
-                            if (activeDraggedRef.current) unstashNode(src.id) // Kargodan başarıyla çıktı
+                            if (wasFromCargo) {
+                                unstashNode(src.id)
+                                useMapStore.getState().clearStash() // Otomatik kargoyu kapat
+                            }
                             window.api.scanVault(hierarchyRef.current.vaultPath).then(updated => {
                                 if (updated) setHierarchy(updated as never)
                             })
@@ -564,9 +576,24 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                             setError(res ? res.error || "Failed to move node" : "Failed to move node")
                         }
                     })
-                } else if (!dst && draggedNodeRef.current) {
-                    // Sadece harita içinden kaldırılanlar kargoya konur, kargodan alınanlar tekrar konmaz
-                    stashNode(src as HierarchyNode)
+                } else if (!dst) {
+                    if (isSolarRef.current && activeDraggedRef.current) {
+                        // Kargo'dan çıkarılan dosyanın ana ekrana (boşluğa) bırakılması -> Gezegene dönüşür
+                        window.api.moveNode(src!.absolutePath, hierarchyRef.current.vaultPath).then(res => {
+                            if (res && res.success) {
+                                unstashNode(src!.id)
+                                useMapStore.getState().clearStash() // Otomatik kargoyu kapat
+                                window.api.scanVault(hierarchyRef.current.vaultPath).then(updated => {
+                                    if (updated) setHierarchy(updated as never)
+                                })
+                            } else {
+                                setError(res ? res.error || "Failed to convert to planet" : "Failed to convert to planet")
+                            }
+                        })
+                    } else if (draggedNodeRef.current) {
+                        // Sadece harita içinden kaldırılanlar kargoya konur, kargodan alınanlar tekrar konmaz
+                        stashNode(src as HierarchyNode)
+                    }
                 }
 
                 draggedNodeRef.current = null
@@ -574,6 +601,8 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                 setDraggedNode(null)
                 setDropTargetId(null)
                 setActiveDraggedNode(null)
+
+                isDraggingRef.current = false // FIX: Prevent screen freeze
 
                 if (isSolarRef.current && el) el.style.cursor = 'grab'
                 return
@@ -592,15 +621,15 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
             setZoom(newZoom)
         }
 
-        el.addEventListener('mousedown', onMouseDown)
-        window.addEventListener('mousemove', onMouseMove)
-        window.addEventListener('mouseup', onMouseUp)
+        el.addEventListener('pointerdown', onPointerDown)
+        window.addEventListener('pointermove', onPointerMove)
+        window.addEventListener('pointerup', onPointerUp)
         el.addEventListener('wheel', onWheel, { passive: false })
 
         return () => {
-            el.removeEventListener('mousedown', onMouseDown)
-            window.removeEventListener('mousemove', onMouseMove)
-            window.removeEventListener('mouseup', onMouseUp)
+            el.removeEventListener('pointerdown', onPointerDown)
+            window.removeEventListener('pointermove', onPointerMove)
+            window.removeEventListener('pointerup', onPointerUp)
             el.removeEventListener('wheel', onWheel)
         }
     }, [dimensions])
