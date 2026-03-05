@@ -10,6 +10,7 @@ electron.contextBridge.exposeInMainWorld("api", {
   deleteNode: (targetPath) => electron.ipcRenderer.invoke("file:delete", targetPath),
   moveNode: (sourcePath, targetFolderPath) => electron.ipcRenderer.invoke("file:move", sourcePath, targetFolderPath),
   openObsidian: (url) => electron.ipcRenderer.invoke("obsidian:open", url),
+  detectObsidianVaults: () => electron.ipcRenderer.invoke("vault:detectObsidianVaults"),
   storeGet: (key) => electron.ipcRenderer.invoke("store:get", key),
   storeSet: (key, value) => electron.ipcRenderer.invoke("store:set", key, value),
   loadAdmin1: () => electron.ipcRenderer.invoke("geo:admin1")

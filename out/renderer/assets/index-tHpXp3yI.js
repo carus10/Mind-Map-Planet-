@@ -7164,10 +7164,12 @@ const PLANET_APPEARANCES = [
   {
     key: "earth",
     name: "Dünya",
+    nameEn: "Earth",
     emoji: "🌍",
     sizeRatio: 1,
     type: "preset",
     description: "Mavi okyanuslar ve yeşil kıtalar",
+    descriptionEn: "Blue oceans and green continents",
     colorCenter: "#1a6fa8",
     colorEdge: "#0a2d4a",
     glowColor: "rgba(40,140,255,0.35)",
@@ -7178,10 +7180,12 @@ const PLANET_APPEARANCES = [
   {
     key: "mars",
     name: "Mars",
+    nameEn: "Mars",
     emoji: "🔴",
     sizeRatio: 0.8,
     type: "preset",
     description: "Kızıl gezegen, toz fırtınaları",
+    descriptionEn: "Red planet, dust storms",
     colorCenter: "#c1440e",
     colorEdge: "#5a1a06",
     glowColor: "rgba(200,80,40,0.35)",
@@ -7193,10 +7197,12 @@ const PLANET_APPEARANCES = [
   {
     key: "moon",
     name: "Ay",
+    nameEn: "Moon",
     emoji: "🌕",
     sizeRatio: 0.65,
     type: "preset",
-    description: "Gri kraterlü uydu",
+    description: "Gri kraterli uydu",
+    descriptionEn: "Grey cratered moon",
     colorCenter: "#b0b0b0",
     colorEdge: "#3a3a3a",
     glowColor: "rgba(200,200,210,0.25)",
@@ -7206,10 +7212,12 @@ const PLANET_APPEARANCES = [
   {
     key: "jupiter",
     name: "Jüpiter",
+    nameEn: "Jupiter",
     emoji: "🟤",
     sizeRatio: 1.45,
     type: "preset",
     description: "Dev gezegen, fırtına bantları",
+    descriptionEn: "Giant planet, storm bands",
     colorCenter: "#c88b4a",
     colorEdge: "#5a3010",
     glowColor: "rgba(200,140,80,0.35)",
@@ -7219,10 +7227,12 @@ const PLANET_APPEARANCES = [
   {
     key: "saturn",
     name: "Satürn",
+    nameEn: "Saturn",
     emoji: "🪐",
     sizeRatio: 1.35,
     type: "preset",
     description: "Halkalı sarı dev",
+    descriptionEn: "Ringed yellow giant",
     colorCenter: "#d4b96a",
     colorEdge: "#6a5020",
     glowColor: "rgba(220,190,100,0.35)",
@@ -7234,10 +7244,12 @@ const PLANET_APPEARANCES = [
   {
     key: "uranus",
     name: "Uranüs",
+    nameEn: "Uranus",
     emoji: "🔵",
     sizeRatio: 1.25,
     type: "preset",
     description: "Buz devi, açık mavi",
+    descriptionEn: "Ice giant, light blue",
     colorCenter: "#7de8e8",
     colorEdge: "#1a6868",
     glowColor: "rgba(100,220,230,0.35)",
@@ -7248,10 +7260,12 @@ const PLANET_APPEARANCES = [
   {
     key: "neptune",
     name: "Neptün",
+    nameEn: "Neptune",
     emoji: "💙",
     sizeRatio: 1.2,
     type: "preset",
     description: "Derin mavi buz devi",
+    descriptionEn: "Deep blue ice giant",
     colorCenter: "#2060d8",
     colorEdge: "#08144a",
     glowColor: "rgba(50,100,255,0.4)",
@@ -7261,10 +7275,12 @@ const PLANET_APPEARANCES = [
   {
     key: "venus",
     name: "Venüs",
+    nameEn: "Venus",
     emoji: "☁️",
     sizeRatio: 0.95,
     type: "preset",
     description: "Sarı bulut örtüsü",
+    descriptionEn: "Yellow cloud cover",
     colorCenter: "#e8c860",
     colorEdge: "#8a6010",
     glowColor: "rgba(240,200,80,0.4)",
@@ -7273,10 +7289,12 @@ const PLANET_APPEARANCES = [
   {
     key: "mercury",
     name: "Merkür",
+    nameEn: "Mercury",
     emoji: "⚫",
     sizeRatio: 0.6,
     type: "preset",
     description: "Küçük metalik kaya",
+    descriptionEn: "Small metallic rock",
     colorCenter: "#909090",
     colorEdge: "#282828",
     glowColor: "rgba(150,150,160,0.2)",
@@ -7286,10 +7304,12 @@ const PLANET_APPEARANCES = [
   {
     key: "pluto",
     name: "Plüton",
+    nameEn: "Pluto",
     emoji: "❄️",
     sizeRatio: 0.55,
     type: "preset",
     description: "Cüce gezegen, buz dünyası",
+    descriptionEn: "Dwarf planet, ice world",
     colorCenter: "#b8d0e8",
     colorEdge: "#304858",
     glowColor: "rgba(160,200,240,0.25)",
@@ -7305,6 +7325,7 @@ function getAppearance(key) {
     return {
       key: "custom",
       name: "Özel Görsel",
+      nameEn: "Custom Image",
       emoji: "🖼️",
       sizeRatio: 1,
       type: "custom",
@@ -7318,6 +7339,7 @@ function getAppearance(key) {
 }
 const LS_APPEARANCES = "planet-appearances-v1";
 const LS_CUSTOM_IMAGES = "planet-custom-images-v1";
+const LS_PLANET_SIZES = "planet-sizes-v1";
 function loadAppearances() {
   try {
     return JSON.parse(localStorage.getItem(LS_APPEARANCES) ?? "{}");
@@ -7344,6 +7366,19 @@ function saveCustomImages(data) {
   } catch {
   }
 }
+function loadPlanetSizes() {
+  try {
+    return JSON.parse(localStorage.getItem(LS_PLANET_SIZES) ?? "{}");
+  } catch {
+    return {};
+  }
+}
+function savePlanetSizes(data) {
+  try {
+    localStorage.setItem(LS_PLANET_SIZES, JSON.stringify(data));
+  } catch {
+  }
+}
 const MIN_SCALE = 0.2;
 const MAX_SCALE = 8;
 const useMapStore = create((set) => ({
@@ -7360,6 +7395,7 @@ const useMapStore = create((set) => ({
   stashedNodes: [],
   planetAppearances: loadAppearances(),
   customPlanetImages: loadCustomImages(),
+  planetSizes: loadPlanetSizes(),
   activeDraggedNode: null,
   voronoiDrillDown: (node) => set((state) => ({
     voronoiPath: [...state.voronoiPath, node]
@@ -7399,8 +7435,33 @@ const useMapStore = create((set) => ({
     return {};
   }),
   setHierarchy: (h) => set((state) => {
+    let appearancesChanged = false;
+    const nextAppearances = { ...state.planetAppearances };
+    const presets = PLANET_APPEARANCES.filter((a) => a.type === "preset");
+    const ensureDefaults = (nodes) => {
+      for (const node of nodes) {
+        if (!nextAppearances[node.id]) {
+          const randomIndex = Math.floor(Math.random() * presets.length);
+          nextAppearances[node.id] = presets[randomIndex]?.key || DEFAULT_APPEARANCE_KEY;
+          appearancesChanged = true;
+        }
+        if (node.children) {
+          ensureDefaults(node.children);
+        }
+      }
+    };
+    if (h.countries) {
+      ensureDefaults(h.countries);
+    }
+    if (appearancesChanged) {
+      saveAppearances(nextAppearances);
+    }
     if (!state.hierarchy || state.hierarchy.vaultName !== h.vaultName) {
-      return { hierarchy: h, voronoiPath: [] };
+      return {
+        hierarchy: h,
+        voronoiPath: [],
+        ...appearancesChanged ? { planetAppearances: nextAppearances } : {}
+      };
     }
     const newPath = [];
     const findNodeById = (nodeList, id2) => {
@@ -7421,7 +7482,11 @@ const useMapStore = create((set) => ({
         break;
       }
     }
-    return { hierarchy: h, voronoiPath: newPath };
+    return {
+      hierarchy: h,
+      voronoiPath: newPath,
+      ...appearancesChanged ? { planetAppearances: nextAppearances } : {}
+    };
   }),
   drillDown: (node) => set((state) => {
     const nav = state.navigation;
@@ -7484,11 +7549,44 @@ const useMapStore = create((set) => ({
     saveAppearances(nextApp);
     return { planetAppearances: nextApp, customPlanetImages: nextImages };
   }),
+  setPlanetSize: (planetId, size) => set((state) => {
+    const nextKeys = { ...state.planetSizes, [planetId]: size };
+    savePlanetSizes(nextKeys);
+    return { planetSizes: nextKeys };
+  }),
   ensurePlanetAppearance: (planetId) => set((state) => {
     if (state.planetAppearances[planetId]) return {};
-    const next = { ...state.planetAppearances, [planetId]: DEFAULT_APPEARANCE_KEY };
+    const presets = PLANET_APPEARANCES.filter((a) => a.type === "preset");
+    const randomIndex = Math.floor(Math.random() * presets.length);
+    const randomKey = presets[randomIndex]?.key || DEFAULT_APPEARANCE_KEY;
+    const next = { ...state.planetAppearances, [planetId]: randomKey };
     saveAppearances(next);
     return { planetAppearances: next };
+  }),
+  randomizeAllAppearances: () => set((state) => {
+    if (!state.hierarchy?.countries) return {};
+    const nextAppearances = { ...state.planetAppearances };
+    const presets = PLANET_APPEARANCES.filter((a) => a.type === "preset");
+    let changed = false;
+    const randomizeNodes = (nodes) => {
+      for (const node of nodes) {
+        const current = nextAppearances[node.id];
+        if (current !== "custom") {
+          const randomIndex = Math.floor(Math.random() * presets.length);
+          nextAppearances[node.id] = presets[randomIndex]?.key || DEFAULT_APPEARANCE_KEY;
+          changed = true;
+        }
+        if (node.children) {
+          randomizeNodes(node.children);
+        }
+      }
+    };
+    randomizeNodes(state.hierarchy.countries);
+    if (changed) {
+      saveAppearances(nextAppearances);
+      return { planetAppearances: nextAppearances };
+    }
+    return {};
   })
   // ---------------------------
 }));
@@ -7506,6 +7604,8 @@ const translations = {
     renameError: "Could not rename. Please try again.",
     settings: "Settings",
     language: "Language",
+    randomizePlanetsBtn: "Randomize All Planets",
+    randomizePlanetsDesc: "Warning: This will clear all your currently assigned planet appearances and randomly generate new ones. Custom images are not affected.",
     english: "English",
     turkish: "Turkish",
     empty: "Empty",
@@ -7534,7 +7634,34 @@ const translations = {
     guideQuickNotes: "Creating Quick Notes",
     guideQuickNotesDesc: "Whenever inspiration strikes, you can quickly add a new note to your current solar system (folder). Click the 'New Note' (+) button in the top navigation bar. Type your note title, and a new planet will be born in your current system. A new markdown file will automatically be created in your Obsidian vault.",
     guideDragDrop: "Drag and Drop & Cargo Hold",
-    guideDragDropDesc: "Mind Map Planet features a unique inventory system called the 'Cargo Hold' (bottom left of the screen). \n\n• You can Right-Click and drag any planet or folder into the Cargo Hold to temporarily store it there. \n• Travel to a different star system (folder) using the camera or navigation. \n• Drag the item out of your Cargo Hold and drop it into the new empty space. \nThis will physically move the markdown file or folder within your Obsidian vault to the new location."
+    guideDragDropDesc: "Mind Map Planet features a unique inventory system called the 'Cargo Hold' (bottom left of the screen). \n\n• You can Right-Click and drag any planet or folder into the Cargo Hold to temporarily store it there. \n• Travel to a different star system (folder) using the camera or navigation. \n• Drag the item out of your Cargo Hold and drop it into the new empty space. \nThis will physically move the markdown file or folder within your Obsidian vault to the new location.",
+    // Planet Appearance Dialog
+    planetAppearanceTitle: "Planet Appearance",
+    closeBtn: "Close",
+    appearanceCustomName: "Custom Image",
+    appearanceCustomDesc: "Upload your own image",
+    appearanceCustomInfo: "📂 File picker opens — JPG, PNG, WebP, GIF supported",
+    planetSizeLabel: "Planet Size:",
+    cancel: "Cancel",
+    apply: "Apply",
+    applySize: "Apply Size",
+    selectImage: "Select Image",
+    // Context Menu
+    contextMenuAppearance: "Appearance",
+    contextMenuRename: "Rename",
+    contextMenuNewFolder: "New Subfolder",
+    contextMenuDelete: "Delete",
+    cannotDropIntoNote: "Files cannot be dropped into a note.",
+    cannotDropNoteToPlanet: "Notes cannot be dropped directly onto planets. Please drop into a folder.",
+    // Welcome Screen
+    welcomeSubtitle: "Transform your Obsidian vault into an interactive universe",
+    continueBtn: "Continue",
+    selectVaultLabel: "Select your vault",
+    noVaultsFound: "No Obsidian vaults found on this computer.",
+    browseManually: "Browse Manually",
+    detectingVaults: "Detecting vaults...",
+    vaultCount: "vault found",
+    vaultCountPlural: "vaults found"
   },
   tr: {
     selectVault: "Vault Klasörü Seç",
@@ -7549,6 +7676,8 @@ const translations = {
     renameError: "Yeniden adlandırılamadı. Lütfen tekrar deneyin.",
     settings: "Ayarlar",
     language: "Dil",
+    randomizePlanetsBtn: "Tüm Gezegenleri Rastgele Yap",
+    randomizePlanetsDesc: "Uyarı: Bu işlem mevcut tüm gezegen görünümlerinizi sıfırlayacak ve yerlerine yenilerini atayacaktır. Özel yüklediğiniz görseller etkilenmez.",
     english: "İngilizce",
     turkish: "Türkçe",
     empty: "Boş",
@@ -7577,7 +7706,34 @@ const translations = {
     guideQuickNotes: "Hızlı Not Oluşturma",
     guideQuickNotesDesc: "İlham geldiği anda bulunduğunuz güneş sistemine (klasöre) hızlıca yeni bir not ekleyebilirsiniz. Üst menü çubuğundaki 'Yeni Not' (+) düğmesine tıklayın. Notunuzun başlığını yazın; bulunduğunuz sistemde yeni bir gezegen doğacak ve Obsidian kasanızda otomatik olarak yeni bir markdown dosyası oluşturulacaktır.",
     guideDragDrop: "Sürükle-Bırak ve Kargo Alanı (Cargo Hold)",
-    guideDragDropDesc: "Mind Map Planet, 'Kargo Alanı' (Cargo Hold) adında benzersiz bir envanter sistemine sahiptir (ekranın sol alt köşesi).\n\n• Herhangi bir gezegeni veya klasörü Sağ Tıklayıp sürükleyerek Kargo Alanı'na bırakabilir ve geçici olarak orada saklayabilirsiniz.\n• Kamera veya navigasyon ile tamamen farklı bir yıldız sistemine (klasöre) seyahat edin.\n• Kargo Alanı'ndaki öğeyi sürükleyip yeni sistemdeki boş uzay alanına bırakın.\nBu işlem, Obsidian kasanızdaki ilgili markdown dosyasını veya klasörünü fiziksel olarak yeni konumuna taşıyacaktır."
+    guideDragDropDesc: "Mind Map Planet, 'Kargo Alanı' (Cargo Hold) adında benzersiz bir envanter sistemine sahiptir (ekranın sol alt köşesi).\n\n• Herhangi bir gezegeni veya klasörü Sağ Tıklayıp sürükleyerek Kargo Alanı'na bırakabilir ve geçici olarak orada saklayabilirsiniz.\n• Kamera veya navigasyon ile tamamen farklı bir yıldız sistemine (klasöre) seyahat edin.\n• Kargo Alanı'ndaki öğeyi sürükleyip yeni sistemdeki boş uzay alanına bırakın.\nBu işlem, Obsidian kasanızdaki ilgili markdown dosyasını veya klasörünü fiziksel olarak yeni konumuna taşıyacaktır.",
+    // Planet Appearance Dialog
+    planetAppearanceTitle: "Gezegen Görünümü",
+    closeBtn: "Kapat",
+    appearanceCustomName: "Özel Görsel",
+    appearanceCustomDesc: "Kendi görselinizi yükleyin",
+    appearanceCustomInfo: "📂 Dosya seçici açılır — JPG, PNG, WebP, GIF desteklenir",
+    planetSizeLabel: "Gezegen Boyutu:",
+    cancel: "İptal",
+    apply: "Uygula",
+    applySize: "Boyutu Uygula",
+    selectImage: "Görsel Seç",
+    // Context Menu
+    contextMenuAppearance: "Görünüm",
+    contextMenuRename: "Yeniden Adlandır",
+    contextMenuNewFolder: "Yeni Alt Klasör",
+    contextMenuDelete: "Sil",
+    cannotDropIntoNote: "Notların içine dosya bırakılamaz.",
+    cannotDropNoteToPlanet: "Gezegenlere doğrudan not eklenemez. Lütfen bir klasöre bırakın.",
+    // Welcome Screen
+    welcomeSubtitle: "Obsidian kasanızı etkileşimli bir evrene dönüştürün",
+    continueBtn: "Devam Et",
+    selectVaultLabel: "Vault seçin",
+    noVaultsFound: "Bu bilgisayarda Obsidian vault bulunamadı.",
+    browseManually: "Manuel Seç",
+    detectingVaults: "Vault'lar algılanıyor...",
+    vaultCount: "vault bulundu",
+    vaultCountPlural: "vault bulundu"
   }
 };
 function WelcomeScreen({ onVaultSelected, scanning }) {
@@ -7587,6 +7743,28 @@ function WelcomeScreen({ onVaultSelected, scanning }) {
     setError: s.setError
   }));
   const t2 = translations[language];
+  const [vaults, setVaults] = reactExports.useState([]);
+  const [detecting, setDetecting] = reactExports.useState(true);
+  const [selectedVault, setSelectedVault] = reactExports.useState(null);
+  reactExports.useEffect(() => {
+    setDetecting(true);
+    window.api.detectObsidianVaults().then((detected) => {
+      setVaults(detected);
+      if (detected.length === 1) {
+        setSelectedVault(detected[0].path);
+      }
+    }).catch((err) => {
+      console.error("Failed to detect vaults:", err);
+    }).finally(() => {
+      setDetecting(false);
+    });
+  }, []);
+  const handleContinue = () => {
+    if (selectedVault) {
+      setError(null);
+      onVaultSelected(selectedVault);
+    }
+  };
   const handleBrowse = async () => {
     const path = await window.api.selectVault();
     if (path) {
@@ -7594,12 +7772,212 @@ function WelcomeScreen({ onVaultSelected, scanning }) {
       onVaultSelected(path);
     }
   };
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "welcome", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "welcome-card", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "welcome-icon", children: "🗺️" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "welcome-title", children: "Mind Map Planet" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "welcome-desc", children: t2.selectVaultDesc }),
-    scanning ? /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn-primary", disabled: true, children: "Scanning..." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn-primary", onClick: handleBrowse, children: t2.browse }),
-    error && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "welcome-error", children: error })
+  const stars = React$2.useMemo(() => {
+    const arr = [];
+    for (let i = 0; i < 80; i++) {
+      arr.push({
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        size: Math.random() * 2.5 + 0.5,
+        delay: Math.random() * 5,
+        duration: Math.random() * 3 + 2
+      });
+    }
+    return arr;
+  }, []);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "welcome", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "welcome-stars", children: stars.map((s, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        className: "welcome-star",
+        style: {
+          left: `${s.x}%`,
+          top: `${s.y}%`,
+          width: `${s.size}px`,
+          height: `${s.size}px`,
+          animationDelay: `${s.delay}s`,
+          animationDuration: `${s.duration}s`
+        }
+      },
+      i
+    )) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "welcome-nebula welcome-nebula-1" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "welcome-nebula welcome-nebula-2" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "welcome-card", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "welcome-planet", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "welcome-planet-ring" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "welcome-planet-body", children: "🪐" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "welcome-title", children: "Mind Map Planet" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "welcome-subtitle", children: t2.welcomeSubtitle }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "welcome-divider" }),
+      detecting ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "welcome-detecting", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "welcome-spinner" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: t2.detectingVaults })
+      ] }) : vaults.length === 0 ? (
+        /* No vaults found */
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "welcome-no-vaults", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "welcome-no-vaults-text", children: t2.noVaultsFound }),
+          scanning ? /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn-primary", disabled: true, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "welcome-spinner welcome-spinner-sm" }) }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn-primary btn-browse", onClick: handleBrowse, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "btn-icon", children: "📂" }),
+            t2.browseManually
+          ] })
+        ] })
+      ) : vaults.length === 1 ? (
+        /* Single vault — direct continue */
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "welcome-single-vault", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "div",
+            {
+              className: "vault-card vault-card-selected",
+              title: vaults[0].path,
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "vault-card-icon", children: "📦" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "vault-card-info", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "vault-card-name", children: vaults[0].name }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "vault-card-path", children: vaults[0].path })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "vault-card-check", children: "✓" })
+              ]
+            }
+          ),
+          scanning ? /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn-primary btn-continue", disabled: true, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "welcome-spinner welcome-spinner-sm" }) }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn-primary btn-continue", onClick: handleContinue, children: [
+            t2.continueBtn,
+            " →"
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn-ghost", onClick: handleBrowse, children: t2.browseManually })
+        ] })
+      ) : (
+        /* Multiple vaults — selection list */
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "welcome-multi-vault", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "welcome-vault-label", children: [
+            t2.selectVaultLabel,
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "welcome-vault-count", children: [
+              vaults.length,
+              " ",
+              vaults.length === 1 ? t2.vaultCount : t2.vaultCountPlural
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "vault-list", children: vaults.map((v2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "div",
+            {
+              className: `vault-card ${selectedVault === v2.path ? "vault-card-selected" : ""}`,
+              onClick: () => setSelectedVault(v2.path),
+              title: v2.path,
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "vault-card-icon", children: "📦" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "vault-card-info", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "vault-card-name", children: v2.name }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "vault-card-path", children: v2.path })
+                ] }),
+                selectedVault === v2.path && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "vault-card-check", children: "✓" })
+              ]
+            },
+            v2.path
+          )) }),
+          scanning ? /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn-primary btn-continue", disabled: true, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "welcome-spinner welcome-spinner-sm" }) }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "button",
+            {
+              className: "btn-primary btn-continue",
+              onClick: handleContinue,
+              disabled: !selectedVault,
+              children: [
+                t2.continueBtn,
+                " →"
+              ]
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn-ghost", onClick: handleBrowse, children: t2.browseManually })
+        ] })
+      ),
+      error && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "welcome-error", children: error })
+    ] })
+  ] });
+}
+function VaultSwitcher({ onVaultSelected, onClose }) {
+  const { language } = useMapStore((s) => ({
+    language: s.language
+  }));
+  const t2 = translations[language];
+  const [vaults, setVaults] = reactExports.useState([]);
+  const [detecting, setDetecting] = reactExports.useState(true);
+  const [selectedVault, setSelectedVault] = reactExports.useState(null);
+  reactExports.useEffect(() => {
+    setDetecting(true);
+    window.api.detectObsidianVaults().then((detected) => {
+      setVaults(detected);
+    }).catch((err) => {
+      console.error("Failed to detect vaults:", err);
+    }).finally(() => {
+      setDetecting(false);
+    });
+  }, []);
+  reactExports.useEffect(() => {
+    const handler = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+  const handleContinue = () => {
+    if (selectedVault) {
+      onVaultSelected(selectedVault);
+      onClose();
+    }
+  };
+  const handleBrowse = async () => {
+    const path = await window.api.selectVault();
+    if (path) {
+      onVaultSelected(path);
+      onClose();
+    }
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "vs-overlay", onClick: onClose, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "vs-panel", onClick: (e) => e.stopPropagation(), children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "vs-header", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: "vs-title", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { width: "18", height: "18", viewBox: "0 0 16 16", fill: "currentColor", style: { marginRight: 8, verticalAlign: -3 }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M1 3.5A1.5 1.5 0 012.5 2h3.879a1.5 1.5 0 011.06.44l1.122 1.12A1.5 1.5 0 009.62 4H13.5A1.5 1.5 0 0115 5.5v7a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12.5v-9z" }) }),
+        t2.selectVaultLabel
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "vs-close", onClick: onClose, children: "✕" })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "vs-body", children: detecting ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "vs-detecting", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "vs-spinner" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: t2.detectingVaults })
+    ] }) : vaults.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "vs-empty", children: t2.noVaultsFound }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "vs-vault-list", children: vaults.map((v2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "div",
+      {
+        className: `vs-vault-card ${selectedVault === v2.path ? "vs-vault-selected" : ""}`,
+        onClick: () => setSelectedVault(v2.path),
+        title: v2.path,
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "vs-vault-icon", children: "📦" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "vs-vault-info", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "vs-vault-name", children: v2.name }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "vs-vault-path", children: v2.path })
+          ] }),
+          selectedVault === v2.path && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "vs-vault-check", children: "✓" })
+        ]
+      },
+      v2.path
+    )) }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "vs-footer", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "vs-btn-browse", onClick: handleBrowse, children: [
+        "📂 ",
+        t2.browseManually
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "button",
+        {
+          className: "vs-btn-continue",
+          onClick: handleContinue,
+          disabled: !selectedVault,
+          children: [
+            t2.continueBtn,
+            " →"
+          ]
+        }
+      )
+    ] })
   ] }) });
 }
 const epsilon$1 = 11102230246251565e-32;
@@ -9188,6 +9566,7 @@ function VoronoiMap({ hierarchy }) {
   const setActiveDraggedNode = useMapStore((s) => s.setActiveDraggedNode);
   const planetAppearances = useMapStore((s) => s.planetAppearances);
   const customPlanetImages = useMapStore((s) => s.customPlanetImages);
+  const planetSizes = useMapStore((s) => s.planetSizes);
   const ensurePlanetAppearance = useMapStore((s) => s.ensurePlanetAppearance);
   const depth = voronoiPath.length;
   const isSolarSystem = depth === 0;
@@ -9197,6 +9576,8 @@ function VoronoiMap({ hierarchy }) {
   hierarchyRef.current = hierarchy;
   const activeDraggedRef = reactExports.useRef(activeDraggedNode);
   activeDraggedRef.current = activeDraggedNode;
+  const voronoiPathRef = reactExports.useRef(voronoiPath);
+  voronoiPathRef.current = voronoiPath;
   const dragTimerRef = reactExports.useRef(null);
   reactExports.useRef({ x: 0, y: 0 });
   const dragPointerDownRefRaw = reactExports.useRef({ x: 0, y: 0 });
@@ -9294,7 +9675,8 @@ function VoronoiMap({ hierarchy }) {
       const appearance = getAppearance(appearanceKey);
       const childCount = node.children?.length || 0;
       const contentBonus = 0.85 + 0.3 * Math.min(childCount / 20, 1);
-      const radius2 = baseRadius * appearance.sizeRatio * contentBonus;
+      const customSizeMultiplier = planetSizes[node.id] ?? 1;
+      const radius2 = baseRadius * appearance.sizeRatio * contentBonus * customSizeMultiplier;
       const angle = i * 2.39996;
       const distance = i === 0 ? 0 : Math.sqrt(i) * spreadFactor;
       const randDist = hashStr(node.name) % 100 / 100 * distance * 0.2;
@@ -9304,7 +9686,7 @@ function VoronoiMap({ hierarchy }) {
       const colorSet = PLANET_COLORS[hashStr(node.name) % PLANET_COLORS.length];
       return { node, cx: cx2, cy: cy2, radius: radius2, colorSet, appearance, appearanceKey };
     });
-  }, [isSolarSystem, hierarchy.countries, dimensions, planetAppearances, ensurePlanetAppearance]);
+  }, [isSolarSystem, hierarchy.countries, dimensions, planetAppearances, planetSizes, ensurePlanetAppearance]);
   const globalLinks = reactExports.useMemo(() => {
     if (!isSolarSystem || planets.length === 0) return [];
     const links = [];
@@ -9340,14 +9722,14 @@ function VoronoiMap({ hierarchy }) {
   reactExports.useEffect(() => {
     const el2 = containerRef.current;
     if (!el2) return;
-    const onMouseDown = (e) => {
+    const onPointerDown = (e) => {
       if (!isSolarRef.current) return;
       isDraggingRef.current = true;
       setDidDrag(false);
       dragStartRef.current = { x: e.clientX, y: e.clientY, panX: panXRef.current, panY: panYRef.current };
       el2.style.cursor = "grabbing";
     };
-    const onMouseMove = (e) => {
+    const onPointerMove = (e) => {
       if (activeDraggedRef.current) {
         setDragPos({ x: e.clientX, y: e.clientY });
         return;
@@ -9383,18 +9765,49 @@ function VoronoiMap({ hierarchy }) {
       setPanX(newPanX);
       setPanY(newPanY);
     };
-    const onMouseUp = () => {
+    const onPointerUp = () => {
       if (dragTimerRef.current) {
         clearTimeout(dragTimerRef.current);
         dragTimerRef.current = null;
       }
       if (draggedNodeRef.current || activeDraggedRef.current) {
         const src = draggedNodeRef.current || activeDraggedRef.current;
-        const dst = dropTargetRef.current;
+        let dst = dropTargetRef.current;
+        if (!dst && !isSolarRef.current && activeDraggedRef.current) {
+          const p2 = voronoiPathRef.current;
+          if (p2.length > 0) dst = p2[p2.length - 1];
+        }
         if (src && dst && src.id !== dst.id) {
+          const t2 = translations[useMapStore.getState().language];
+          if (dst.type === "home") {
+            setError(t2.cannotDropIntoNote);
+            draggedNodeRef.current = null;
+            dropTargetRef.current = null;
+            setDraggedNode(null);
+            setDropTargetId(null);
+            setActiveDraggedNode(null);
+            isDraggingRef.current = false;
+            if (isSolarRef.current && el2) el2.style.cursor = "grab";
+            return;
+          }
+          if (src.type === "home" && dst.type === "country") {
+            setError(t2.cannotDropNoteToPlanet);
+            draggedNodeRef.current = null;
+            dropTargetRef.current = null;
+            setDraggedNode(null);
+            setDropTargetId(null);
+            setActiveDraggedNode(null);
+            isDraggingRef.current = false;
+            if (isSolarRef.current && el2) el2.style.cursor = "grab";
+            return;
+          }
+          const wasFromCargo = !!activeDraggedRef.current;
           window.api.moveNode(src.absolutePath, dst.absolutePath).then((res) => {
             if (res && res.success) {
-              if (activeDraggedRef.current) unstashNode(src.id);
+              if (wasFromCargo) {
+                unstashNode(src.id);
+                useMapStore.getState().clearStash();
+              }
               window.api.scanVault(hierarchyRef.current.vaultPath).then((updated) => {
                 if (updated) setHierarchy(updated);
               });
@@ -9402,14 +9815,29 @@ function VoronoiMap({ hierarchy }) {
               setError(res ? res.error || "Failed to move node" : "Failed to move node");
             }
           });
-        } else if (!dst && draggedNodeRef.current) {
-          stashNode(src);
+        } else if (!dst) {
+          if (isSolarRef.current && activeDraggedRef.current) {
+            window.api.moveNode(src.absolutePath, hierarchyRef.current.vaultPath).then((res) => {
+              if (res && res.success) {
+                unstashNode(src.id);
+                useMapStore.getState().clearStash();
+                window.api.scanVault(hierarchyRef.current.vaultPath).then((updated) => {
+                  if (updated) setHierarchy(updated);
+                });
+              } else {
+                setError(res ? res.error || "Failed to convert to planet" : "Failed to convert to planet");
+              }
+            });
+          } else if (draggedNodeRef.current) {
+            stashNode(src);
+          }
         }
         draggedNodeRef.current = null;
         dropTargetRef.current = null;
         setDraggedNode(null);
         setDropTargetId(null);
         setActiveDraggedNode(null);
+        isDraggingRef.current = false;
         if (isSolarRef.current && el2) el2.style.cursor = "grab";
         return;
       }
@@ -9424,14 +9852,14 @@ function VoronoiMap({ hierarchy }) {
       zoomRef.current = newZoom;
       setZoom(newZoom);
     };
-    el2.addEventListener("mousedown", onMouseDown);
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
+    el2.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
     el2.addEventListener("wheel", onWheel, { passive: false });
     return () => {
-      el2.removeEventListener("mousedown", onMouseDown);
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
+      el2.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
       el2.removeEventListener("wheel", onWheel);
     };
   }, [dimensions]);
@@ -10366,8 +10794,19 @@ function NavBar({ onSettings, onChangeVault, onCreateNote, onCreatePlanet }) {
     voronoiNavigateToIndex: s.voronoiNavigateToIndex
   }));
   const t2 = translations[language];
+  const crumbIcon = (depth) => {
+    if (depth === 0) {
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { className: "crumb-icon", width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "12", r: "10" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("ellipse", { cx: "12", cy: "12", rx: "10", ry: "4" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "2", x2: "12", y2: "22" })
+      ] });
+    }
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { className: "crumb-icon", width: "13", height: "13", viewBox: "0 0 16 16", fill: "currentColor", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M1 3.5A1.5 1.5 0 012.5 2h3.879a1.5 1.5 0 011.06.44l1.122 1.12A1.5 1.5 0 009.62 4H13.5A1.5 1.5 0 0115 5.5v7a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12.5v-9z" }) });
+  };
+  const chevronSep = /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { className: "crumb-chevron", width: "12", height: "12", viewBox: "0 0 16 16", fill: "none", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M6 4L10 8L6 12", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round" }) });
   const crumbs = [
-    { label: "🗺️ " + (hierarchy?.vaultName || t2.world), index: -1 }
+    { label: hierarchy?.vaultName || t2.world, index: -1 }
   ];
   for (let i = 0; i < voronoiPath.length; i++) {
     crumbs.push({ label: voronoiPath[i].name, index: i });
@@ -10376,13 +10815,14 @@ function NavBar({ onSettings, onChangeVault, onCreateNote, onCreatePlanet }) {
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "navbar-left", children: [
       voronoiPath.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn-back", onClick: voronoiGoBack, children: /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { width: "16", height: "16", viewBox: "0 0 16 16", fill: "none", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M10 12L6 8L10 4", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }) }) }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("nav", { className: "breadcrumb", children: crumbs.map((c, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "crumb-item", children: [
-        i > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "crumb-sep", children: "/" }),
+        i > 0 && chevronSep,
         /* @__PURE__ */ jsxRuntimeExports.jsxs(
           "button",
           {
             className: `crumb-btn ${i === crumbs.length - 1 ? "crumb-active" : "crumb-parent"}`,
             onClick: () => voronoiNavigateToIndex(c.index),
             children: [
+              crumbIcon(i),
               c.label,
               i === 0 && hierarchy && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "crumb-count", children: hierarchy.countries.length }),
               i > 0 && voronoiPath[c.index] && voronoiPath[c.index].children && voronoiPath[c.index].children.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "crumb-count", children: voronoiPath[c.index].children.length })
@@ -10392,9 +10832,9 @@ function NavBar({ onSettings, onChangeVault, onCreateNote, onCreatePlanet }) {
       ] }, i)) })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "navbar-right", children: [
-      hierarchy && /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "vault-name clickable", onClick: onChangeVault, title: "Kasayı Değiştir", children: [
+      hierarchy && /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "vault-name clickable", onClick: onChangeVault, title: hierarchy?.vaultName || "", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { width: "14", height: "14", viewBox: "0 0 16 16", fill: "currentColor", style: { marginRight: 4, verticalAlign: -2 }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M1 3.5A1.5 1.5 0 012.5 2h3.879a1.5 1.5 0 011.06.44l1.122 1.12A1.5 1.5 0 009.62 4H13.5A1.5 1.5 0 0115 5.5v7a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12.5v-9z" }) }),
-        hierarchy.vaultName
+        t2.selectVault
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn-icon", onClick: onCreatePlanet, title: "New Planet", style: { marginRight: "4px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "20", height: "20", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "12", r: "5" }),
@@ -10527,7 +10967,23 @@ function SettingsPanel({ onClose }) {
             children: l2.label
           },
           l2.value
-        )) })
+        )) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginTop: "2rem" }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "settings-label", children: t2.randomizePlanetsBtn }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { style: { fontSize: "0.8rem", color: "#ffb300", marginBottom: "0.5rem", lineHeight: "1.4" }, children: t2.randomizePlanetsDesc }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              className: "lang-btn",
+              onClick: () => {
+                useMapStore.getState().randomizeAllAppearances();
+                onClose();
+              },
+              style: { width: "100%", borderColor: "#ffb300", color: "#ffb300" },
+              children: t2.randomizePlanetsBtn
+            }
+          )
+        ] })
       ] }),
       activeTab === "guide" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "settings-section guide-section", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "guide-intro", children: t2.guideIntro }),
@@ -10904,6 +11360,8 @@ function DeleteConfirmDialog({ node, onClose, onRescan }) {
 }
 function NodeContextMenu({ node, x: x2, y: y2, onClose, onRename, onDelete, onCreateFolder, onAppearance, isPlanet }) {
   const isFolder = node.type !== "home";
+  const language = useMapStore((s) => s.language);
+  const t2 = translations[language];
   const clampedX = Math.min(x2, window.innerWidth - 220);
   const clampedY = Math.min(y2, window.innerHeight - 200);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
@@ -10930,7 +11388,7 @@ function NodeContextMenu({ node, x: x2, y: y2, onClose, onRename, onDelete, onCr
                 /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "2", y1: "12", x2: "6", y2: "12" }),
                 /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "18", y1: "12", x2: "22", y2: "12" })
               ] }),
-              "Görünüm"
+              t2.contextMenuAppearance
             ] }),
             /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "ctx-divider" })
           ] }),
@@ -10942,7 +11400,7 @@ function NodeContextMenu({ node, x: x2, y: y2, onClose, onRename, onDelete, onCr
               /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" }),
               /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" })
             ] }),
-            "Rename"
+            t2.contextMenuRename
           ] }),
           isFolder && /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "ctx-item", onClick: onCreateFolder, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: [
@@ -10950,7 +11408,7 @@ function NodeContextMenu({ node, x: x2, y: y2, onClose, onRename, onDelete, onCr
               /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "11", x2: "12", y2: "17" }),
               /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "9", y1: "14", x2: "15", y2: "14" })
             ] }),
-            "New Subfolder"
+            t2.contextMenuNewFolder
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "ctx-divider" }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "ctx-item ctx-item-danger", onClick: onDelete, children: [
@@ -10958,7 +11416,7 @@ function NodeContextMenu({ node, x: x2, y: y2, onClose, onRename, onDelete, onCr
               /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "3 6 5 6 21 6" }),
               /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2" })
             ] }),
-            "Delete"
+            t2.contextMenuDelete
           ] })
         ]
       }
@@ -10967,6 +11425,7 @@ function NodeContextMenu({ node, x: x2, y: y2, onClose, onRename, onDelete, onCr
 }
 function MiniPlanetPreview({ appearanceKey, size = 54 }) {
   const app = getAppearance(appearanceKey);
+  translations[useMapStore((s) => s.language)];
   const cx = size / 2;
   const cy = size / 2;
   const r2 = size * 0.38;
@@ -11080,12 +11539,18 @@ function PlanetAppearanceDialog({ planet, onClose }) {
   const planetAppearances = useMapStore((s) => s.planetAppearances);
   const setPlanetAppearance = useMapStore((s) => s.setPlanetAppearance);
   const setCustomPlanetImage = useMapStore((s) => s.setCustomPlanetImage);
+  const planetSizes = useMapStore((s) => s.planetSizes);
+  const setPlanetSize = useMapStore((s) => s.setPlanetSize);
+  const language = useMapStore((s) => s.language);
+  const t2 = translations[language];
   const currentKey = planetAppearances[planet.id] ?? "earth";
+  const currentSize = planetSizes[planet.id] ?? 1;
   const [selectedKey, setSelectedKey] = reactExports.useState(currentKey);
+  const [selectedSize, setSelectedSize] = reactExports.useState(currentSize);
   const fileInputRef = reactExports.useRef(null);
   const allOptions = [
     ...PLANET_APPEARANCES,
-    { key: "custom", name: "Özel Görsel", emoji: "🖼️", description: "Kendi görselinizi yükleyin" }
+    { key: "custom", name: t2.appearanceCustomName, nameEn: t2.appearanceCustomName, emoji: "🖼️", description: t2.appearanceCustomDesc }
   ];
   const handleCustomFile = reactExports.useCallback((e) => {
     const file = e.target.files?.[0];
@@ -11094,28 +11559,36 @@ function PlanetAppearanceDialog({ planet, onClose }) {
     reader.onload = (ev) => {
       const dataUrl = ev.target?.result;
       if (dataUrl) {
+        if (selectedSize !== currentSize) {
+          setPlanetSize(planet.id, selectedSize);
+        }
         setCustomPlanetImage(planet.id, dataUrl);
         onClose();
       }
     };
     reader.readAsDataURL(file);
-  }, [planet.id, setCustomPlanetImage, onClose]);
+  }, [planet.id, setCustomPlanetImage, setPlanetSize, selectedSize, currentSize, onClose]);
   const handleApply = reactExports.useCallback(() => {
+    if (selectedSize !== currentSize) {
+      setPlanetSize(planet.id, selectedSize);
+    }
     if (selectedKey === "custom") {
       fileInputRef.current?.click();
       return;
     }
-    setPlanetAppearance(planet.id, selectedKey);
+    if (selectedKey !== currentKey) {
+      setPlanetAppearance(planet.id, selectedKey);
+    }
     onClose();
-  }, [selectedKey, planet.id, setPlanetAppearance, onClose]);
+  }, [selectedKey, selectedSize, currentKey, currentSize, planet.id, setPlanetAppearance, setPlanetSize, onClose]);
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pa-overlay", onClick: onClose, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "pa-dialog", onClick: (e) => e.stopPropagation(), children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "pa-header", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pa-header-icon", children: "🪐" }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "pa-title", children: "Gezegen Görünümü" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "pa-title", children: t2.planetAppearanceTitle }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "pa-subtitle", children: planet.name })
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "pa-close", onClick: onClose, "aria-label": "Kapat", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.5", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "pa-close", onClick: onClose, "aria-label": t2.closeBtn, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.5", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "18", y1: "6", x2: "6", y2: "18" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "6", y1: "6", x2: "18", y2: "18" })
       ] }) })
@@ -11131,7 +11604,7 @@ function PlanetAppearanceDialog({ planet, onClose }) {
             /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pa-card-preview", children: /* @__PURE__ */ jsxRuntimeExports.jsx(MiniPlanetPreview, { appearanceKey: opt.key, size: 60 }) }),
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "pa-card-info", children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "pa-card-emoji", children: opt.emoji }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "pa-card-name", children: opt.name })
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "pa-card-name", children: language === "tr" ? opt.name : opt.nameEn || opt.name })
             ] }),
             isSelected && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pa-card-check", children: "✓" })
           ]
@@ -11139,13 +11612,52 @@ function PlanetAppearanceDialog({ planet, onClose }) {
         opt.key
       );
     }) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pa-desc", children: selectedKey === "custom" ? "📂 Dosya seçici açılır — JPG, PNG, WebP, GIF desteklenir" : (() => {
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pa-desc", children: selectedKey === "custom" ? t2.appearanceCustomInfo : (() => {
       const found = PLANET_APPEARANCES.find((a) => a.key === selectedKey);
-      return found ? found.description : "";
+      return found ? language === "tr" ? found.description : found.descriptionEn || found.description : "";
     })() }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "pa-size-slider", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+          t2.planetSizeLabel,
+          " ",
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("strong", { children: [
+            selectedSize.toFixed(2),
+            "x"
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "input",
+          {
+            type: "range",
+            min: "0.55",
+            max: "3",
+            step: "0.05",
+            value: selectedSize,
+            onChange: (e) => setSelectedSize(parseFloat(e.target.value)),
+            className: "pa-slider-input"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "button",
+        {
+          className: "pa-btn-apply",
+          style: { marginTop: "14px", width: "100%", padding: "8px 12px" },
+          onClick: () => {
+            setPlanetSize(planet.id, selectedSize);
+            onClose();
+          },
+          children: [
+            "📏 ",
+            t2.applySize
+          ]
+        }
+      )
+    ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "pa-actions", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "pa-btn-cancel", onClick: onClose, children: "İptal" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "pa-btn-apply", onClick: handleApply, children: selectedKey === "custom" ? "🖼️ Görsel Seç" : "✓ Uygula" })
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "pa-btn-cancel", onClick: onClose, children: t2.cancel }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "pa-btn-apply", onClick: handleApply, children: selectedKey === "custom" ? `🖼️ ${t2.selectImage}` : `✓ ${t2.apply}` })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(
       "input",
@@ -11396,8 +11908,11 @@ function App() {
   const [showCreateFolder, setShowCreateFolder] = reactExports.useState(false);
   const [showOmniSearch, setShowOmniSearch] = reactExports.useState(false);
   const [showAppearance, setShowAppearance] = reactExports.useState(false);
+  const [showVaultSwitcher, setShowVaultSwitcher] = reactExports.useState(false);
   const [vaultPath, setVaultPath] = reactExports.useState(null);
   const [scanning, setScanning] = reactExports.useState(false);
+  const [showWelcome, setShowWelcome] = reactExports.useState(true);
+  const [initialLoading, setInitialLoading] = reactExports.useState(true);
   const doScan = async (path) => {
     setScanning(true);
     try {
@@ -11418,9 +11933,12 @@ function App() {
       const path = saved;
       if (path) {
         setVaultPath(path);
+        setShowWelcome(false);
         doScan(path);
       }
     }).catch(() => {
+    }).finally(() => {
+      setInitialLoading(false);
     });
   }, []);
   reactExports.useEffect(() => {
@@ -11441,25 +11959,22 @@ function App() {
   const handleVaultSelected = (path) => {
     window.api.storeSet("vaultPath", path);
     setVaultPath(path);
+    setShowWelcome(false);
     doScan(path);
   };
-  const handleChangeVault = async () => {
-    try {
-      const selectedPath = await window.api.selectVault();
-      if (selectedPath) {
-        handleVaultSelected(selectedPath);
-      }
-    } catch (e) {
-      setError("Could not select vault folder: " + String(e));
-    }
-  };
+  if (initialLoading) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "app" });
+  }
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ErrorBoundary, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "app", children: [
-    !hierarchy ? /* @__PURE__ */ jsxRuntimeExports.jsx(WelcomeScreen, { onVaultSelected: handleVaultSelected, scanning }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    showWelcome && !hierarchy ? /* @__PURE__ */ jsxRuntimeExports.jsx(WelcomeScreen, { onVaultSelected: handleVaultSelected, scanning }) : !hierarchy ? (
+      // Loading state after auto-load
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "app" })
+    ) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(
         NavBar,
         {
           onSettings: () => setShowSettings(true),
-          onChangeVault: handleChangeVault,
+          onChangeVault: () => setShowVaultSwitcher(true),
           onCreateNote: () => setShowCreateNote(true),
           onCreatePlanet: () => setShowCreatePlanet(true)
         }
@@ -11521,7 +12036,14 @@ function App() {
       }
     ),
     showOmniSearch && hierarchy && /* @__PURE__ */ jsxRuntimeExports.jsx(OmniSearch, { onClose: () => setShowOmniSearch(false) }),
-    hierarchy && /* @__PURE__ */ jsxRuntimeExports.jsx(CargoHold, {})
+    hierarchy && /* @__PURE__ */ jsxRuntimeExports.jsx(CargoHold, {}),
+    showVaultSwitcher && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      VaultSwitcher,
+      {
+        onVaultSelected: handleVaultSelected,
+        onClose: () => setShowVaultSwitcher(false)
+      }
+    )
   ] }) });
 }
 client.createRoot(document.getElementById("root")).render(

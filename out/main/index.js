@@ -291,6 +291,35 @@ const defaults = {
   language: "en"
 };
 const store = new Store({ defaults });
+function detectObsidianVaults() {
+  try {
+    const appData = electron.app.getPath("appData");
+    const obsidianJsonPath = path.join(appData, "Obsidian", "obsidian.json");
+    if (!fs.existsSync(obsidianJsonPath)) {
+      console.log("[detectObsidianVaults] obsidian.json not found at:", obsidianJsonPath);
+      return [];
+    }
+    const raw = fs.readFileSync(obsidianJsonPath, "utf8");
+    const data = JSON.parse(raw);
+    const vaults = [];
+    if (data.vaults && typeof data.vaults === "object") {
+      for (const key of Object.keys(data.vaults)) {
+        const entry = data.vaults[key];
+        if (entry && entry.path && fs.existsSync(entry.path)) {
+          vaults.push({
+            path: entry.path,
+            name: path.basename(entry.path)
+          });
+        }
+      }
+    }
+    console.log("[detectObsidianVaults] Found", vaults.length, "vaults");
+    return vaults;
+  } catch (err) {
+    console.error("[detectObsidianVaults] Error:", err);
+    return [];
+  }
+}
 function registerIpcHandlers() {
   electron.ipcMain.handle("vault:select", async () => {
     const result = await electron.dialog.showOpenDialog({ properties: ["openDirectory"] });
@@ -348,6 +377,9 @@ function registerIpcHandlers() {
   electron.ipcMain.handle("store:get", (_e, key) => store.get(key));
   electron.ipcMain.handle("store:set", (_e, key, value) => {
     store.set(key, value);
+  });
+  electron.ipcMain.handle("vault:detectObsidianVaults", () => {
+    return detectObsidianVaults();
   });
 }
 const icon = path.join(__dirname, "../../resources/icon.png");
