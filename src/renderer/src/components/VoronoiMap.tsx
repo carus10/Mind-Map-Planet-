@@ -255,6 +255,8 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
     const [transitioning, setTransitioning] = useState(false)
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
     const [hoveredLinkIdx, setHoveredLinkIdx] = useState<number | null>(null)
+    const [hoveredGlobalLinkIdx, setHoveredGlobalLinkIdx] = useState<number | null>(null)
+    const [linkHoverPos, setLinkHoverPos] = useState<{ x: number, y: number } | null>(null)
 
     // Solar system pan + zoom — useRef for immediate drag tracking
     const panXRef = useRef(0)
@@ -702,20 +704,21 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
         const links: {
             source: { x: number, y: number, id: string, index: number },
             target: { x: number, y: number, id: string, isForeign: boolean, index: number },
+            details: { sourceName: string, targetName: string, sourcePlanetName?: string, targetPlanetName?: string }[]
         }[] = []
 
         // cellMap: direkt hücre adı/ID → centroid.
         // Ayrıca hücrelerin TÜM alt notlarını da aynı hücrenin centroid'ine eşle
-        const cellMap = new Map<string, { x: number, y: number, index: number }>()
+        const cellMap = new Map<string, { x: number, y: number, index: number, id: string }>()
 
-        const registerDescendants = (node: HierarchyNode, centroid: { x: number, y: number, index: number }) => {
+        const registerDescendants = (node: HierarchyNode, centroid: { x: number, y: number, index: number, id: string }) => {
             cellMap.set(node.name, centroid)
             if (node.id) cellMap.set(node.id, centroid)
             node.children?.forEach(child => registerDescendants(child, centroid))
         }
 
         cells.forEach((c, i) => {
-            const info = { x: c.centroid[0], y: c.centroid[1], index: i }
+            const info = { x: c.centroid[0], y: c.centroid[1], index: i, id: c.node.id }
             registerDescendants(c.node, info)
         })
 
@@ -743,6 +746,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
             links.push({
                 source: { x: cellCentroid[0], y: cellCentroid[1], id: foreignNodeId, index: cellIdx },
                 target: { x: edgeX, y: edgeY, id: foreignNodeId, isForeign: true, index: -1 },
+                details: [] // Will populate after initial collection if needed or dynamically
             })
         }
 
@@ -758,13 +762,30 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                         if (cellMap.has(targetNode.name) || cellMap.has(targetNode.id)) {
                             const targetInfo = cellMap.get(targetNode.name) ?? cellMap.get(targetNode.id)!
                             if (targetInfo.index === i) return // self-loop engelle
-                            links.push({
-                                source: { x: cell.centroid[0], y: cell.centroid[1], id: node.id, index: i },
-                                target: { x: targetInfo.x, y: targetInfo.y, id: targetNode.id, isForeign: false, index: targetInfo.index },
-                            })
+
+                            // Check if a link between these two cells already exists
+                            const existingLink = links.find(ln => ln.source.index === i && ln.target.index === targetInfo.index)
+                            if (existingLink) {
+                                existingLink.details.push({ sourceName: node.name, targetName: targetNode.name })
+                            } else {
+                                links.push({
+                                    source: { x: cell.centroid[0], y: cell.centroid[1], id: cell.node.id, index: i },
+                                    target: { x: targetInfo.x, y: targetInfo.y, id: targetInfo.id || targetNode.id, isForeign: false, index: targetInfo.index },
+                                    details: [{ sourceName: node.name, targetName: targetNode.name }]
+                                })
+                            }
+
                         } else if (parentMap.has(targetNode.id)) {
                             // Yabancı gezegen → kenar noktasına çizgi (giden)
-                            addForeignLink(i, cell.centroid, targetNode.id)
+                            const foreignRootId = parentMap.get(targetNode.id)?.id || targetNode.id
+                            const key = `${i}:${foreignRootId}`
+
+                            let existingLink = links.find(ln => ln.source.index === i && ln.target.isForeign && addedForeignKeys.has(key))
+                            if (!existingLink) {
+                                addForeignLink(i, cell.centroid, targetNode.id)
+                                existingLink = links[links.length - 1]
+                            }
+                            existingLink.details.push({ sourceName: node.name, targetName: targetNode.name, targetPlanetName: parentMap.get(targetNode.id)?.name || 'Bilinmeyen Gezegen' })
                         }
                     })
                 }
@@ -786,9 +807,21 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                         if (cellMap.has(sourceNode.name) || cellMap.has(sourceNode.id)) return
                         // Kaynak gerçekten başka bir gezegende mi?
                         if (!parentMap.has(sourceNode.id)) return
-                        // Gelen bağlantıyı hücre → kenar olarak çiz
-                        // target.id = sourceNode.id → tıklandığında kaynağa zıpla
-                        addForeignLink(i, cell.centroid, sourceNode.id)
+
+                        const foreignRootId = parentMap.get(sourceNode.id)?.id || sourceNode.id
+                        const linkKey = `${i}:${foreignRootId}`
+
+                        let existingLink = links.find(ln => ln.source.index === i && ln.target.isForeign && addedForeignKeys.has(linkKey))
+                        if (!existingLink) {
+                            addForeignLink(i, cell.centroid, sourceNode.id)
+                            existingLink = links[links.length - 1]
+                        }
+
+                        // Prevent duplicates in incoming links if they have already been registered
+                        const isDuplicate = existingLink.details.some((d: any) => d.sourceName === sourceNode.name && d.targetName === node.name)
+                        if (!isDuplicate) {
+                            existingLink.details.push({ sourceName: sourceNode.name, targetName: node.name, sourcePlanetName: parentMap.get(sourceNode.id)?.name || 'Bilinmeyen Gezegen' })
+                        }
                     })
                 })
                 node.children?.forEach(gatherIncoming)
@@ -956,10 +989,31 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                                 const strokeColor = source.colorSet.accent
 
                                 const isFocus = hoveredIndex === null || hoveredIndex === link.source || hoveredIndex === link.target
-                                const opacity = isFocus ? 0.4 : 0.05
+                                let opacity = isFocus ? 0.4 : 0.05
+
+                                if (hoveredGlobalLinkIdx !== null) {
+                                    opacity = hoveredGlobalLinkIdx === idx ? 0.8 : 0.05
+                                }
 
                                 return (
                                     <g key={`glink-${idx}`} style={{ opacity, transition: 'opacity 0.3s ease' }}>
+                                        {/* Tıklanabilir Görünmez Tampon */}
+                                        <path
+                                            d={pathData}
+                                            fill="none"
+                                            stroke="transparent"
+                                            strokeWidth="20"
+                                            style={{ pointerEvents: 'auto', cursor: 'pointer' }}
+                                            onMouseEnter={(e) => {
+                                                setHoveredGlobalLinkIdx(idx)
+                                                setLinkHoverPos({ x: e.clientX, y: e.clientY })
+                                            }}
+                                            onMouseLeave={() => {
+                                                setHoveredGlobalLinkIdx(null)
+                                                setLinkHoverPos(null)
+                                            }}
+                                            onPointerMove={(e) => setLinkHoverPos({ x: e.clientX, y: e.clientY })}
+                                        />
                                         <path
                                             d={pathData}
                                             fill="none"
@@ -1271,6 +1325,38 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                         {dropTargetId ? '↳ Drop here' : (activeDraggedNode ? 'Hold to move' : '↑ Quick Stash')} | {(draggedNode || activeDraggedNode)?.name}
                     </div>
                 )}
+
+                {/* Global Hover Tooltip */}
+                {hoveredGlobalLinkIdx !== null && linkHoverPos && isSolarSystem && globalLinks[hoveredGlobalLinkIdx] && (
+                    <div
+                        className="voronoi-link-tooltip"
+                        style={{
+                            position: 'fixed',
+                            left: linkHoverPos.x + 15,
+                            top: linkHoverPos.y + 15,
+                            background: 'rgba(10, 15, 30, 0.85)',
+                            border: '1px solid rgba(80, 140, 255, 0.5)',
+                            padding: '6px 12px',
+                            borderRadius: '6px',
+                            color: '#fff',
+                            fontSize: '13px',
+                            pointerEvents: 'none',
+                            zIndex: 10000,
+                            backdropFilter: 'blur(4px)',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                        }}
+                    >
+                        {planets[globalLinks[hoveredGlobalLinkIdx].source]?.node.name}
+                        <span style={{ color: 'rgba(255,255,255,0.5)' }}>↔</span>
+                        {planets[globalLinks[hoveredGlobalLinkIdx].target]?.node.name}
+                        <span style={{ color: '#40c4ff', fontSize: '11px', marginLeft: '4px' }}>
+                            ({globalLinks[hoveredGlobalLinkIdx].count})
+                        </span>
+                    </div>
+                )}
             </div>
         )
     }
@@ -1471,11 +1557,16 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                                             onClick={() => {
                                                 if (link.target.isForeign) handleLinkJump(link.target.id)
                                             }}
-                                            onMouseEnter={() => {
+                                            onMouseEnter={(e) => {
                                                 setHoveredLinkIdx(idx)
                                                 setHoveredIndex(null) // Hücre hover'ını temizle — karışmasın
+                                                setLinkHoverPos({ x: e.clientX, y: e.clientY })
                                             }}
-                                            onMouseLeave={() => setHoveredLinkIdx(null)}
+                                            onMouseLeave={() => {
+                                                setHoveredLinkIdx(null)
+                                                setLinkHoverPos(null)
+                                            }}
+                                            onPointerMove={(e) => setLinkHoverPos({ x: e.clientX, y: e.clientY })}
                                         />
 
                                         {/* Görünür Ana Çizgi */}
@@ -1552,6 +1643,37 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                         animation: 'voronoi-pulse 1s infinite alternate'
                     }} />
                     {dropTargetId ? '↳ Drop here' : (activeDraggedNode ? 'Hold to move' : '↑ Quick Stash')} | {(draggedNode || activeDraggedNode)?.name}
+                </div>
+            )}
+
+            {/* Local Hover Tooltip */}
+            {hoveredLinkIdx !== null && linkHoverPos && !isSolarSystem && localLinks[hoveredLinkIdx] && (
+                <div
+                    className="voronoi-link-tooltip"
+                    style={{
+                        position: 'fixed',
+                        left: linkHoverPos.x + 15,
+                        top: linkHoverPos.y + 15,
+                        background: 'rgba(10, 15, 30, 0.85)',
+                        border: '1px solid rgba(80, 140, 255, 0.5)',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        color: '#fff',
+                        fontSize: '13px',
+                        pointerEvents: 'none',
+                        zIndex: 10000,
+                        backdropFilter: 'blur(4px)',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                    }}
+                >
+                    {nodeMap.get(localLinks[hoveredLinkIdx].source.id)?.name}
+                    <span style={{ color: localLinks[hoveredLinkIdx].target.isForeign ? '#ff4081' : '#40c4ff' }}>
+                        {localLinks[hoveredLinkIdx].target.isForeign ? '↗' : '→'}
+                    </span>
+                    {nodeMap.get(localLinks[hoveredLinkIdx].target.id)?.name}
                 </div>
             )}
 
