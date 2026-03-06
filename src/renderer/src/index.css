@@ -30,7 +30,11 @@ body,
 
 /* 2. Spiral Galaxy Theme */
 .theme-galaxy {
-  background: radial-gradient(circle at 50% 50%, #1a0b2e 0%, #050510 60%, #000 100%);
+  background-image: url('./assets/spiral-galaxy.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: #050510;
   position: relative;
 }
 
