@@ -35,29 +35,6 @@ export const translations = {
     howToBack: 'Esc Key or Back Button: Fly up one level',
     howToJump: 'Click Pink Trade Routes: Warp jump to connected planet',
     tabGeneral: 'General',
-    tabGuide: 'User Guide',
-    guideIntro: 'Welcome to Mind Map Planet. This application visualizes your Obsidian vault as an interactive 3D universe. Below are detailed instructions covering every advanced feature.',
-
-    guideNavigation: 'Navigation & Camera Movement',
-    guideNavigationDesc: 'The camera allows you to freely explore your digital universe. Move around simply by clicking and dragging on empty space to pan the camera across the star cluster. Scroll your mouse wheel forward to zoom into specific planets, or scroll backward to get a wider galactic view of your entire folder structure. Double-clicking on empty space will smoothly refocus the camera to the center of the current solar system.',
-
-    guideInteraction: 'Interacting with Planets (Notes & Folders)',
-    guideInteractionDesc: 'Every celestial body represents a file or folder in your vault. \n\n• Left Click on a planet (folder) to dive deeper into that specific solar system. If the planet is a Note, Left Clicking it will immediately open that exact note inside Obsidian for editing.\n\n• Right Click on any planet or orbital ring to quickly rename it. This rename operation will be instantly reflected in your actual file system as well.',
-
-    guideTradeRoutes: 'Trade Routes (Interactive Links)',
-    guideTradeRoutesDesc: 'The pink, glowing energetic streams connecting different planets represent the internal WikiLinks between your notes. These aren\'t just visual—they are interactive wormholes. You can click on any of these trade routes to instantly warp jump the camera directly to the connected planet, allowing you to easily follow trains of thought across your entire vault.',
-
-    guideReturn: 'Returning & Traversal',
-    guideReturnDesc: 'When you dive deep into sub-folders (inner solar systems), you can always resurface. Press the Esc (Escape) key on your keyboard, or click the \'Back\' UI button in the top left corner of the screen to smoothly fly the camera up one hierarchy level, back to the parent folder.',
-
-    guideSearch: 'Fast Universal Search',
-    guideSearchDesc: 'Use the Search bar at the top of the screen to instantly locate any note or folder across your entire vault. Simply start typing, and the search results will appear. Clicking on a result will instantly warp your camera to that specific planet\'s location, no matter how deep it is in your folder structure.',
-
-    guideQuickNotes: 'Creating Quick Notes',
-    guideQuickNotesDesc: 'Whenever inspiration strikes, you can quickly add a new note to your current solar system (folder). Click the \'New Note\' (+) button in the top navigation bar. Type your note title, and a new planet will be born in your current system. A new markdown file will automatically be created in your Obsidian vault.',
-
-    guideDragDrop: 'Drag and Drop & Cargo Hold',
-    guideDragDropDesc: 'Mind Map Planet features a unique inventory system called the \'Cargo Hold\' (bottom left of the screen). \n\n• You can Right-Click and drag any planet or folder into the Cargo Hold to temporarily store it there. \n• Travel to a different star system (folder) using the camera or navigation. \n• Drag the item out of your Cargo Hold and drop it into the new empty space. \nThis will physically move the markdown file or folder within your Obsidian vault to the new location.',
 
     // Planet Appearance Dialog
     planetAppearanceTitle: 'Planet Appearance',
@@ -108,6 +85,95 @@ export const translations = {
     solarSystem: 'Solar System',
     planetCount: 'planet',
     planetsCount: 'planets',
+
+    // ===== New User Guide =====
+    guideModalTitle: 'User Guide',
+    userGuideBtn: 'Guide',
+
+    // Section Titles (sidebar)
+    guideNavTitle: 'Navigation',
+    guideInterTitle: 'Interaction',
+    guideSearchTitle: 'Search',
+    guideNotesTitle: 'Create Notes',
+    guideDragTitle: 'Drag & Drop',
+    guideRoutesTitle: 'Trade Routes',
+    guideAppearTitle: 'Appearance',
+    guideShortcutsTitle: 'Shortcuts',
+
+    // Section Subtitles
+    guideNavSubtitle: 'Move around your digital universe freely.',
+    guideInterSubtitle: 'Interact with planets, notes, and folders.',
+    guideSearchSubtitle: 'Find any note or folder instantly.',
+    guideNotesSubtitle: 'Quickly add new notes and planets.',
+    guideDragSubtitle: 'Move files between folders with the Cargo Hold.',
+    guideRoutesSubtitle: 'Follow WikiLink connections between your notes.',
+    guideAppearSubtitle: 'Customize how your planets look.',
+    guideShortcutsSubtitle: 'Speed up your workflow with keyboard shortcuts.',
+
+    // Navigation Features
+    guideNavClick: 'Left Click',
+    guideNavClickDesc: 'Click on a planet (folder) to enter it, or click a note to open it in Obsidian.',
+    guideNavPan: 'Pan Camera',
+    guideNavPanDesc: 'Click and drag on empty space to move the camera around.',
+    guideNavZoom: 'Zoom',
+    guideNavZoomDesc: 'Scroll the mouse wheel to zoom in/out.',
+    guideNavCenter: 'Recenter',
+    guideNavCenterDesc: 'Double-click on empty space to reset the camera to center.',
+
+    // Interaction Features
+    guideInterFolder: 'Open Folder',
+    guideInterFolderDesc: 'Left-click any planet to dive into its sub-folders.',
+    guideInterNote: 'Open Note',
+    guideInterNoteDesc: 'Left-click a note to open it directly in Obsidian.',
+    guideInterRename: 'Rename',
+    guideInterRenameDesc: 'Right-click any planet or note → select Rename.',
+    guideInterDelete: 'Delete',
+    guideInterDeleteDesc: 'Right-click → Delete to remove a file or folder.',
+    guideInterSubfolder: 'New Subfolder',
+    guideInterSubfolderDesc: 'Right-click a planet → New Subfolder to create a folder inside it.',
+
+    // Search Features
+    guideSearchOpen: 'Open Search',
+    guideSearchOpenDesc: 'Press Ctrl+K or click the search bar to search across your entire vault.',
+    guideSearchJump: 'Jump to Result',
+    guideSearchJumpDesc: 'Click on any search result to instantly warp to that planet\'s location.',
+
+    // Notes Features
+    guideNotesNew: 'New Note',
+    guideNotesNewDesc: 'Press Ctrl+N or click the + button in the top bar. A new markdown file will be created in your current folder.',
+    guideNotesPlanet: 'New Planet',
+    guideNotesPlanetDesc: 'Press Ctrl+P or click the planet icon in the top bar to create a new top-level folder.',
+
+    // Drag & Drop Features
+    guideDragCargo: 'Cargo Hold',
+    guideDragCargoDesc: 'Right-click and drag any planet or folder into the Cargo Hold (bottom-left) to temporarily store it.',
+    guideDragMove: 'Move Files',
+    guideDragMoveDesc: 'Navigate to a different folder, then drag the item out of the Cargo Hold to move it there.',
+    guideDragTip: 'Tip: Dropping an item into empty space will place it in the current folder.',
+
+    // Trade Routes Features
+    guideRoutesWhat: 'What Are Trade Routes?',
+    guideRoutesWhatDesc: 'The glowing pink lines between planets represent WikiLinks between your notes.',
+    guideRoutesJump: 'Warp Jump',
+    guideRoutesJumpDesc: 'Click on any trade route to instantly teleport to the connected planet.',
+
+    // Appearance Features
+    guideAppearChange: 'Change Appearance',
+    guideAppearChangeDesc: 'Right-click a planet → Appearance to choose from built-in planet styles.',
+    guideAppearSize: 'Resize',
+    guideAppearSizeDesc: 'Adjust the planet size slider in the Appearance dialog.',
+    guideAppearCustom: 'Custom Image',
+    guideAppearCustomDesc: 'Upload your own image (JPG, PNG, WebP, GIF) as a planet texture.',
+    guideAppearRandom: 'Randomize All',
+    guideAppearRandomDesc: 'Go to Settings → Randomize All Planets to shuffle all appearances at once.',
+
+    // Keyboard Shortcuts
+    shortcutNewNote: 'New Note',
+    shortcutNewPlanet: 'New Planet',
+    shortcutSearch: 'Search',
+    shortcutSettings: 'Settings',
+    shortcutGuide: 'User Guide',
+    shortcutBack: 'Go Back',
   },
   tr: {
     selectVault: 'Vault Klasörü Seç',
@@ -143,29 +209,6 @@ export const translations = {
     howToBack: 'Esc Tuşu veya Geri B.: Bir üst seviyeye uç',
     howToJump: 'Pembe Işınlara Tıkla: Bağlantılı gezegene ışınlan',
     tabGeneral: 'Genel',
-    tabGuide: 'Kullanım Kılavuzu',
-    guideIntro: 'Mind Map Planet\'e hoş geldiniz. Bu uygulama Obsidian kasanızı etkileşimli bir 3D evren olarak görselleştirir. Uygulamanın tüm gelişmiş özelliklerini kullanmak için detaylı talimatları aşağıda bulabilirsiniz.',
-
-    guideNavigation: 'Gezinme ve Kamera Kontrolü',
-    guideNavigationDesc: 'Kamera, dijital evreninizi özgürce keşfetmenizi sağlar. Uzay boşluğuna sol tıklayıp sürükleyerek kamerayı yıldız kümesi etrafında kaydırabilirsiniz. Gezegenlere yaklaşmak için farenizin tekerleğini ileri, tüm klasör yapınızı daha geniş bir galaktik perspektiften görmek için ise geri kaydırın. Boşluğa çift tıklamak, kamerayı yumuşak bir şekilde mevcut güneş sisteminin merkezine odaklar.',
-
-    guideInteraction: 'Gezegenlerle Etkileşim (Notlar ve Klasörler)',
-    guideInteractionDesc: 'Her gök cismi, kasanızdaki bir dosya veya klasörü temsil eder.\n\n• O özel güneş sisteminin daha da derinlerine inmek için bir gezegene (klasör) Sol Tıklayın. Eğer gezegen bir Not ise, Sol Tıklamak o notu düzenlemeniz için anında Obsidian\'da açacaktır.\n\n• Herhangi bir gezegeni veya yörünge halkasını hızlıca yeniden adlandırmak için üzerine Sağ Tıklayın. Bu isim değiştirme işlemi anında gerçek dosya sisteminize de yansıtılacaktır.',
-
-    guideTradeRoutes: 'Ticaret Rotaları (Etkileşimli Bağlantılar)',
-    guideTradeRoutesDesc: 'Farklı gezegenleri birbirine bağlayan pembe, parlayan enerji akışları, notlarınız arasındaki WikiLink iç bağlantılarını temsil eder. Bunlar sadece görsel değil, aynı zamanda etkileşimli solucan delikleridir. Kasanızın tamamında düşünce zincirlerinizi kolayca takip edebilmek için bu ticaret rotalarına tıklayarak bağlı olan gezegene anında ışınlanabilirsiniz.',
-
-    guideReturn: 'Geri Dönüş ve Yüzeye Çıkış',
-    guideReturnDesc: 'Alt klasörlerin (iç güneş sistemlerinin) derinliklerine indiğinizde her zaman yüzeye çıkabilirsiniz. Kamerayı sorunsuz bir şekilde bir üst hiyerarşi seviyesine, yani ana klasöre doğru uçurmak için klavyenizdeki Esc (Escape) tuşuna basın veya ekranın sol üst köşesindeki \'Geri\' (Back) arayüz düğmesine tıklayın.',
-
-    guideSearch: 'Hızlı Evrensel Arama',
-    guideSearchDesc: 'Ekranın üst kısmındaki Arama çubuğunu kullanarak tüm kasanızdaki herhangi bir notu veya klasörü anında bulabilirsiniz. Sadece yazmaya başlayın, arama sonuçları aşağı açılacaktır. Bir sonuca tıkladığınızda, o gezegen klasör yapınızın ne kadar derininde olursa olsun kameranız anında o konuma ışınlanacaktır.',
-
-    guideQuickNotes: 'Hızlı Not Oluşturma',
-    guideQuickNotesDesc: 'İlham geldiği anda bulunduğunuz güneş sistemine (klasöre) hızlıca yeni bir not ekleyebilirsiniz. Üst menü çubuğundaki \'Yeni Not\' (+) düğmesine tıklayın. Notunuzun başlığını yazın; bulunduğunuz sistemde yeni bir gezegen doğacak ve Obsidian kasanızda otomatik olarak yeni bir markdown dosyası oluşturulacaktır.',
-
-    guideDragDrop: 'Sürükle-Bırak ve Kargo Alanı (Cargo Hold)',
-    guideDragDropDesc: 'Mind Map Planet, \'Kargo Alanı\' (Cargo Hold) adında benzersiz bir envanter sistemine sahiptir (ekranın sol alt köşesi).\n\n• Herhangi bir gezegeni veya klasörü Sağ Tıklayıp sürükleyerek Kargo Alanı\'na bırakabilir ve geçici olarak orada saklayabilirsiniz.\n• Kamera veya navigasyon ile tamamen farklı bir yıldız sistemine (klasöre) seyahat edin.\n• Kargo Alanı\'ndaki öğeyi sürükleyip yeni sistemdeki boş uzay alanına bırakın.\nBu işlem, Obsidian kasanızdaki ilgili markdown dosyasını veya klasörünü fiziksel olarak yeni konumuna taşıyacaktır.',
 
     // Planet Appearance Dialog
     planetAppearanceTitle: 'Gezegen Görünümü',
@@ -216,6 +259,95 @@ export const translations = {
     solarSystem: 'Güneş Sistemi',
     planetCount: 'gezegen',
     planetsCount: 'gezegen',
+
+    // ===== Yeni Kullanım Kılavuzu =====
+    guideModalTitle: 'Kullanım Kılavuzu',
+    userGuideBtn: 'Kılavuz',
+
+    // Bölüm Başlıkları (sidebar)
+    guideNavTitle: 'Gezinme',
+    guideInterTitle: 'Etkileşim',
+    guideSearchTitle: 'Arama',
+    guideNotesTitle: 'Not Oluştur',
+    guideDragTitle: 'Sürükle-Bırak',
+    guideRoutesTitle: 'Ticaret Rotaları',
+    guideAppearTitle: 'Görünüm',
+    guideShortcutsTitle: 'Kısayollar',
+
+    // Bölüm Alt Başlıkları
+    guideNavSubtitle: 'Dijital evreninizde serbestçe gezinin.',
+    guideInterSubtitle: 'Gezegenler, notlar ve klasörlerle etkileşim kurun.',
+    guideSearchSubtitle: 'Herhangi bir notu veya klasörü anında bulun.',
+    guideNotesSubtitle: 'Hızlıca yeni notlar ve gezegenler ekleyin.',
+    guideDragSubtitle: 'Dosyaları Kargo Alanı ile klasörler arasında taşıyın.',
+    guideRoutesSubtitle: 'Notlarınız arasındaki WikiLink bağlantılarını takip edin.',
+    guideAppearSubtitle: 'Gezegenlerinizin görünümünü özelleştirin.',
+    guideShortcutsSubtitle: 'Klavye kısayollarıyla iş akışınızı hızlandırın.',
+
+    // Gezinme Özellikleri
+    guideNavClick: 'Sol Tıklama',
+    guideNavClickDesc: 'Bir gezegene (klasör) tıklayarak içine girin veya bir nota tıklayarak Obsidian\'da açın.',
+    guideNavPan: 'Kamerayı Kaydır',
+    guideNavPanDesc: 'Boş alana tıklayıp sürükleyerek kamerayı hareket ettirin.',
+    guideNavZoom: 'Yakınlaştır / Uzaklaştır',
+    guideNavZoomDesc: 'Fare tekerleğini kullanarak yakınlaşın veya uzaklaşın.',
+    guideNavCenter: 'Merkeze Dön',
+    guideNavCenterDesc: 'Boş alana çift tıklayarak kamerayı merkeze sıfırlayın.',
+
+    // Etkileşim Özellikleri
+    guideInterFolder: 'Klasör Aç',
+    guideInterFolderDesc: 'Herhangi bir gezegene sol tıklayarak alt klasörlerine dalın.',
+    guideInterNote: 'Not Aç',
+    guideInterNoteDesc: 'Bir nota sol tıklayarak doğrudan Obsidian\'da açın.',
+    guideInterRename: 'Yeniden Adlandır',
+    guideInterRenameDesc: 'Herhangi bir gezegen veya nota sağ tıklayın → Yeniden Adlandır seçin.',
+    guideInterDelete: 'Sil',
+    guideInterDeleteDesc: 'Sağ tıklayın → Sil ile bir dosya veya klasörü kaldırın.',
+    guideInterSubfolder: 'Yeni Alt Klasör',
+    guideInterSubfolderDesc: 'Bir gezegene sağ tıklayın → Yeni Alt Klasör ile içine klasör oluşturun.',
+
+    // Arama Özellikleri
+    guideSearchOpen: 'Aramayı Aç',
+    guideSearchOpenDesc: 'Ctrl+K\'ye basın veya arama çubuğuna tıklayarak tüm kasanızda arama yapın.',
+    guideSearchJump: 'Sonuca Atla',
+    guideSearchJumpDesc: 'Herhangi bir arama sonucuna tıklayarak o gezegenin konumuna anında ışınlanın.',
+
+    // Not Oluşturma Özellikleri
+    guideNotesNew: 'Yeni Not',
+    guideNotesNewDesc: 'Ctrl+N\'ye basın veya üst çubuktaki + butonuna tıklayın. Bulunduğunuz klasörde yeni bir markdown dosyası oluşturulur.',
+    guideNotesPlanet: 'Yeni Gezegen',
+    guideNotesPlanetDesc: 'Ctrl+P\'ye basın veya üst çubuktaki gezegen ikonuna tıklayarak yeni bir üst düzey klasör oluşturun.',
+
+    // Sürükle-Bırak Özellikleri
+    guideDragCargo: 'Kargo Alanı',
+    guideDragCargoDesc: 'Herhangi bir gezegen veya klasörü sağ tıklayıp Kargo Alanı\'na (sol alt köşe) sürükleyerek geçici olarak saklayın.',
+    guideDragMove: 'Dosya Taşı',
+    guideDragMoveDesc: 'Başka bir klasöre gidin, ardından öğeyi Kargo Alanı\'ndan sürükleyip oraya bırakın.',
+    guideDragTip: 'İpucu: Bir öğeyi boş alana bırakmak, onu mevcut klasöre yerleştirir.',
+
+    // Ticaret Rotaları Özellikleri
+    guideRoutesWhat: 'Ticaret Rotaları Nedir?',
+    guideRoutesWhatDesc: 'Gezegenler arasındaki parlayan pembe çizgiler, notlarınız arasındaki WikiLink bağlantılarını temsil eder.',
+    guideRoutesJump: 'Işınlanma',
+    guideRoutesJumpDesc: 'Herhangi bir ticaret rotasına tıklayarak bağlı gezegene anında ışınlanın.',
+
+    // Görünüm Özellikleri
+    guideAppearChange: 'Görünümü Değiştir',
+    guideAppearChangeDesc: 'Bir gezegene sağ tıklayın → Görünüm ile yerleşik gezegen stillerinden birini seçin.',
+    guideAppearSize: 'Boyutu Ayarla',
+    guideAppearSizeDesc: 'Görünüm penceresindeki gezegen boyutu kaydırıcısını kullanın.',
+    guideAppearCustom: 'Özel Görsel',
+    guideAppearCustomDesc: 'Kendi görselinizi (JPG, PNG, WebP, GIF) gezegen dokusu olarak yükleyin.',
+    guideAppearRandom: 'Hepsini Rastgele Yap',
+    guideAppearRandomDesc: 'Ayarlar → Tüm Gezegenleri Rastgele Yap ile tüm görünümleri tek seferde karıştırın.',
+
+    // Klavye Kısayolları
+    shortcutNewNote: 'Yeni Not',
+    shortcutNewPlanet: 'Yeni Gezegen',
+    shortcutSearch: 'Arama',
+    shortcutSettings: 'Ayarlar',
+    shortcutGuide: 'Kullanım Kılavuzu',
+    shortcutBack: 'Geri Dön',
   }
 } as const
 

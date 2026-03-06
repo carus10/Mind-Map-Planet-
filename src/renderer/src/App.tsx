@@ -16,6 +16,7 @@ import { NodeContextMenu } from './components/NodeContextMenu'
 import { PlanetAppearanceDialog } from './components/PlanetAppearanceDialog'
 import { OmniSearch } from './components/OmniSearch'
 import { CargoHold } from './components/CargoHold'
+import { UserGuideModal } from './components/UserGuideModal'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import type { VaultHierarchy } from './types/hierarchy'
 import './index.css'
@@ -38,6 +39,7 @@ export function App(): React.ReactElement {
   const [showOmniSearch, setShowOmniSearch] = useState(false)
   const [showAppearance, setShowAppearance] = useState(false)
   const [showVaultSwitcher, setShowVaultSwitcher] = useState(false)
+  const [showGuide, setShowGuide] = useState(false)
   const [vaultPath, setVaultPath] = useState<string | null>(null)
   const [scanning, setScanning] = useState(false)
   // Controls whether WelcomeScreen is shown (only on first launch or no saved vault)
@@ -85,12 +87,38 @@ export function App(): React.ReactElement {
     return () => clearInterval(interval)
   }, [vaultPath])
 
-  // Global OmniSearch Hotkey (Cmd/Ctrl + K)
+  // Global Keyboard Shortcuts
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault()
-        setShowOmniSearch(true)
+    const handler = (e: KeyboardEvent): void => {
+      // Skip if user is typing in an input/textarea
+      const target = e.target as HTMLElement
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return
+      }
+
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key.toLowerCase()) {
+          case 'k':
+            e.preventDefault()
+            setShowOmniSearch(true)
+            break
+          case 'n':
+            e.preventDefault()
+            setShowCreateNote(true)
+            break
+          case 'p':
+            e.preventDefault()
+            setShowCreatePlanet(true)
+            break
+          case ',':
+            e.preventDefault()
+            setShowSettings(true)
+            break
+          case 'h':
+            e.preventDefault()
+            setShowGuide(true)
+            break
+        }
       }
     }
     window.addEventListener('keydown', handler)
@@ -138,6 +166,7 @@ export function App(): React.ReactElement {
               onChangeVault={() => setShowVaultSwitcher(true)}
               onCreateNote={() => setShowCreateNote(true)}
               onCreatePlanet={() => setShowCreatePlanet(true)}
+              onGuide={() => setShowGuide(true)}
             />
             <div className="canvas-container">
               <VoronoiMap hierarchy={hierarchy} />
@@ -185,6 +214,7 @@ export function App(): React.ReactElement {
         )}
         {showOmniSearch && hierarchy && <OmniSearch onClose={() => setShowOmniSearch(false)} />}
         {hierarchy && <CargoHold />}
+        {showGuide && <UserGuideModal onClose={() => setShowGuide(false)} />}
         {showVaultSwitcher && (
           <VaultSwitcher
             onVaultSelected={handleVaultSelected}
