@@ -6,6 +6,7 @@ import { VoronoiMap } from './components/VoronoiMap'
 import { NavBar } from './components/NavBar'
 import { RenameDialog } from './components/RenameDialog'
 import { ErrorToast } from './components/ErrorToast'
+import { SuccessToast } from './components/SuccessToast'
 import { SettingsPanel } from './components/SettingsPanel'
 import { CreateNoteDialog } from './components/CreateNoteDialog'
 import { CreatePlanetDialog } from './components/CreatePlanetDialog'
@@ -145,6 +146,7 @@ export function App(): React.ReactElement {
         )}
         <RenameDialog />
         <ErrorToast />
+        <SuccessToast />
         {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
         {showCreateNote && vaultPath && <CreateNoteDialog onClose={() => setShowCreateNote(false)} onRescan={doScan} />}
         {showCreatePlanet && vaultPath && <CreatePlanetDialog onClose={() => setShowCreatePlanet(false)} onRescan={doScan} />}

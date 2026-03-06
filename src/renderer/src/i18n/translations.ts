@@ -87,7 +87,27 @@ export const translations = {
     browseManually: 'Browse Manually',
     detectingVaults: 'Detecting vaults...',
     vaultCount: 'vault found',
-    vaultCountPlural: 'vaults found'
+    vaultCountPlural: 'vaults found',
+
+    // Success Toast Messages
+    toastFolderCreated: 'Folder created:',
+    toastPlanetCreated: 'Planet created:',
+    toastNoteCreated: 'Note created:',
+    toastFolderDeleted: 'Folder deleted:',
+    toastNoteDeleted: 'Note deleted:',
+    toastRenamed: 'Renamed:',
+    toastMoved: 'moved to',
+    toastStashed: 'Added to Cargo:',
+    toastConvertedToPlanet: 'Converted to planet:',
+    toastTheme: 'Theme:',
+    toastAppearanceUpdated: 'Appearance updated:',
+    toastCustomAppearance: 'Custom appearance applied:',
+    toastSizeUpdated: 'Size updated:',
+    toastAllRandomized: 'All appearances randomized',
+    unknownPlanet: 'Unknown Planet',
+    solarSystem: 'Solar System',
+    planetCount: 'planet',
+    planetsCount: 'planets',
   },
   tr: {
     selectVault: 'Vault Klasörü Seç',
@@ -175,7 +195,27 @@ export const translations = {
     browseManually: 'Manuel Seç',
     detectingVaults: 'Vault\'lar algılanıyor...',
     vaultCount: 'vault bulundu',
-    vaultCountPlural: 'vault bulundu'
+    vaultCountPlural: 'vault bulundu',
+
+    // Success Toast Messages
+    toastFolderCreated: 'Klasör oluşturuldu:',
+    toastPlanetCreated: 'Gezegen oluşturuldu:',
+    toastNoteCreated: 'Not oluşturuldu:',
+    toastFolderDeleted: 'Klasör silindi:',
+    toastNoteDeleted: 'Not silindi:',
+    toastRenamed: 'Yeniden adlandırıldı:',
+    toastMoved: 'taşındı:',
+    toastStashed: 'Kargoya eklendi:',
+    toastConvertedToPlanet: 'Gezegene dönüştürüldü:',
+    toastTheme: 'Tema:',
+    toastAppearanceUpdated: 'Görünüm güncellendi:',
+    toastCustomAppearance: 'Özel görünüm uygulandı:',
+    toastSizeUpdated: 'Boyut güncellendi:',
+    toastAllRandomized: 'Tüm görünümler karıştırıldı',
+    unknownPlanet: 'Bilinmeyen Gezegen',
+    solarSystem: 'Güneş Sistemi',
+    planetCount: 'gezegen',
+    planetsCount: 'gezegen',
   }
 } as const
 

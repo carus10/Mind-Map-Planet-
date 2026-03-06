@@ -66,7 +66,7 @@ const DEPTH_HOVER: string[][] = [
     ['#6a5080', '#755a8a', '#806498', '#6e547e', '#7a5e88', '#8468a0', '#664c78', '#7c5a90'],
 ]
 
-const DEPTH_LABELS = ['Güneş Sistemi', 'Kıtalar', 'Bölgeler', 'Şehirler', 'Yapılar', 'Odalar']
+const DEPTH_LABELS = ['Solar System', 'Continents', 'Regions', 'Cities', 'Structures', 'Rooms']
 
 function getDepthPalette(depth: number): string[] {
     return DEPTH_PALETTES[Math.min(depth, DEPTH_PALETTES.length - 1)]
@@ -276,6 +276,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
     const setRenameTarget = useMapStore((s) => s.setRenameTarget)
     const setContextMenuTarget = useMapStore((s) => s.setContextMenuTarget)
     const setError = useMapStore((s) => s.setError)
+    const setSuccessMessage = useMapStore((s) => s.setSuccessMessage)
     const setHierarchy = useMapStore((s) => s.setHierarchy)
     const stashNode = useMapStore((s) => s.stashNode)
     const unstashNode = useMapStore((s) => s.unstashNode)
@@ -598,6 +599,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                                 unstashNode(src.id)
                                 useMapStore.getState().clearStash() // Otomatik kargoyu kapat
                             }
+                            useMapStore.getState().setSuccessMessage(`📦 ${src.name} → ${dst.name} ${t.toastMoved}`)
                             window.api.scanVault(hierarchyRef.current.vaultPath).then(updated => {
                                 if (updated) setHierarchy(updated as never)
                             })
@@ -612,6 +614,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                             if (res && res.success) {
                                 unstashNode(src!.id)
                                 useMapStore.getState().clearStash() // Otomatik kargoyu kapat
+                                useMapStore.getState().setSuccessMessage(`🌟 ${translations[useMapStore.getState().language].toastConvertedToPlanet} ${src!.name}`)
                                 window.api.scanVault(hierarchyRef.current.vaultPath).then(updated => {
                                     if (updated) setHierarchy(updated as never)
                                 })
@@ -622,6 +625,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                     } else if (draggedNodeRef.current) {
                         // Sadece harita içinden kaldırılanlar kargoya konur, kargodan alınanlar tekrar konmaz
                         stashNode(src as HierarchyNode)
+                        useMapStore.getState().setSuccessMessage(`📦 ${translations[useMapStore.getState().language].toastStashed} ${src!.name}`)
                     }
                 }
 
@@ -785,7 +789,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                                 addForeignLink(i, cell.centroid, targetNode.id)
                                 existingLink = links[links.length - 1]
                             }
-                            existingLink.details.push({ sourceName: node.name, targetName: targetNode.name, targetPlanetName: parentMap.get(targetNode.id)?.name || 'Bilinmeyen Gezegen' })
+                            existingLink.details.push({ sourceName: node.name, targetName: targetNode.name, targetPlanetName: parentMap.get(targetNode.id)?.name || 'Unknown Planet' })
                         }
                     })
                 }
@@ -820,7 +824,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                         // Prevent duplicates in incoming links if they have already been registered
                         const isDuplicate = existingLink.details.some((d: any) => d.sourceName === sourceNode.name && d.targetName === node.name)
                         if (!isDuplicate) {
-                            existingLink.details.push({ sourceName: sourceNode.name, targetName: node.name, sourcePlanetName: parentMap.get(sourceNode.id)?.name || 'Bilinmeyen Gezegen' })
+                            existingLink.details.push({ sourceName: sourceNode.name, targetName: node.name, sourcePlanetName: parentMap.get(sourceNode.id)?.name || 'Unknown Planet' })
                         }
                     })
                 })
@@ -1279,13 +1283,8 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                 {/* Derinlik etiketi */}
                 <div className="voronoi-depth-label">
                     <span className="voronoi-depth-label__icon">☀</span>
-                    <span className="voronoi-depth-label__text">Güneş Sistemi</span>
-                    <span className="voronoi-depth-label__level">{planets.length} gezegen</span>
-                </div>
-
-                {/* İpucu */}
-                <div className="voronoi-info">
-                    Sürükle veya kaydır · Gezegene tıkla
+                    <span className="voronoi-depth-label__text">{translations[useMapStore.getState().language].solarSystem}</span>
+                    <span className="voronoi-depth-label__level">{planets.length} {planets.length === 1 ? translations[useMapStore.getState().language].planetCount : translations[useMapStore.getState().language].planetsCount}</span>
                 </div>
 
                 {/* Drag Ghost Element */}

@@ -10,10 +10,11 @@ interface Props {
 }
 
 export function CreateNoteDialog({ onClose, onRescan }: Props): React.ReactElement {
-    const { hierarchy, language, setError } = useMapStore((s) => ({
+    const { hierarchy, language, setError, setSuccessMessage } = useMapStore((s) => ({
         hierarchy: s.hierarchy,
         language: s.language,
-        setError: s.setError
+        setError: s.setError,
+        setSuccessMessage: s.setSuccessMessage,
     }))
     const t = translations[language]
 
@@ -87,6 +88,7 @@ export function CreateNoteDialog({ onClose, onRescan }: Props): React.ReactEleme
                 const fileUrl = `obsidian://open?vault=${encodeURIComponent(hierarchy.vaultName)}&file=${encodedPath}`
                 window.api.openObsidian(fileUrl)
 
+                setSuccessMessage(`📝 ${t.toastNoteCreated} ${finalName}`)
                 onClose()
             }
         } catch {

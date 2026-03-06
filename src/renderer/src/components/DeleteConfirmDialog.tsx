@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useMapStore } from '../store/mapStore'
+import { translations } from '../i18n/translations'
 import type { HierarchyNode, VaultHierarchy } from '../types/hierarchy'
 import './DeleteConfirmDialog.css'
 
@@ -10,12 +11,14 @@ interface Props {
 }
 
 export function DeleteConfirmDialog({ node, onClose, onRescan }: Props): React.ReactElement {
-    const { hierarchy, setError, voronoiPath, voronoiNavigateToIndex } = useMapStore((s) => ({
+    const { hierarchy, setError, setSuccessMessage, voronoiPath, voronoiNavigateToIndex } = useMapStore((s) => ({
         hierarchy: s.hierarchy,
         setError: s.setError,
+        setSuccessMessage: s.setSuccessMessage,
         voronoiPath: s.voronoiPath,
         voronoiNavigateToIndex: s.voronoiNavigateToIndex,
     }))
+    const t = translations[useMapStore((s) => s.language)]
     const [isDeleting, setIsDeleting] = useState(false)
 
     const isFolder = node.children !== undefined
@@ -28,6 +31,8 @@ export function DeleteConfirmDialog({ node, onClose, onRescan }: Props): React.R
             if (result && !result.success) {
                 setError(result.error ?? 'Could not delete.')
             } else {
+                const label = isFolder ? t.toastFolderDeleted : t.toastNoteDeleted
+                setSuccessMessage(`🗑️ ${label} ${node.name}`)
                 // If we're inside the deleted folder go back to root
                 const deletedInPath = voronoiPath.some(p => p.id === node.id)
                 if (deletedInPath) voronoiNavigateToIndex(-1)

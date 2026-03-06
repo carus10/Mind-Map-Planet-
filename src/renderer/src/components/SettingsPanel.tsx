@@ -13,8 +13,9 @@ export function SettingsPanel({ onClose }: Props): React.ReactElement {
     language: s.language,
     setLanguage: s.setLanguage,
     backgroundTheme: s.backgroundTheme,
-    setBackgroundTheme: s.setBackgroundTheme
+    setBackgroundTheme: s.setBackgroundTheme,
   }))
+  const setSuccessMessage = useMapStore((s) => s.setSuccessMessage)
   const t = translations[language]
   const [activeTab, setActiveTab] = useState<'general' | 'guide'>('general')
 
@@ -75,7 +76,10 @@ export function SettingsPanel({ onClose }: Props): React.ReactElement {
                     <button
                       key={th.val}
                       className={`lang-btn ${backgroundTheme === th.val ? 'active' : ''}`}
-                      onClick={() => setBackgroundTheme(th.val as any)}
+                      onClick={() => {
+                        setBackgroundTheme(th.val as any)
+                        setSuccessMessage(`🎨 ${t.toastTheme} ${th.label}`)
+                      }}
                       style={{ textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                     >
                       <span>{th.label}</span>
@@ -94,6 +98,7 @@ export function SettingsPanel({ onClose }: Props): React.ReactElement {
                   className="lang-btn"
                   onClick={() => {
                     useMapStore.getState().randomizeAllAppearances()
+                    setSuccessMessage(`🎲 ${t.toastAllRandomized}`)
                     onClose()
                   }}
                   style={{ width: '100%', borderColor: '#ffb300', color: '#ffb300' }}

@@ -54,6 +54,7 @@ interface MapStore {
   renameTarget: HierarchyNode | null
   contextMenuTarget: { node: HierarchyNode; x: number; y: number; isPlanet?: boolean } | null
   error: string | null
+  successMessage: string | null
 
   backgroundTheme: BackgroundTheme
   setBackgroundTheme: (theme: BackgroundTheme) => void
@@ -74,6 +75,7 @@ interface MapStore {
   setRenameTarget: (node: HierarchyNode | null) => void
   setContextMenuTarget: (target: { node: HierarchyNode; x: number; y: number; isPlanet?: boolean } | null) => void
   setError: (msg: string | null) => void
+  setSuccessMessage: (msg: string | null) => void
 
   // --- Drag & Drop (Cargo Hold) ---
   stashedNodes: HierarchyNode[]
@@ -116,6 +118,7 @@ export const useMapStore = create<MapStore>((set) => ({
   renameTarget: null,
   contextMenuTarget: null,
   error: null,
+  successMessage: null,
 
   backgroundTheme: loadBackgroundTheme(),
   setBackgroundTheme: (theme) => set(() => {
@@ -291,6 +294,7 @@ export const useMapStore = create<MapStore>((set) => ({
   setRenameTarget: (node) => set({ renameTarget: node }),
   setContextMenuTarget: (target) => set({ contextMenuTarget: target }),
   setError: (msg) => set({ error: msg }),
+  setSuccessMessage: (msg) => set({ successMessage: msg }),
 
   // --- Drag & Drop (Cargo Hold) ---
   setActiveDraggedNode: (node) => set({ activeDraggedNode: node }),

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useMapStore } from '../store/mapStore'
+import { translations } from '../i18n/translations'
 import type { HierarchyNode } from '../types/hierarchy'
 import './CreateFolderDialog.css'
 
@@ -10,10 +11,13 @@ interface Props {
 }
 
 export function CreateFolderDialog({ parentNode, onClose, onRescan }: Props): React.ReactElement {
-    const { hierarchy, setError } = useMapStore((s) => ({
+    const { hierarchy, setError, setSuccessMessage, language } = useMapStore((s) => ({
         hierarchy: s.hierarchy,
         setError: s.setError,
+        setSuccessMessage: s.setSuccessMessage,
+        language: s.language,
     }))
+    const t = translations[language]
     const [folderName, setFolderName] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const inputRef = useRef<HTMLInputElement>(null)
@@ -31,6 +35,7 @@ export function CreateFolderDialog({ parentNode, onClose, onRescan }: Props): Re
             if (result && !result.success) {
                 setError(result.error ?? 'Could not create folder.')
             } else {
+                setSuccessMessage(`📁 ${t.toastFolderCreated} ${finalName}`)
                 onRescan(hierarchy.vaultPath)
                 onClose()
             }

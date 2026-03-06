@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useMapStore } from '../store/mapStore'
+import { translations } from '../i18n/translations'
 import './CreatePlanetDialog.css'
 
 interface Props {
@@ -8,10 +9,13 @@ interface Props {
 }
 
 export function CreatePlanetDialog({ onClose, onRescan }: Props): React.ReactElement {
-    const { hierarchy, setError } = useMapStore((s) => ({
+    const { hierarchy, setError, setSuccessMessage, language } = useMapStore((s) => ({
         hierarchy: s.hierarchy,
-        setError: s.setError
+        setError: s.setError,
+        setSuccessMessage: s.setSuccessMessage,
+        language: s.language,
     }))
+    const t = translations[language]
 
     const [planetName, setPlanetName] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -31,6 +35,7 @@ export function CreatePlanetDialog({ onClose, onRescan }: Props): React.ReactEle
             if (result && !result.success) {
                 setError(result.error ?? 'Could not create planet.')
             } else {
+                setSuccessMessage(`🪐 ${t.toastPlanetCreated} ${finalName}`)
                 onRescan(hierarchy.vaultPath)
                 onClose()
             }

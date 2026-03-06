@@ -5,10 +5,11 @@ import type { VaultHierarchy } from '../types/hierarchy'
 import './RenameDialog.css'
 
 export function RenameDialog(): React.ReactElement | null {
-  const { renameTarget, setRenameTarget, setError, setHierarchy, hierarchy, language } = useMapStore((s) => ({
+  const { renameTarget, setRenameTarget, setError, setSuccessMessage, setHierarchy, hierarchy, language } = useMapStore((s) => ({
     renameTarget: s.renameTarget,
     setRenameTarget: s.setRenameTarget,
     setError: s.setError,
+    setSuccessMessage: s.setSuccessMessage,
     setHierarchy: s.setHierarchy,
     hierarchy: s.hierarchy,
     language: s.language
@@ -37,6 +38,7 @@ export function RenameDialog(): React.ReactElement | null {
       if (result && !result.success) {
         setError(result.error ?? t.renameError)
       } else {
+        setSuccessMessage(`✏️ ${t.toastRenamed} ${newName}`)
         // Rescan vault to reflect changes
         if (hierarchy) {
           const updated = await window.api.scanVault(hierarchy.vaultPath)

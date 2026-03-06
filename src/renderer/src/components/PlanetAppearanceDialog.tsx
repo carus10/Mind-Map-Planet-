@@ -144,6 +144,7 @@ export function PlanetAppearanceDialog({ planet, onClose }: Props): React.ReactE
     const planetSizes = useMapStore(s => s.planetSizes)
     const setPlanetSize = useMapStore(s => s.setPlanetSize)
     const language = useMapStore(s => s.language)
+    const setSuccessMessage = useMapStore(s => s.setSuccessMessage)
     const t = translations[language]
 
     const currentKey = planetAppearances[planet.id] ?? 'earth'
@@ -168,6 +169,7 @@ export function PlanetAppearanceDialog({ planet, onClose }: Props): React.ReactE
                     setPlanetSize(planet.id, selectedSize)
                 }
                 setCustomPlanetImage(planet.id, dataUrl)
+                setSuccessMessage(`🖼️ ${t.toastCustomAppearance} ${planet.name}`)
                 onClose()
             }
         }
@@ -185,6 +187,7 @@ export function PlanetAppearanceDialog({ planet, onClose }: Props): React.ReactE
         if (selectedKey !== currentKey) {
             setPlanetAppearance(planet.id, selectedKey)
         }
+        setSuccessMessage(`🪐 ${t.toastAppearanceUpdated} ${planet.name}`)
         onClose()
     }, [selectedKey, selectedSize, currentKey, currentSize, planet.id, setPlanetAppearance, setPlanetSize, onClose])
 
@@ -258,6 +261,7 @@ export function PlanetAppearanceDialog({ planet, onClose }: Props): React.ReactE
                         style={{ marginTop: '14px', width: '100%', padding: '8px 12px' }}
                         onClick={() => {
                             setPlanetSize(planet.id, selectedSize)
+                            setSuccessMessage(`📏 ${t.toastSizeUpdated} ${planet.name}`)
                             onClose()
                         }}
                     >
