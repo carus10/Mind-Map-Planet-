@@ -9,7 +9,12 @@ interface Props {
 }
 
 export function SettingsPanel({ onClose }: Props): React.ReactElement {
-  const { language, setLanguage } = useMapStore((s) => ({ language: s.language, setLanguage: s.setLanguage }))
+  const { language, setLanguage, backgroundTheme, setBackgroundTheme } = useMapStore((s) => ({
+    language: s.language,
+    setLanguage: s.setLanguage,
+    backgroundTheme: s.backgroundTheme,
+    setBackgroundTheme: s.setBackgroundTheme
+  }))
   const t = translations[language]
   const [activeTab, setActiveTab] = useState<'general' | 'guide'>('general')
 
@@ -55,6 +60,46 @@ export function SettingsPanel({ onClose }: Props): React.ReactElement {
                     {l.label}
                   </button>
                 ))}
+              </div>
+
+              <div style={{ marginTop: '2rem' }}>
+                <label className="settings-label">{t.bgTheme}</label>
+                <div className="theme-options" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {[
+                    { val: 'default', label: t.bgDefault },
+                    { val: 'galaxy', label: t.bgGalaxy },
+                    { val: 'meteors', label: t.bgMeteors },
+                    { val: 'constellation', label: t.bgConstellation },
+                    { val: 'supernova', label: t.bgSupernova }
+                  ].map((th) => (
+                    <button
+                      key={th.val}
+                      className={`lang-btn ${backgroundTheme === th.val ? 'active' : ''}`}
+                      onClick={() => setBackgroundTheme(th.val as any)}
+                      style={{ textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                    >
+                      <span>{th.label}</span>
+                      {backgroundTheme === th.val && <span style={{ color: '#88aaff' }}>✓</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ marginTop: '2rem' }}>
+                <label className="settings-label">{t.randomizePlanetsBtn}</label>
+                <p style={{ fontSize: '0.8rem', color: '#ffb300', marginBottom: '0.5rem', lineHeight: '1.4' }}>
+                  {t.randomizePlanetsDesc}
+                </p>
+                <button
+                  className="lang-btn"
+                  onClick={() => {
+                    useMapStore.getState().randomizeAllAppearances()
+                    onClose()
+                  }}
+                  style={{ width: '100%', borderColor: '#ffb300', color: '#ffb300' }}
+                >
+                  {t.randomizePlanetsBtn}
+                </button>
               </div>
             </div>
           )}

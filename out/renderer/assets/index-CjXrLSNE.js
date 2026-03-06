@@ -7381,6 +7381,20 @@ function savePlanetSizes(data) {
 }
 const MIN_SCALE = 0.2;
 const MAX_SCALE = 8;
+const LS_BACKGROUND_THEME = "background-theme-v1";
+function loadBackgroundTheme() {
+  const saved = localStorage.getItem(LS_BACKGROUND_THEME);
+  if (saved && ["default", "galaxy", "meteors", "constellation", "supernova"].includes(saved)) {
+    return saved;
+  }
+  return "default";
+}
+function saveBackgroundTheme(theme) {
+  try {
+    localStorage.setItem(LS_BACKGROUND_THEME, theme);
+  } catch {
+  }
+}
 const useMapStore = create((set) => ({
   hierarchy: null,
   navigation: { level: "world", selectedCountry: null, selectedCity: null, selectedTown: null },
@@ -7390,6 +7404,11 @@ const useMapStore = create((set) => ({
   renameTarget: null,
   contextMenuTarget: null,
   error: null,
+  backgroundTheme: loadBackgroundTheme(),
+  setBackgroundTheme: (theme) => set(() => {
+    saveBackgroundTheme(theme);
+    return { backgroundTheme: theme };
+  }),
   // Voronoi navigasyon — klasör yolu stack'i
   voronoiPath: [],
   stashedNodes: [],
@@ -7608,6 +7627,12 @@ const translations = {
     randomizePlanetsDesc: "Warning: This will clear all your currently assigned planet appearances and randomly generate new ones. Custom images are not affected.",
     english: "English",
     turkish: "Turkish",
+    bgTheme: "Background Theme",
+    bgDefault: "Default Space",
+    bgGalaxy: "Spiral Galaxy",
+    bgMeteors: "Meteor Shower",
+    bgConstellation: "Constellations",
+    bgSupernova: "Supernova",
     empty: "Empty",
     notes: "notes",
     folders: "folders",
@@ -7680,6 +7705,12 @@ const translations = {
     randomizePlanetsDesc: "Uyarı: Bu işlem mevcut tüm gezegen görünümlerinizi sıfırlayacak ve yerlerine yenilerini atayacaktır. Özel yüklediğiniz görseller etkilenmez.",
     english: "İngilizce",
     turkish: "Türkçe",
+    bgTheme: "Arka Plan Teması",
+    bgDefault: "Varsayılan Uzay",
+    bgGalaxy: "Sarmal Galaksi",
+    bgMeteors: "Meteor Yağmuru",
+    bgConstellation: "Takımyıldızları",
+    bgSupernova: "Nova Patlaması",
     empty: "Boş",
     notes: "not",
     folders: "klasör",
@@ -10926,7 +10957,12 @@ function ErrorToast() {
   ] });
 }
 function SettingsPanel({ onClose }) {
-  const { language, setLanguage } = useMapStore((s) => ({ language: s.language, setLanguage: s.setLanguage }));
+  const { language, setLanguage, backgroundTheme, setBackgroundTheme } = useMapStore((s) => ({
+    language: s.language,
+    setLanguage: s.setLanguage,
+    backgroundTheme: s.backgroundTheme,
+    setBackgroundTheme: s.setBackgroundTheme
+  }));
   const t2 = translations[language];
   const [activeTab, setActiveTab] = reactExports.useState("general");
   const langs = [
@@ -10968,6 +11004,28 @@ function SettingsPanel({ onClose }) {
           },
           l2.value
         )) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginTop: "2rem" }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "settings-label", children: t2.bgTheme }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "theme-options", style: { display: "flex", flexDirection: "column", gap: "0.5rem" }, children: [
+            { val: "default", label: t2.bgDefault },
+            { val: "galaxy", label: t2.bgGalaxy },
+            { val: "meteors", label: t2.bgMeteors },
+            { val: "constellation", label: t2.bgConstellation },
+            { val: "supernova", label: t2.bgSupernova }
+          ].map((th2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "button",
+            {
+              className: `lang-btn ${backgroundTheme === th2.val ? "active" : ""}`,
+              onClick: () => setBackgroundTheme(th2.val),
+              style: { textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center" },
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: th2.label }),
+                backgroundTheme === th2.val && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { color: "#88aaff" }, children: "✓" })
+              ]
+            },
+            th2.val
+          )) })
+        ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginTop: "2rem" }, children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "settings-label", children: t2.randomizePlanetsBtn }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("p", { style: { fontSize: "0.8rem", color: "#ffb300", marginBottom: "0.5rem", lineHeight: "1.4" }, children: t2.randomizePlanetsDesc }),
@@ -11893,13 +11951,14 @@ class ErrorBoundary extends reactExports.Component {
   }
 }
 function App() {
-  const { hierarchy, setHierarchy, setError, contextMenuTarget, setContextMenuTarget, setRenameTarget } = useMapStore((s) => ({
+  const { hierarchy, setHierarchy, setError, contextMenuTarget, setContextMenuTarget, setRenameTarget, backgroundTheme } = useMapStore((s) => ({
     hierarchy: s.hierarchy,
     setHierarchy: s.setHierarchy,
     setError: s.setError,
     contextMenuTarget: s.contextMenuTarget,
     setContextMenuTarget: s.setContextMenuTarget,
-    setRenameTarget: s.setRenameTarget
+    setRenameTarget: s.setRenameTarget,
+    backgroundTheme: s.backgroundTheme
   }));
   const [showSettings, setShowSettings] = reactExports.useState(false);
   const [showCreateNote, setShowCreateNote] = reactExports.useState(false);
@@ -11965,7 +12024,19 @@ function App() {
   if (initialLoading) {
     return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "app" });
   }
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ErrorBoundary, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "app", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ErrorBoundary, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `app theme-${backgroundTheme}`, children: [
+    backgroundTheme === "meteors" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "meteor-container", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "meteor" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "meteor" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "meteor" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "meteor" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "meteor" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "meteor" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "meteor" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "meteor" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "meteor" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "meteor" })
+    ] }),
     showWelcome && !hierarchy ? /* @__PURE__ */ jsxRuntimeExports.jsx(WelcomeScreen, { onVaultSelected: handleVaultSelected, scanning }) : !hierarchy ? (
       // Loading state after auto-load
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "app" })

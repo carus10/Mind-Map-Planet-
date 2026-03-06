@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { VaultHierarchy, NavigationState, CameraState, HierarchyNode } from '../types/hierarchy'
 import type { Language } from '../i18n/translations'
-import { DEFAULT_APPEARANCE_KEY } from '../utils/planetAppearances'
+import { PLANET_APPEARANCES, DEFAULT_APPEARANCE_KEY } from '../utils/planetAppearances'
 
 /* ── LocalStorage helpers ─────────────────────────────────── */
 const LS_APPEARANCES = 'planet-appearances-v1'
@@ -30,6 +30,21 @@ function savePlanetSizes(data: Record<string, number>): void {
 const MIN_SCALE = 0.2
 const MAX_SCALE = 8
 
+export type BackgroundTheme = 'default' | 'galaxy' | 'meteors' | 'constellation' | 'supernova'
+const LS_BACKGROUND_THEME = 'background-theme-v1'
+
+function loadBackgroundTheme(): BackgroundTheme {
+  const saved = localStorage.getItem(LS_BACKGROUND_THEME) as BackgroundTheme | null
+  if (saved && ['default', 'galaxy', 'meteors', 'constellation', 'supernova'].includes(saved)) {
+    return saved
+  }
+  return 'default'
+}
+
+function saveBackgroundTheme(theme: BackgroundTheme): void {
+  try { localStorage.setItem(LS_BACKGROUND_THEME, theme) } catch { }
+}
+
 interface MapStore {
   hierarchy: VaultHierarchy | null
   navigation: NavigationState
@@ -39,6 +54,9 @@ interface MapStore {
   renameTarget: HierarchyNode | null
   contextMenuTarget: { node: HierarchyNode; x: number; y: number; isPlanet?: boolean } | null
   error: string | null
+
+  backgroundTheme: BackgroundTheme
+  setBackgroundTheme: (theme: BackgroundTheme) => void
 
   voronoiPath: HierarchyNode[]
   voronoiDrillDown: (node: HierarchyNode) => void
@@ -85,6 +103,7 @@ interface MapStore {
   setCustomPlanetImage: (planetId: string, dataUrl: string) => void
   setPlanetSize: (planetId: string, size: number) => void
   ensurePlanetAppearance: (planetId: string) => void
+  randomizeAllAppearances: () => void
   // ---------------------------
 }
 
@@ -97,6 +116,12 @@ export const useMapStore = create<MapStore>((set) => ({
   renameTarget: null,
   contextMenuTarget: null,
   error: null,
+
+  backgroundTheme: loadBackgroundTheme(),
+  setBackgroundTheme: (theme) => set(() => {
+    saveBackgroundTheme(theme)
+    return { backgroundTheme: theme }
+  }),
 
   // Voronoi navigasyon — klasör yolu stack'i
   voronoiPath: [],
@@ -158,9 +183,39 @@ export const useMapStore = create<MapStore>((set) => ({
   }),
 
   setHierarchy: (h) => set((state) => {
+    // 1. Bulk initialize missing appearances for the incoming hierarchy
+    let appearancesChanged = false
+    const nextAppearances = { ...state.planetAppearances }
+    const presets = PLANET_APPEARANCES.filter(a => a.type === 'preset')
+
+    const ensureDefaults = (nodes: HierarchyNode[]) => {
+      for (const node of nodes) {
+        if (!nextAppearances[node.id]) {
+          const randomIndex = Math.floor(Math.random() * presets.length)
+          nextAppearances[node.id] = presets[randomIndex]?.key || DEFAULT_APPEARANCE_KEY
+          appearancesChanged = true
+        }
+        if (node.children) {
+          ensureDefaults(node.children)
+        }
+      }
+    }
+
+    if (h.countries) {
+      ensureDefaults(h.countries)
+    }
+
+    if (appearancesChanged) {
+      saveAppearances(nextAppearances)
+    }
+
     if (!state.hierarchy || state.hierarchy.vaultName !== h.vaultName) {
       // Farklı vault yüklendiyse state sıfırlanır
-      return { hierarchy: h, voronoiPath: [] }
+      return {
+        hierarchy: h,
+        voronoiPath: [],
+        ...(appearancesChanged ? { planetAppearances: nextAppearances } : {})
+      }
     }
 
     // Aynı vault'un 30 saniyelik arka plan güncellemesi
@@ -189,7 +244,11 @@ export const useMapStore = create<MapStore>((set) => ({
       }
     }
 
-    return { hierarchy: h, voronoiPath: newPath }
+    return {
+      hierarchy: h,
+      voronoiPath: newPath,
+      ...(appearancesChanged ? { planetAppearances: nextAppearances } : {})
+    }
   }),
 
   drillDown: (node) => set((state) => {
@@ -272,9 +331,47 @@ export const useMapStore = create<MapStore>((set) => ({
 
   ensurePlanetAppearance: (planetId) => set((state) => {
     if (state.planetAppearances[planetId]) return {}
-    const next = { ...state.planetAppearances, [planetId]: DEFAULT_APPEARANCE_KEY }
+
+    // Pick a random preset
+    const presets = PLANET_APPEARANCES.filter(a => a.type === 'preset')
+    const randomIndex = Math.floor(Math.random() * presets.length)
+    const randomKey = presets[randomIndex]?.key || DEFAULT_APPEARANCE_KEY
+
+    const next = { ...state.planetAppearances, [planetId]: randomKey }
     saveAppearances(next)
     return { planetAppearances: next }
+  }),
+
+  randomizeAllAppearances: () => set((state) => {
+    if (!state.hierarchy?.countries) return {}
+
+    const nextAppearances = { ...state.planetAppearances }
+    const presets = PLANET_APPEARANCES.filter(a => a.type === 'preset')
+    let changed = false
+
+    const randomizeNodes = (nodes: HierarchyNode[]) => {
+      for (const node of nodes) {
+        // Only override if not custom
+        const current = nextAppearances[node.id]
+        if (current !== 'custom') {
+          const randomIndex = Math.floor(Math.random() * presets.length)
+          nextAppearances[node.id] = presets[randomIndex]?.key || DEFAULT_APPEARANCE_KEY
+          changed = true
+        }
+
+        if (node.children) {
+          randomizeNodes(node.children)
+        }
+      }
+    }
+
+    randomizeNodes(state.hierarchy.countries)
+
+    if (changed) {
+      saveAppearances(nextAppearances)
+      return { planetAppearances: nextAppearances }
+    }
+    return {}
   }),
   // ---------------------------
 }))

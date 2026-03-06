@@ -20,13 +20,14 @@ import type { VaultHierarchy } from './types/hierarchy'
 import './index.css'
 
 export function App(): React.ReactElement {
-  const { hierarchy, setHierarchy, setError, contextMenuTarget, setContextMenuTarget, setRenameTarget } = useMapStore((s) => ({
+  const { hierarchy, setHierarchy, setError, contextMenuTarget, setContextMenuTarget, setRenameTarget, backgroundTheme } = useMapStore((s) => ({
     hierarchy: s.hierarchy,
     setHierarchy: s.setHierarchy,
     setError: s.setError,
     contextMenuTarget: s.contextMenuTarget,
     setContextMenuTarget: s.setContextMenuTarget,
     setRenameTarget: s.setRenameTarget,
+    backgroundTheme: s.backgroundTheme,
   }))
   const [showSettings, setShowSettings] = useState(false)
   const [showCreateNote, setShowCreateNote] = useState(false)
@@ -109,7 +110,21 @@ export function App(): React.ReactElement {
 
   return (
     <ErrorBoundary>
-      <div className="app">
+      <div className={`app theme-${backgroundTheme}`}>
+        {backgroundTheme === 'meteors' && (
+          <div className="meteor-container">
+            <div className="meteor"></div>
+            <div className="meteor"></div>
+            <div className="meteor"></div>
+            <div className="meteor"></div>
+            <div className="meteor"></div>
+            <div className="meteor"></div>
+            <div className="meteor"></div>
+            <div className="meteor"></div>
+            <div className="meteor"></div>
+            <div className="meteor"></div>
+          </div>
+        )}
         {showWelcome && !hierarchy ? (
           <WelcomeScreen onVaultSelected={handleVaultSelected} scanning={scanning} />
         ) : !hierarchy ? (
