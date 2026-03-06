@@ -184,6 +184,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 **Mind Map Planet** — Explore your knowledge like a universe. 🪐
 
 Built by [@carus10](https://github.com/carus10)
+Contact: taskancihan78@gmail.com
 
 ⭐ Star this repo if you find it useful!
 
