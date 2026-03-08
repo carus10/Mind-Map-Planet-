@@ -24,6 +24,7 @@ export function ImageOcclusionBuilder({ data, t, onSave }: Props): React.ReactEl
     const [drawing, setDrawing] = useState(false)
     const [drawStart, setDrawStart] = useState<{ x: number; y: number } | null>(null)
     const imgRef = useRef<HTMLImageElement>(null)
+    const tempMaskRef = useRef<HTMLDivElement>(null)
 
     const items = data.imageOcclusionItems
 
@@ -72,8 +73,31 @@ export function ImageOcclusionBuilder({ data, t, onSave }: Props): React.ReactEl
     const handleMouseDown = (e: React.MouseEvent): void => {
         if (view !== 'create' && view !== 'edit') return
         const pos = getRelativePosition(e)
+        if (tempMaskRef.current) {
+            tempMaskRef.current.style.display = 'block'
+            tempMaskRef.current.style.left = `${pos.x}%`
+            tempMaskRef.current.style.top = `${pos.y}%`
+            tempMaskRef.current.style.width = `0%`
+            tempMaskRef.current.style.height = `0%`
+        }
         setDrawStart(pos)
         setDrawing(true)
+    }
+
+    const handleMouseMove = (e: React.MouseEvent): void => {
+        if (!drawing || !drawStart) return
+        const pos = getRelativePosition(e)
+        const x = Math.min(drawStart.x, pos.x)
+        const y = Math.min(drawStart.y, pos.y)
+        const width = Math.abs(pos.x - drawStart.x)
+        const height = Math.abs(pos.y - drawStart.y)
+
+        if (tempMaskRef.current) {
+            tempMaskRef.current.style.left = `${x}%`
+            tempMaskRef.current.style.top = `${y}%`
+            tempMaskRef.current.style.width = `${width}%`
+            tempMaskRef.current.style.height = `${height}%`
+        }
     }
 
     const handleMouseUp = (e: React.MouseEvent): void => {
@@ -86,6 +110,9 @@ export function ImageOcclusionBuilder({ data, t, onSave }: Props): React.ReactEl
         if (width > 2 && height > 2) {
             const newMask: OcclusionMask = { id: generateId(), x, y, width, height }
             setMasks((prev) => [...prev, newMask])
+        }
+        if (tempMaskRef.current) {
+            tempMaskRef.current.style.display = 'none'
         }
         setDrawing(false)
         setDrawStart(null)
@@ -142,7 +169,10 @@ export function ImageOcclusionBuilder({ data, t, onSave }: Props): React.ReactEl
                     </span>
                 </div>
                 <div className="le-card">
-                    <p className="le-card-title" style={{ marginBottom: 12 }}>{current.title}</p>
+                    <p className="le-card-title" style={{ marginBottom: 4 }}>{current.title}</p>
+                    <p style={{ fontSize: '0.85rem', color: 'rgba(200,190,255,0.7)', marginBottom: 12 }}>
+                        {t.learnIOInstruction}
+                    </p>
                     <div className="le-io-canvas-wrapper">
                         <img src={current.imageDataUrl} alt={current.title} />
                         {current.masks.map((m) => (
@@ -192,10 +222,12 @@ export function ImageOcclusionBuilder({ data, t, onSave }: Props): React.ReactEl
                             <div
                                 className="le-io-canvas-wrapper"
                                 onMouseDown={handleMouseDown}
+                                onMouseMove={handleMouseMove}
                                 onMouseUp={handleMouseUp}
-                                style={{ cursor: 'crosshair' }}
+                                onMouseLeave={handleMouseUp}
+                                style={{ cursor: 'crosshair', userSelect: 'none' }}
                             >
-                                <img ref={imgRef} src={imageDataUrl} alt="occlusion" />
+                                <img ref={imgRef} src={imageDataUrl} alt="occlusion" draggable={false} style={{ pointerEvents: 'none' }} />
                                 {masks.map((m) => (
                                     <div
                                         key={m.id}
@@ -205,6 +237,7 @@ export function ImageOcclusionBuilder({ data, t, onSave }: Props): React.ReactEl
                                         <span style={{ fontSize: '0.65rem' }}>✕</span>
                                     </div>
                                 ))}
+                                <div ref={tempMaskRef} className="le-io-mask" style={{ display: 'none', background: 'rgba(50, 180, 80, 0.4)', borderColor: '#69f0ae', pointerEvents: 'none' }} />
                             </div>
                             {masks.length > 0 && (
                                 <div style={{ marginTop: 12 }}>
@@ -226,13 +259,16 @@ export function ImageOcclusionBuilder({ data, t, onSave }: Props): React.ReactEl
                         </>
                     )}
 
-                    <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
+                    <div style={{ marginTop: 16, display: 'flex', gap: 8, alignItems: 'center' }}>
                         <button className="le-btn le-btn-primary" onClick={handleSubmit} disabled={!imageDataUrl || masks.length === 0}>
                             {t.learnSave}
                         </button>
                         <button className="le-btn" onClick={() => { resetForm(); setView('list') }}>
                             {t.learnCancel}
                         </button>
+                        {(!imageDataUrl || masks.length === 0) && (
+                            <span style={{ fontSize: '0.75rem', color: '#ff8a80', marginLeft: 8 }}>{t.learnIOReqMask}</span>
+                        )}
                     </div>
                 </div>
             </div>

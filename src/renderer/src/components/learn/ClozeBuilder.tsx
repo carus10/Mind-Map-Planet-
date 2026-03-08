@@ -16,6 +16,9 @@ export function ClozeBuilder({ data, t, onSave }: Props): React.ReactElement {
     const [editingItem, setEditingItem] = useState<ClozeItem | null>(null)
     const [studyIdx, setStudyIdx] = useState(0)
     const [revealed, setRevealed] = useState(false)
+    const [userAnswer, setUserAnswer] = useState('')
+    const [checked, setChecked] = useState(false)
+    const [isCorrect, setIsCorrect] = useState(false)
 
     // Form state
     const [sourceText, setSourceText] = useState('')
@@ -94,6 +97,8 @@ export function ClozeBuilder({ data, t, onSave }: Props): React.ReactElement {
     const startStudy = (): void => {
         setStudyIdx(0)
         setRevealed(false)
+        setChecked(false)
+        setUserAnswer('')
         setView('study')
     }
 
@@ -101,6 +106,20 @@ export function ClozeBuilder({ data, t, onSave }: Props): React.ReactElement {
     if (view === 'study') {
         if (items.length === 0) return <div className="le-empty">{t.learnNoItems}</div>
         const current = items[studyIdx % items.length]
+
+        const handleCheck = (): void => {
+            if (!userAnswer.trim()) return;
+            setChecked(true);
+            setIsCorrect(userAnswer.trim().toLowerCase() === current.answer.trim().toLowerCase());
+        };
+
+        const handleNext = (): void => {
+            setRevealed(false);
+            setChecked(false);
+            setUserAnswer('');
+            setStudyIdx((prev) => prev + 1);
+        };
+
         return (
             <div>
                 <div className="le-toolbar">
@@ -118,20 +137,69 @@ export function ClozeBuilder({ data, t, onSave }: Props): React.ReactElement {
                             💡 {t.learnHint}: {current.hint}
                         </p>
                     )}
-                    {!revealed ? (
-                        <button className="le-btn le-btn-primary" onClick={() => setRevealed(true)}>
-                            {t.learnClozeShowAnswer}
+
+                    {!revealed && !checked && (
+                        <div style={{ marginBottom: 16 }}>
+                            <input
+                                className="le-input"
+                                style={{ width: '100%' }}
+                                placeholder={t.learnClozeTypeAnswer}
+                                value={userAnswer}
+                                onChange={(e) => setUserAnswer(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === 'Enter') handleCheck() }}
+                            />
+                        </div>
+                    )}
+
+                    {checked && !revealed && (
+                        <div style={{ marginBottom: 16 }}>
+                            {isCorrect ? (
+                                <p className="le-badge-correct" style={{ fontSize: '1.1rem', marginBottom: 12 }}>
+                                    ✓ {t.learnCorrect}
+                                </p>
+                            ) : (
+                                <p className="le-badge-incorrect" style={{ fontSize: '1.1rem', marginBottom: 12 }}>
+                                    ✗ {t.learnIncorrect} ({userAnswer})
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    {!checked && !revealed && (
+                        <button className="le-btn le-btn-primary" onClick={handleCheck} disabled={!userAnswer.trim()}>
+                            {t.learnQuizCheck}
                         </button>
-                    ) : (
+                    )}
+
+                    {checked && !revealed && !isCorrect && (
+                        <div style={{ display: 'flex', gap: 8 }}>
+                            <button className="le-btn le-btn-primary" onClick={() => { setChecked(false); setUserAnswer(''); }}>
+                                {t.learnClozeTryAgain}
+                            </button>
+                            <button className="le-btn le-btn-danger" onClick={() => setRevealed(true)}>
+                                {t.learnClozeShowAnswer}
+                            </button>
+                        </div>
+                    )}
+
+                    {checked && !revealed && isCorrect && (
+                        <div style={{ display: 'flex', gap: 8 }}>
+                            <button className="le-btn le-btn-success" onClick={handleNext}>
+                                {t.learnQuizNext}
+                            </button>
+                        </div>
+                    )}
+
+                    {revealed && (
                         <div>
                             <p className="le-badge-correct" style={{ fontSize: '1.1rem', marginBottom: 12 }}>
                                 {current.answer}
                             </p>
                             <div style={{ display: 'flex', gap: 8 }}>
-                                <button className="le-btn le-btn-danger" onClick={() => { setRevealed(false); }}>
+                                <button className="le-btn le-btn-danger" onClick={() => { setRevealed(false); setChecked(false); setUserAnswer(''); }}>
                                     {t.learnClozeAgain}
                                 </button>
-                                <button className="le-btn le-btn-success" onClick={() => { setRevealed(false); setStudyIdx(studyIdx + 1); }}>
+                                <button className="le-btn le-btn-success" onClick={handleNext}>
                                     {t.learnClozeGood}
                                 </button>
                             </div>

@@ -26,6 +26,17 @@ export function ConceptMatchBuilder({ data, t, onSave }: Props): React.ReactElem
 
     const items = data.conceptMatchItems
 
+    const currentStudyItem = items.length > 0 ? items[studyIdx % items.length] : null
+    // Shuffle right-side options deterministically per card
+    const shuffledRights = useMemo(
+        () => {
+            if (!currentStudyItem) return []
+            return [...currentStudyItem.pairs.map((p) => p.right)].sort(() => Math.random() - 0.5)
+        },
+        // eslint-disable-next-line
+        [studyIdx]
+    )
+
     const resetForm = (): void => {
         setTitle('')
         setPairs([{ left: '', right: '' }])
@@ -87,12 +98,6 @@ export function ConceptMatchBuilder({ data, t, onSave }: Props): React.ReactElem
     if (view === 'study') {
         if (items.length === 0) return <div className="le-empty">{t.learnNoItems}</div>
         const current = items[studyIdx % items.length]
-        // Shuffle right-side options deterministically per card
-        const shuffledRights = useMemo(
-            () => [...current.pairs.map((p) => p.right)].sort(() => Math.random() - 0.5),
-            // eslint-disable-next-line
-            [studyIdx],
-        )
 
         const allSelected = Object.keys(selectedAnswers).length === current.pairs.length
 
@@ -195,9 +200,12 @@ export function ConceptMatchBuilder({ data, t, onSave }: Props): React.ReactElem
 
                     <button className="le-btn" style={{ marginTop: 12 }} onClick={addPair}>{t.learnCMAddPair}</button>
 
-                    <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
+                    <div style={{ marginTop: 16, display: 'flex', gap: 8, alignItems: 'center' }}>
                         <button className="le-btn le-btn-primary" onClick={handleSubmit} disabled={!title.trim() || pairs.filter((p) => p.left.trim() && p.right.trim()).length < 2}>{t.learnSave}</button>
                         <button className="le-btn" onClick={() => { resetForm(); setView('list') }}>{t.learnCancel}</button>
+                        {(!title.trim() || pairs.filter((p) => p.left.trim() && p.right.trim()).length < 2) && (
+                            <span style={{ fontSize: '0.75rem', color: '#ff8a80', marginLeft: 8 }}>{t.learnCMReqPairs}</span>
+                        )}
                     </div>
                 </div>
             </div>

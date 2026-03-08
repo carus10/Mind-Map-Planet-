@@ -502,8 +502,8 @@
 
 .le-io-mask {
     position: absolute;
-    background: rgba(120, 80, 220, 0.7);
-    border: 2px solid rgba(180, 150, 255, 0.5);
+    background: #7850dc;
+    border: 2px solid #9b7cf6;
     border-radius: 4px;
     cursor: pointer;
     display: flex;
@@ -511,16 +511,23 @@
     justify-content: center;
     font-size: 0.75rem;
     color: #fff;
-    transition: background 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .le-io-mask.revealed {
-    background: rgba(50, 180, 80, 0.3);
-    border-color: rgba(50, 180, 80, 0.5);
+    background: transparent;
+    border-color: #69f0ae;
+    color: #69f0ae;
+    font-weight: bold;
+    text-shadow: 0px 0px 4px rgba(0, 0, 0, 0.8);
 }
 
-.le-io-mask:hover {
-    background: rgba(120, 80, 220, 0.5);
+.le-io-mask:hover:not(.revealed) {
+    background: #6a44c7;
+}
+
+.le-io-mask.revealed:hover {
+    background: rgba(105, 240, 174, 0.1);
 }
 
 /* Concept Match game */

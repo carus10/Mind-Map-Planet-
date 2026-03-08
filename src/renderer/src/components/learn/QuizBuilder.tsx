@@ -60,11 +60,16 @@ export function QuizBuilder({ data, t, onSave }: Props): React.ReactElement {
     const handleSubmit = async (): Promise<void> => {
         const validOptions = options.filter((o) => o.trim())
         if (!question.trim() || validOptions.length < 2) return
+
+        // Bug fix: if options are removed, correct index might point out of bounds
+        // Fallback to 0 if out of bounds after filtering
+        const safeCorrectIndex = correctIndex < validOptions.length ? correctIndex : 0;
+
         if (view === 'edit' && editingItem) {
-            const updated: QuizItem = { ...editingItem, question, options: validOptions, correctIndex, explanation: explanation || undefined }
+            const updated: QuizItem = { ...editingItem, question, options: validOptions, correctIndex: safeCorrectIndex, explanation: explanation || undefined }
             await onSave({ ...data, quizItems: data.quizItems.map((i) => (i.id === updated.id ? updated : i)) })
         } else {
-            const newItem: QuizItem = { id: generateId(), question, options: validOptions, correctIndex, explanation: explanation || undefined, createdAt: Date.now() }
+            const newItem: QuizItem = { id: generateId(), question, options: validOptions, correctIndex: safeCorrectIndex, explanation: explanation || undefined, createdAt: Date.now() }
             await onSave({ ...data, quizItems: [...data.quizItems, newItem] })
         }
         resetForm()
@@ -145,7 +150,13 @@ export function QuizBuilder({ data, t, onSave }: Props): React.ReactElement {
 
                     {options.map((opt, idx) => (
                         <div key={idx} style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8 }}>
-                            <input type="radio" name="correct" checked={correctIndex === idx} onChange={() => setCorrectIndex(idx)} />
+                            <button
+                                className={`le-btn le-btn-sm ${correctIndex === idx ? 'le-btn-success' : ''}`}
+                                onClick={() => setCorrectIndex(idx)}
+                                title={t.learnQuizMarkCorrect}
+                            >
+                                ✓
+                            </button>
                             <input className="le-input" style={{ flex: 1 }} placeholder={`${t.learnQuizOption} ${idx + 1}`} value={opt} onChange={(e) => updateOption(idx, e.target.value)} />
                             {options.length > 2 && <button className="le-btn le-btn-sm le-btn-danger" onClick={() => removeOption(idx)}>✕</button>}
                         </div>

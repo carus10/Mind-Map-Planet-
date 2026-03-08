@@ -17,6 +17,7 @@ export function RealProblemBuilder({ data, t, onSave }: Props): React.ReactEleme
     const [studyIdx, setStudyIdx] = useState(0)
     const [revealedHints, setRevealedHints] = useState(0)
     const [showSolution, setShowSolution] = useState(false)
+    const [userSolution, setUserSolution] = useState('')
 
     // Form
     const [title, setTitle] = useState('')
@@ -74,6 +75,7 @@ export function RealProblemBuilder({ data, t, onSave }: Props): React.ReactEleme
         setStudyIdx(0)
         setRevealedHints(0)
         setShowSolution(false)
+        setUserSolution('')
         setView('study')
     }
 
@@ -129,11 +131,29 @@ export function RealProblemBuilder({ data, t, onSave }: Props): React.ReactEleme
 
                     {/* Solution */}
                     {!showSolution ? (
-                        <button className="le-btn le-btn-primary" onClick={() => setShowSolution(true)}>
-                            {t.learnRPShowSolution}
-                        </button>
+                        <div style={{ marginTop: 16 }}>
+                            <label className="le-label" style={{ marginBottom: 8, display: 'block' }}>{t.learnRPTypeSolution}</label>
+                            <textarea
+                                className="le-textarea"
+                                style={{ minHeight: 120, marginBottom: 16 }}
+                                placeholder={t.learnRPTypeSolution}
+                                value={userSolution}
+                                onChange={(e) => setUserSolution(e.target.value)}
+                            />
+                            <button className="le-btn le-btn-primary" onClick={() => setShowSolution(true)}>
+                                {t.learnRPCheckResult}
+                            </button>
+                        </div>
                     ) : (
-                        <div style={{ marginTop: 12 }}>
+                        <div style={{ marginTop: 16 }}>
+                            {userSolution.trim() && (
+                                <div style={{ marginBottom: 16 }}>
+                                    <h4 style={{ fontSize: '0.88rem', color: '#c5b8ff', marginBottom: 8 }}>Your Solution</h4>
+                                    <div style={{ padding: 14, background: 'rgba(20,20,40,0.6)', borderRadius: 8, whiteSpace: 'pre-wrap', color: '#e8eaf6', fontSize: '0.88rem', lineHeight: 1.6 }}>
+                                        {userSolution}
+                                    </div>
+                                </div>
+                            )}
                             <h4 style={{ fontSize: '0.88rem', color: '#c5b8ff', marginBottom: 8 }}>{t.learnRPApproach}</h4>
                             <div style={{ padding: 14, background: 'rgba(50,180,80,0.08)', borderRadius: 8, border: '1px solid rgba(50,180,80,0.2)', whiteSpace: 'pre-wrap', color: '#e8eaf6', fontSize: '0.88rem', lineHeight: 1.6 }}>
                                 {current.expectedApproach}
@@ -150,7 +170,7 @@ export function RealProblemBuilder({ data, t, onSave }: Props): React.ReactEleme
                     )}
 
                     <div style={{ marginTop: 16 }}>
-                        <button className="le-btn le-btn-success" onClick={() => { setRevealedHints(0); setShowSolution(false); setStudyIdx(studyIdx + 1) }}>
+                        <button className="le-btn le-btn-success" onClick={() => { setRevealedHints(0); setShowSolution(false); setUserSolution(''); setStudyIdx(studyIdx + 1) }}>
                             {t.learnQuizNext}
                         </button>
                     </div>

@@ -268,11 +268,15 @@ export const translations = {
     learnClozeShowAnswer: 'Show Answer',
     learnClozeAgain: 'Again',
     learnClozeGood: 'Good',
+    learnClozeTypeAnswer: 'Type your answer here...',
+    learnClozeTryAgain: 'Try Again',
     // Image Occlusion
     learnIOLoadImage: 'Load Image',
     learnIOAddMask: 'Click & drag on image to add a mask',
     learnIOMaskLabel: 'Mask Label (optional)',
     learnIOTitle: 'Card Title',
+    learnIOReqMask: 'Requires an image and at least 1 mask.',
+    learnIOInstruction: 'Click on the masks to reveal the hidden parts, or use the Reveal button.',
     // Concept Match
     learnCMConcept: 'Concept',
     learnCMDefinition: 'Definition',
@@ -282,6 +286,7 @@ export const translations = {
     learnCMMatched: 'Matched!',
     learnCMComplete: 'All Matched!',
     learnCMSelect: 'Select matching definition',
+    learnCMReqPairs: 'Requires a title and at least 2 pairs.',
     // Quiz
     learnQuizQuestion: 'Question',
     learnQuizOption: 'Option',
@@ -290,6 +295,7 @@ export const translations = {
     learnQuizExplanation: 'Explanation (optional)',
     learnQuizCheck: 'Check',
     learnQuizNext: 'Next',
+    learnQuizMarkCorrect: 'Mark as Correct',
     // Output Prediction
     learnOPLanguage: 'Language',
     learnOPCode: 'Code',
@@ -316,6 +322,8 @@ export const translations = {
     learnRPHard: 'Hard',
     learnRPShowHint: 'Show Hint',
     learnRPShowSolution: 'Show Solution',
+    learnRPCheckResult: 'Check Result',
+    learnRPTypeSolution: 'Type your solution here...',
     learnDeleteConfirm: 'Are you sure you want to delete this item?',
     learnCancel: 'Cancel',
     learnStudyMode: 'Study',
@@ -588,11 +596,15 @@ export const translations = {
     learnClozeShowAnswer: 'Cevabı Göster',
     learnClozeAgain: 'Tekrar',
     learnClozeGood: 'İyi',
+    learnClozeTypeAnswer: 'Cevabınızı buraya yazın...',
+    learnClozeTryAgain: 'Yeniden Dene',
     // Image Occlusion
     learnIOLoadImage: 'Görsel Yükle',
     learnIOAddMask: 'Maske eklemek için görsele tıklayıp sürükleyin',
     learnIOMaskLabel: 'Maske Etiketi (isteğe bağlı)',
     learnIOTitle: 'Kart Başlığı',
+    learnIOReqMask: 'Bir görsel ve en az 1 maske gerektirir.',
+    learnIOInstruction: 'Gizli kısımları ortaya çıkarmak için maskelere tıklayın veya Göster butonunu kullanın.',
     // Concept Match
     learnCMConcept: 'Kavram',
     learnCMDefinition: 'Tanım',
@@ -602,6 +614,7 @@ export const translations = {
     learnCMMatched: 'Eşleşti!',
     learnCMComplete: 'Hepsi Eşleşti!',
     learnCMSelect: 'Eşleşen tanımı seçin',
+    learnCMReqPairs: 'Bir başlık ve en az 2 çift gerektirir.',
     // Quiz
     learnQuizQuestion: 'Soru',
     learnQuizOption: 'Seçenek',
@@ -610,6 +623,7 @@ export const translations = {
     learnQuizExplanation: 'Açıklama (isteğe bağlı)',
     learnQuizCheck: 'Kontrol Et',
     learnQuizNext: 'Sonraki',
+    learnQuizMarkCorrect: 'Doğru Olarak İşaretle',
     // Output Prediction
     learnOPLanguage: 'Dil',
     learnOPCode: 'Kod',
@@ -636,6 +650,8 @@ export const translations = {
     learnRPHard: 'Zor',
     learnRPShowHint: 'İpucunu Göster',
     learnRPShowSolution: 'Çözümü Göster',
+    learnRPCheckResult: 'Sonucu Kontrol Et',
+    learnRPTypeSolution: 'Çözümünüzü buraya yazın...',
     learnDeleteConfirm: 'Bu öğeyi silmek istediğinizden emin misiniz?',
     learnCancel: 'İptal',
     learnStudyMode: 'Çalış',
