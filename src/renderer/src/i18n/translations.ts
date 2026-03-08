@@ -124,6 +124,18 @@ export const translations = {
     tbPlaceholderText: 'text',
     tbPlaceholderCode: 'code',
 
+    // ===== Link Improvements =====
+    brokenLink: 'Broken Link',
+    ambiguousLink: 'Ambiguous Link',
+    unresolvedLink: 'Unresolved Link',
+    linkCount: 'Links: ',
+    sourceNote: 'Source: ',
+    targetNote: 'Target: ',
+    jumpToLinkedNote: 'Jump to linked note',
+    duplicateNoteName: 'Duplicate note name',
+    localLink: 'Local Link',
+    foreignLink: 'Foreign Link',
+
     // ===== New User Guide =====
     guideModalTitle: 'User Guide',
     userGuideBtn: 'Guide',
@@ -430,6 +442,18 @@ export const translations = {
     // Araç çubuğu yer tutucuları
     tbPlaceholderText: 'metin',
     tbPlaceholderCode: 'kod',
+
+    // ===== Link Improvements =====
+    brokenLink: 'Kırık Bağlantı',
+    ambiguousLink: 'Belirsiz Bağlantı',
+    unresolvedLink: 'Çözümlenmemiş Bağlantı',
+    linkCount: 'Bağlantılar: ',
+    sourceNote: 'Kaynak: ',
+    targetNote: 'Hedef: ',
+    jumpToLinkedNote: 'Bağlantılı nota git',
+    duplicateNoteName: 'Aynı isimli not',
+    localLink: 'Yerel Bağlantı',
+    foreignLink: 'Harici Bağlantı',
 
     // ===== Yeni Kullanım Kılavuzu =====
     guideModalTitle: 'Kullanım Kılavuzu',

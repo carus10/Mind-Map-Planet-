@@ -1,3 +1,13 @@
+export interface ResolvedLink {
+  raw: string
+  normalizedTarget: string
+  resolvedId: string | null
+  resolvedPath: string | null
+  isBroken: boolean
+  isAmbiguous: boolean
+  matchMode: 'exact-path' | 'relative-path' | 'basename' | 'unresolved'
+}
+
 export interface HierarchyNode {
   id: string
   name: string
@@ -9,7 +19,7 @@ export interface HierarchyNode {
   color?: string | null
   weight?: number
   preview?: string
-  links?: string[]
+  links?: ResolvedLink[]
 }
 
 export interface VaultHierarchy {

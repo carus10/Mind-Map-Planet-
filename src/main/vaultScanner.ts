@@ -1,6 +1,6 @@
 import { readdirSync, statSync, openSync, readSync, closeSync } from 'fs'
 import { join, relative, extname, basename } from 'path'
-import type { HierarchyNode, VaultHierarchy } from '../renderer/src/types/hierarchy'
+import type { HierarchyNode, VaultHierarchy, ResolvedLink } from '../renderer/src/types/hierarchy'
 
 const HIDDEN_PATTERN = /^\./
 
@@ -24,10 +24,21 @@ function extractFirstLines(text: string, count: number): string {
   return lines.slice(0, count).join(' ').slice(0, 150)
 }
 
+function parseRawLink(raw: string): { normalizedTarget: string } {
+  let target = raw.split('|')[0] // remove alias
+  target = target.split('#')[0] // remove heading
+  target = target.trim()
+  if (target.toLowerCase().endsWith('.md')) {
+    target = target.slice(0, -3)
+  }
+  target = target.replace(/\\/g, '/')
+  return { normalizedTarget: target }
+}
+
 function parseMarkdownNode(fullPath: string, stat: any, relPath: string, entry: string): HierarchyNode {
   let color: string | null = null
   let preview = ''
-  let links: string[] = []
+  let links: ResolvedLink[] = []
 
   // Weight representation (file size in bytes, ensure at least 500 for visibility)
   const weight = Math.max(500, stat.size)
@@ -64,14 +75,24 @@ function parseMarkdownNode(fullPath: string, stat: any, relPath: string, entry: 
       // 3. Extract Preview Text
       preview = extractFirstLines(content, 3)
 
-      // 4. Extract Links: [[target|display]] -> target
+      // 4. Extract Links
       const linkRegex = /\[\[(.*?)\]\]/g
       let match
       while ((match = linkRegex.exec(content)) !== null) {
-        let linkTarget = match[1].split('|')[0].trim()
-        if (linkTarget) {
-          // Normalize link paths (obsidian allows just the filename)
-          links.push(linkTarget)
+        const raw = match[1].trim()
+        if (raw) {
+          const { normalizedTarget } = parseRawLink(raw)
+          if (normalizedTarget) {
+            links.push({
+              raw,
+              normalizedTarget,
+              resolvedId: null,
+              resolvedPath: null,
+              isBroken: true,
+              isAmbiguous: false,
+              matchMode: 'unresolved'
+            })
+          }
         }
       }
     }
@@ -133,15 +154,6 @@ function scanDirectory(
 
       const dirWeight = children.reduce((sum, child) => sum + (child.weight || 0), 0)
 
-      const dirLinks: string[] = []
-      for (const child of children) {
-        if (child.links) {
-          dirLinks.push(...child.links)
-        }
-      }
-      // Deduplicate links for the folder
-      const uniqueLinks = Array.from(new Set(dirLinks))
-
       nodes.push({
         id: relPath,
         name: entry,
@@ -151,7 +163,7 @@ function scanDirectory(
         children,
         isEmpty: children.length === 0,
         weight: Math.max(1000, dirWeight), // Folders have a minimum baseline weight
-        links: uniqueLinks
+        links: [] // will be aggregated after resolution
       })
     } else if (extname(entry).toLowerCase() === '.md') {
       // .md dosyaları her seviyede home olarak göster
@@ -162,12 +174,128 @@ function scanDirectory(
   return nodes
 }
 
+function resolveLinks(hierarchy: VaultHierarchy) {
+  // 1. Build indexes
+  const byPath = new Map<string, HierarchyNode>() // Lowercase normalized path
+  const byBasename = new Map<string, HierarchyNode[]>() // Lowercase basename -> nodes
+
+  function indexNode(node: HierarchyNode) {
+    const normPath = node.relativePath.toLowerCase().replace(/\\/g, '/').replace(/\.md$/, '')
+    byPath.set(normPath, node)
+
+    const normBasename = node.name.toLowerCase().replace(/\.md$/, '')
+    const arr = byBasename.get(normBasename) || []
+    arr.push(node)
+    byBasename.set(normBasename, arr)
+
+    if (node.children) {
+      node.children.forEach(indexNode)
+    }
+  }
+  hierarchy.countries.forEach(indexNode)
+
+  // 2. Resolve links for 'home' nodes (markdown files)
+  function resolveNodeLinks(node: HierarchyNode) {
+    if (node.type === 'home' && node.links) {
+      for (const link of node.links) {
+        const target = link.normalizedTarget.toLowerCase()
+
+        // Exact relative path match
+        if (byPath.has(target)) {
+          const match = byPath.get(target)!
+          link.resolvedId = match.id
+          link.resolvedPath = match.relativePath
+          link.isBroken = false
+          link.isAmbiguous = false
+          link.matchMode = 'exact-path'
+          continue
+        }
+
+        // Basename match (or partial path matching if duplicate)
+        const targetBasename = basename(target)
+        const basenameMatches = byBasename.get(targetBasename)
+
+        if (basenameMatches && basenameMatches.length > 0) {
+          if (basenameMatches.length === 1) {
+            const match = basenameMatches[0]
+            link.resolvedId = match.id
+            link.resolvedPath = match.relativePath
+            link.isBroken = false
+            link.isAmbiguous = false
+            link.matchMode = 'basename'
+          } else {
+            // Ambiguous: check if any ends with the exact specified target string
+            const exactEndingMatches = basenameMatches.filter(n =>
+              n.relativePath.toLowerCase().replace(/\\/g, '/').replace(/\.md$/, '').endsWith(target)
+            )
+
+            if (exactEndingMatches.length === 1) {
+              const match = exactEndingMatches[0]
+              link.resolvedId = match.id
+              link.resolvedPath = match.relativePath
+              link.isBroken = false
+              link.isAmbiguous = false
+              link.matchMode = 'relative-path'
+            } else {
+              // Pick first but mark ambiguous
+              const match = exactEndingMatches.length > 0 ? exactEndingMatches[0] : basenameMatches[0]
+              link.resolvedId = match.id
+              link.resolvedPath = match.relativePath
+              link.isBroken = false
+              link.isAmbiguous = true
+              link.matchMode = 'basename'
+            }
+          }
+          continue
+        }
+
+        // Unresolved / Broken
+        link.isBroken = true
+        link.isAmbiguous = false
+        link.matchMode = 'unresolved'
+      }
+    }
+
+    if (node.children) {
+      node.children.forEach(resolveNodeLinks)
+    }
+  }
+  hierarchy.countries.forEach(resolveNodeLinks)
+
+  // 3. Aggregate folder links (from children)
+  function aggregateFolderLinks(node: HierarchyNode) {
+    if (node.children && node.children.length > 0) {
+      node.children.forEach(aggregateFolderLinks)
+      if (node.type !== 'home') {
+        const allLinks: ResolvedLink[] = []
+        const linkKeys = new Set<string>()
+
+        node.children.forEach(child => {
+          if (child.links) {
+            child.links.forEach((l) => {
+              const key = l.resolvedId ? `id:${l.resolvedId}` : `raw:${l.normalizedTarget}`
+              if (!linkKeys.has(key)) {
+                linkKeys.add(key)
+                allLinks.push({ ...l })
+              }
+            })
+          }
+        })
+        node.links = allLinks
+      }
+    }
+  }
+  hierarchy.countries.forEach(aggregateFolderLinks)
+}
+
 export function scanVault(vaultPath: string): VaultHierarchy {
   const countries = scanDirectory(vaultPath, vaultPath, 1)
-  return {
+  const hierarchy: VaultHierarchy = {
     vaultPath,
     vaultName: basename(vaultPath),
     scannedAt: Date.now(),
     countries
   }
+  resolveLinks(hierarchy)
+  return hierarchy
 }

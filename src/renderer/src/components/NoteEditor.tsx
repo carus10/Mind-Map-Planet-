@@ -194,12 +194,15 @@ export function NoteEditor({ filePath, noteName: initialNoteName, onClose }: Pro
         setShowLinkPicker(true)
     }
 
-    const handleLinkSelect = (selectedName: string) => {
+    const handleLinkSelect = (selected: { noteName: string, path: string, isDuplicate: boolean }) => {
         const ta = textareaRef.current
         let start = cursorRef.current?.start ?? 0
         let end = cursorRef.current?.end ?? 0
         if (document.activeElement === ta) { start = ta!.selectionStart; end = ta!.selectionEnd }
-        const wikiLink = `[[${selectedName}]]`
+
+        const safePath = selected.path.replace(/\\/g, '/').replace(/\.md$/i, '')
+        const wikiLink = selected.isDuplicate ? `[[${safePath}]]` : `[[${selected.noteName}]]`
+
         setContent(content.slice(0, start) + wikiLink + content.slice(end))
         setShowLinkPicker(false)
         setTimeout(() => { ta?.focus(); const p = start + wikiLink.length; ta?.setSelectionRange(p, p) }, 0)

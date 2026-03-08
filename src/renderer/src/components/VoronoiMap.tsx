@@ -370,15 +370,17 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
     }, [hierarchy])
 
     /* ── Ters Bağlantı Haritası (Gelen linkler için) ─────────── */
-    // linkText → [bu linki içeren node'lar] haritası
-    // Hedef gezegende “gelen bağlantı” çizgilerini çizmek için kullanılır
+    // resolvedId → [bu linki içeren node'lar] haritası
     const reverseNodeMap = useMemo(() => {
         const rm = new Map<string, HierarchyNode[]>()
         const traverse = (node: HierarchyNode) => {
-            if (node.links) {
-                node.links.forEach(linkText => {
-                    const existing = rm.get(linkText) ?? []
-                    rm.set(linkText, [...existing, node])
+            if (node.type === 'home' && node.links) {
+                node.links.forEach(l => {
+                    const lObj = l as any
+                    if (!lObj.isBroken && lObj.resolvedId) {
+                        const existing = rm.get(lObj.resolvedId) ?? []
+                        rm.set(lObj.resolvedId, [...existing, node])
+                    }
                 })
             }
             node.children?.forEach(traverse)
@@ -462,12 +464,14 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                 const countLinks = (planetA: HierarchyNode, planetB: HierarchyNode) => {
                     let c = 0
                     const check = (node: HierarchyNode) => {
-                        if (node.links) {
+                        if (node.type === 'home' && node.links) {
                             node.links.forEach(l => {
-                                // Obsidian link format is usually just title. We use nodeMap.
-                                const target = nodeMap.get(l)
-                                if (target && parentMap.get(target.id)?.id === planetB.id) {
-                                    c++
+                                const lObj = l as any
+                                if (!lObj.isBroken && lObj.resolvedId) {
+                                    const isTargetPlanetB = lObj.resolvedId === planetB.id || parentMap.get(lObj.resolvedId)?.id === planetB.id
+                                    if (isTargetPlanetB) {
+                                        c++
+                                    }
                                 }
                             })
                         }
@@ -486,7 +490,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
             }
         }
         return links
-    }, [isSolarSystem, planets, nodeMap, parentMap])
+    }, [isSolarSystem, planets, parentMap])
 
     /* ── Solar System: Native DOM Event Listeners ─────────── */
 
@@ -707,12 +711,10 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
 
         const links: {
             source: { x: number, y: number, id: string, index: number },
-            target: { x: number, y: number, id: string, isForeign: boolean, index: number },
-            details: { sourceName: string, targetName: string, sourcePlanetName?: string, targetPlanetName?: string }[]
+            target: { x: number, y: number, id: string, isForeign: boolean, index: number, isBroken?: boolean },
+            details: { sourceName: string, targetName: string, sourcePlanetName?: string, targetPlanetName?: string, isBroken?: boolean }[]
         }[] = []
 
-        // cellMap: direkt hücre adı/ID → centroid.
-        // Ayrıca hücrelerin TÜM alt notlarını da aynı hücrenin centroid'ine eşle
         const cellMap = new Map<string, { x: number, y: number, index: number, id: string }>()
 
         const registerDescendants = (node: HierarchyNode, centroid: { x: number, y: number, index: number, id: string }) => {
@@ -726,7 +728,6 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
             registerDescendants(c.node, info)
         })
 
-        // Duplicate engellemek için hazırlanan key formatı: "cellIndex:karsıGePlanetId"
         const addedForeignKeys = new Set<string>()
 
         const addForeignLink = (
@@ -734,7 +735,6 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
             cellCentroid: [number, number],
             foreignNodeId: string,
         ) => {
-            // Aynı hücre için aynı yabancı gezegene birden fazla çizgi çizme
             const foreignRoot = parentMap.get(foreignNodeId)
             const key = `${cellIdx}:${foreignRoot?.id ?? foreignNodeId}`
             if (addedForeignKeys.has(key)) return
@@ -750,16 +750,27 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
             links.push({
                 source: { x: cellCentroid[0], y: cellCentroid[1], id: foreignNodeId, index: cellIdx },
                 target: { x: edgeX, y: edgeY, id: foreignNodeId, isForeign: true, index: -1 },
-                details: [] // Will populate after initial collection if needed or dynamically
+                details: []
             })
         }
 
         // ── Pass 1: GİDEN (outgoing) bağlantılar ────────────────────────
         cells.forEach((cell, i) => {
             const gatherLinks = (node: HierarchyNode) => {
-                if (node.links) {
-                    node.links.forEach((l) => {
-                        const targetNode = nodeMap.get(l)
+                if (node.type === 'home' && node.links) {
+                    node.links.forEach((_l) => {
+                        const l = _l as any // Cast for convenience
+                        if (l.isBroken) {
+                            // Add a stub line
+                            links.push({
+                                source: { x: cell.centroid[0], y: cell.centroid[1], id: cell.node.id, index: i },
+                                target: { x: cell.centroid[0] + 20, y: cell.centroid[1] - 20, id: 'broken', isForeign: false, index: -1, isBroken: true },
+                                details: [{ sourceName: node.name, targetName: l.raw, isBroken: true }]
+                            })
+                            return
+                        }
+
+                        const targetNode = l.resolvedId ? nodeMap.get(l.resolvedId) : undefined
                         if (!targetNode) return
 
                         // Aynı gezegende mi?
@@ -767,8 +778,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                             const targetInfo = cellMap.get(targetNode.name) ?? cellMap.get(targetNode.id)!
                             if (targetInfo.index === i) return // self-loop engelle
 
-                            // Check if a link between these two cells already exists
-                            const existingLink = links.find(ln => ln.source.index === i && ln.target.index === targetInfo.index)
+                            const existingLink = links.find(ln => ln.source.index === i && ln.target.index === targetInfo.index && !ln.target.isBroken)
                             if (existingLink) {
                                 existingLink.details.push({ sourceName: node.name, targetName: targetNode.name })
                             } else {
@@ -778,13 +788,12 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                                     details: [{ sourceName: node.name, targetName: targetNode.name }]
                                 })
                             }
-
                         } else if (parentMap.has(targetNode.id)) {
                             // Yabancı gezegen → kenar noktasına çizgi (giden)
                             const foreignRootId = parentMap.get(targetNode.id)?.id || targetNode.id
                             const key = `${i}:${foreignRootId}`
 
-                            let existingLink = links.find(ln => ln.source.index === i && ln.target.isForeign && addedForeignKeys.has(key))
+                            let existingLink = links.find(ln => ln.source.index === i && ln.target.isForeign && addedForeignKeys.has(key) && !ln.target.isBroken)
                             if (!existingLink) {
                                 addForeignLink(i, cell.centroid, targetNode.id)
                                 existingLink = links[links.length - 1]
@@ -799,35 +808,36 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
         })
 
         // ── Pass 2: GELEN (incoming) yabancı bağlantılar ──────────────
-        // Mevcut gezegenin her notuna başka bir gezegenden link var mı?
         cells.forEach((cell, i) => {
             const gatherIncoming = (node: HierarchyNode) => {
-                // Bu node'u linkleyen dış node'ları bul (isimle ve ID ile)
-                const keys = [node.name, node.id].filter(Boolean)
-                keys.forEach(key => {
-                    const sourcers = reverseNodeMap.get(key) ?? []
+                if (node.type !== 'home') {
+                    node.children?.forEach(gatherIncoming)
+                    return
+                }
+
+                if (node.id) {
+                    const sourcers = reverseNodeMap.get(node.id) ?? []
                     sourcers.forEach(sourceNode => {
-                        // Kaynak aynı gezegende mi? Aynıysa atla (Pass 1 halletti)
-                        if (cellMap.has(sourceNode.name) || cellMap.has(sourceNode.id)) return
-                        // Kaynak gerçekten başka bir gezegende mi?
+                        // Kaynak aynı gezegende mi?
+                        if (cellMap.has(sourceNode.id)) return
                         if (!parentMap.has(sourceNode.id)) return
 
                         const foreignRootId = parentMap.get(sourceNode.id)?.id || sourceNode.id
                         const linkKey = `${i}:${foreignRootId}`
 
-                        let existingLink = links.find(ln => ln.source.index === i && ln.target.isForeign && addedForeignKeys.has(linkKey))
+                        let existingLink = links.find(ln => ln.source.index === i && ln.target.isForeign && addedForeignKeys.has(linkKey) && !ln.target.isBroken)
                         if (!existingLink) {
                             addForeignLink(i, cell.centroid, sourceNode.id)
                             existingLink = links[links.length - 1]
                         }
 
-                        // Prevent duplicates in incoming links if they have already been registered
+                        // Prevent duplicates
                         const isDuplicate = existingLink.details.some((d: any) => d.sourceName === sourceNode.name && d.targetName === node.name)
                         if (!isDuplicate) {
                             existingLink.details.push({ sourceName: sourceNode.name, targetName: node.name, sourcePlanetName: parentMap.get(sourceNode.id)?.name || 'Unknown Planet' })
                         }
                     })
-                })
+                }
                 node.children?.forEach(gatherIncoming)
             }
             gatherIncoming(cell.node)
@@ -1527,11 +1537,11 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                                 const cx = mx - (link.target.y - link.source.y) * 0.15
                                 const cy = my + (link.target.x - link.source.x) * 0.15
 
-                                const pathData = link.target.isForeign
+                                const pathData = link.target.isForeign || link.target.isBroken
                                     ? `M ${link.source.x} ${link.source.y} L ${link.target.x} ${link.target.y}`
                                     : `M ${link.source.x} ${link.source.y} Q ${cx} ${cy} ${link.target.x} ${link.target.y}`
 
-                                const strokeColor = link.target.isForeign ? '#ff4081' : '#40c4ff'
+                                const strokeColor = link.target.isBroken ? '#ff5555' : link.target.isForeign ? '#ff4081' : '#40c4ff'
 
                                 return (
                                     <g
@@ -1572,6 +1582,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                                             stroke={strokeColor}
                                             strokeWidth={strokeWidth}
                                             strokeLinecap="round"
+                                            strokeDasharray={link.target.isBroken ? '4 4' : 'none'}
                                             style={{ transition: 'stroke-width 0.2s ease', pointerEvents: 'none' }}
                                             className={`voronoi-trade-route ${link.target.isForeign ? 'voronoi-trade-route--jump' : ''}`}
                                         />
@@ -1650,26 +1661,69 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                         position: 'fixed',
                         left: linkHoverPos.x + 15,
                         top: linkHoverPos.y + 15,
-                        background: 'rgba(10, 15, 30, 0.85)',
-                        border: '1px solid rgba(80, 140, 255, 0.5)',
-                        padding: '6px 12px',
-                        borderRadius: '6px',
+                        background: 'rgba(10, 15, 30, 0.9)',
+                        border: `1px solid ${localLinks[hoveredLinkIdx].target.isBroken ? 'rgba(255, 85, 85, 0.5)' : localLinks[hoveredLinkIdx].target.isForeign ? 'rgba(255, 64, 129, 0.5)' : 'rgba(64, 196, 255, 0.5)'}`,
+                        padding: '12px',
+                        borderRadius: '8px',
                         color: '#fff',
                         fontSize: '13px',
                         pointerEvents: 'none',
                         zIndex: 10000,
-                        backdropFilter: 'blur(4px)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                        backdropFilter: 'blur(8px)',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+                        minWidth: '200px'
+                    }}
+                >
+                    <div style={{
+                        marginBottom: '8px',
+                        paddingBottom: '8px',
+                        borderBottom: '1px solid rgba(255,255,255,0.1)',
+                        fontWeight: 600,
+                        color: localLinks[hoveredLinkIdx].target.isBroken ? '#ff5555' : localLinks[hoveredLinkIdx].target.isForeign ? '#ff4081' : '#40c4ff',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '6px'
-                    }}
-                >
-                    {nodeMap.get(localLinks[hoveredLinkIdx].source.id)?.name}
-                    <span style={{ color: localLinks[hoveredLinkIdx].target.isForeign ? '#ff4081' : '#40c4ff' }}>
-                        {localLinks[hoveredLinkIdx].target.isForeign ? '↗' : '→'}
-                    </span>
-                    {nodeMap.get(localLinks[hoveredLinkIdx].target.id)?.name}
+                    }}>
+                        {localLinks[hoveredLinkIdx].target.isBroken ? (
+                            <>⚠️ {translations[useMapStore.getState().language].brokenLink || 'Kırık Bağlantı'}</>
+                        ) : localLinks[hoveredLinkIdx].target.isForeign ? (
+                            <>🚀 {translations[useMapStore.getState().language].foreignLink || 'Yabancı Gezegen Rotası'}</>
+                        ) : (
+                            <>⚡ {translations[useMapStore.getState().language].localLink || 'Yerel Bağlantı'}</>
+                        )}
+                        <span style={{
+                            background: 'rgba(255,255,255,0.1)',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            fontSize: '11px',
+                            marginLeft: 'auto'
+                        }}>
+                            {localLinks[hoveredLinkIdx].details.length} {translations[useMapStore.getState().language].linkCount || 'bağ'}
+                        </span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '200px', overflowY: 'auto' }}>
+                        {localLinks[hoveredLinkIdx].details.map((d, i) => (
+                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
+                                <span style={{ color: 'rgba(255,255,255,0.9)' }}>{d.sourceName}</span>
+                                <span style={{ color: 'rgba(255,255,255,0.3)' }}>→</span>
+                                <span style={{ color: d.isBroken ? '#ff8a8a' : localLinks[hoveredLinkIdx].target.isForeign ? '#ff80ab' : '#80d8ff', textDecoration: d.isBroken ? 'line-through' : 'none' }}>
+                                    {d.targetPlanetName ? `[${d.targetPlanetName}] ` : ''}{d.targetName}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                    {localLinks[hoveredLinkIdx].target.isForeign && !localLinks[hoveredLinkIdx].target.isBroken && (
+                        <div style={{
+                            marginTop: '8px',
+                            paddingTop: '8px',
+                            borderTop: '1px dotted rgba(255,255,255,0.2)',
+                            fontSize: '11px',
+                            color: 'rgba(255,255,255,0.5)',
+                            textAlign: 'center'
+                        }}>
+                            {translations[useMapStore.getState().language].jumpToLinkedNote || 'Gitmek için tıklayın'}
+                        </div>
+                    )}
                 </div>
             )}
 

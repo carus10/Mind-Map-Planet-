@@ -1,10 +1,12 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react'
 import type { HierarchyNode, VaultHierarchy } from '../types/hierarchy'
+import { useMapStore } from '../store/mapStore'
+import { translations } from '../i18n/translations'
 import './NoteLinkPicker.css'
 
 interface Props {
     hierarchy: VaultHierarchy
-    onSelect: (noteName: string) => void
+    onSelect: (result: { noteName: string; path: string; isDuplicate: boolean }) => void
     onClose: () => void
 }
 
@@ -29,12 +31,25 @@ export function NoteLinkPicker({ hierarchy, onSelect, onClose }: Props): React.R
     const inputRef = useRef<HTMLInputElement>(null)
     const listRef = useRef<HTMLDivElement>(null)
 
+    const language = useMapStore(s => s.language)
+    const t = translations[language]
+
     const allNotes = useMemo(() => {
-        const notes: Array<{ node: HierarchyNode; path: string[] }> = []
+        const flat: Array<{ node: HierarchyNode; path: string[] }> = []
         for (const country of hierarchy.countries) {
-            notes.push(...flattenNotes(country))
+            flat.push(...flattenNotes(country))
         }
-        return notes
+
+        const nameCount = new Map<string, number>()
+        for (const item of flat) {
+            const base = item.node.name.toLowerCase()
+            nameCount.set(base, (nameCount.get(base) || 0) + 1)
+        }
+
+        return flat.map(item => ({
+            ...item,
+            isDuplicate: (nameCount.get(item.node.name.toLowerCase()) || 0) > 1
+        }))
     }, [hierarchy])
 
     const filtered = useMemo(() => {
@@ -64,7 +79,8 @@ export function NoteLinkPicker({ hierarchy, onSelect, onClose }: Props): React.R
         } else if (e.key === 'Enter') {
             e.preventDefault()
             if (filtered[selectedIdx]) {
-                onSelect(filtered[selectedIdx].node.name)
+                const item = filtered[selectedIdx]
+                onSelect({ noteName: item.node.name, path: item.node.relativePath, isDuplicate: item.isDuplicate })
             }
         } else if (e.key === 'Escape') {
             onClose()
@@ -102,18 +118,32 @@ export function NoteLinkPicker({ hierarchy, onSelect, onClose }: Props): React.R
                     {filtered.length === 0 ? (
                         <div className="nlp-empty">Not bulunamadı</div>
                     ) : (
-                        filtered.map(({ node, path }, idx) => {
+                        filtered.map(({ node, path, isDuplicate }, idx) => {
                             const folderPath = path.slice(0, -1).join(' › ')
                             return (
                                 <div
                                     key={node.id}
                                     className={`nlp-item ${idx === selectedIdx ? 'nlp-item--selected' : ''}`}
-                                    onClick={() => onSelect(node.name)}
+                                    onClick={() => onSelect({ noteName: node.name, path: node.relativePath, isDuplicate })}
                                     onMouseEnter={() => setSelectedIdx(idx)}
                                 >
                                     <span className="nlp-item-icon">📄</span>
                                     <div className="nlp-item-info">
-                                        <span className="nlp-item-name">{node.name}</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span className="nlp-item-name">{node.name}</span>
+                                            {isDuplicate && (
+                                                <span className="nlp-item-duplicate-label" style={{
+                                                    fontSize: '0.7rem',
+                                                    background: 'rgba(255,100,100,0.15)',
+                                                    color: '#ff8a8a',
+                                                    padding: '2px 6px',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid rgba(255,100,100,0.3)'
+                                                }}>
+                                                    {t.duplicateNoteName}
+                                                </span>
+                                            )}
+                                        </div>
                                         {folderPath && <span className="nlp-item-path">{folderPath}</span>}
                                     </div>
                                     <span className="nlp-item-arrow">→</span>
