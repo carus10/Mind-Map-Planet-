@@ -299,3 +299,5 @@ export function scanVault(vaultPath: string): VaultHierarchy {
   resolveLinks(hierarchy)
   return hierarchy
 }
+
+// Final verification commit for note link resolution.
