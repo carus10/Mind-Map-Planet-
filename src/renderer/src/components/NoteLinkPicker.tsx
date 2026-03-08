@@ -104,19 +104,19 @@ export function NoteLinkPicker({ hierarchy, onSelect, onClose }: Props): React.R
                         <input
                             ref={inputRef}
                             className="nlp-input"
-                            placeholder="Not ara…"
+                            placeholder={t.omniPlaceholder || 'Not ara…'}
                             value={query}
                             onChange={e => setQuery(e.target.value)}
                             onKeyDown={handleKeyDown}
                         />
                         <button className="nlp-close" onClick={onClose}>✕</button>
                     </div>
-                    <p className="nlp-hint">↑↓ seç · Enter bağla · Esc kapat</p>
+                    <p className="nlp-hint">↑↓ {t.guideNavTitle || 'seç'} · Enter {t.editorLinkBtn || 'bağla'} · Esc {t.closeBtn}</p>
                 </div>
 
                 <div className="nlp-list" ref={listRef}>
                     {filtered.length === 0 ? (
-                        <div className="nlp-empty">Not bulunamadı</div>
+                        <div className="nlp-empty">{t.empty || 'Not bulunamadı'}</div>
                     ) : (
                         filtered.map(({ node, path, isDuplicate }, idx) => {
                             const folderPath = path.slice(0, -1).join(' › ')

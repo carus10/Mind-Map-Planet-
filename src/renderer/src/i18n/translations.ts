@@ -135,6 +135,7 @@ export const translations = {
     duplicateNoteName: 'Duplicate note name',
     localLink: 'Local Link',
     foreignLink: 'Foreign Link',
+    omniPlaceholder: 'Search notes...',
 
     // ===== New User Guide =====
     guideModalTitle: 'User Guide',
@@ -454,6 +455,7 @@ export const translations = {
     duplicateNoteName: 'Aynı isimli not',
     localLink: 'Yerel Bağlantı',
     foreignLink: 'Harici Bağlantı',
+    omniPlaceholder: 'Not ara...',
 
     // ===== Yeni Kullanım Kılavuzu =====
     guideModalTitle: 'Kullanım Kılavuzu',
