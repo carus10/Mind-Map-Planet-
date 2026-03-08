@@ -237,10 +237,9 @@ function resolveLinks(hierarchy: VaultHierarchy) {
               link.isAmbiguous = false
               link.matchMode = 'relative-path'
             } else {
-              // Pick first but mark ambiguous
-              const match = exactEndingMatches.length > 0 ? exactEndingMatches[0] : basenameMatches[0]
-              link.resolvedId = match.id
-              link.resolvedPath = match.relativePath
+              // Mark ambiguous and DO NOT resolve the link targets to prevent false jumps
+              link.resolvedId = null
+              link.resolvedPath = null
               link.isBroken = false
               link.isAmbiguous = true
               link.matchMode = 'basename'

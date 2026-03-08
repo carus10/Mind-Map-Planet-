@@ -711,8 +711,8 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
 
         const links: {
             source: { x: number, y: number, id: string, index: number },
-            target: { x: number, y: number, id: string, isForeign: boolean, index: number, isBroken?: boolean },
-            details: { sourceName: string, targetName: string, sourcePlanetName?: string, targetPlanetName?: string, isBroken?: boolean }[]
+            target: { x: number, y: number, id: string, isForeign: boolean, index: number, isBroken?: boolean, isAmbiguous?: boolean },
+            details: { sourceName: string, targetName: string, sourcePlanetName?: string, targetPlanetName?: string, isBroken?: boolean, isAmbiguous?: boolean }[]
         }[] = []
 
         const cellMap = new Map<string, { x: number, y: number, index: number, id: string }>()
@@ -766,6 +766,16 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                                 source: { x: cell.centroid[0], y: cell.centroid[1], id: cell.node.id, index: i },
                                 target: { x: cell.centroid[0] + 20, y: cell.centroid[1] - 20, id: 'broken', isForeign: false, index: -1, isBroken: true },
                                 details: [{ sourceName: node.name, targetName: l.raw, isBroken: true }]
+                            })
+                            return
+                        }
+
+                        if (l.isAmbiguous) {
+                            // Add an ambiguous stub line (shorter, different direction)
+                            links.push({
+                                source: { x: cell.centroid[0], y: cell.centroid[1], id: cell.node.id, index: i },
+                                target: { x: cell.centroid[0] + 15, y: cell.centroid[1] + 15, id: 'ambiguous', isForeign: false, index: -1, isAmbiguous: true },
+                                details: [{ sourceName: node.name, targetName: l.raw, isAmbiguous: true }]
                             })
                             return
                         }
@@ -1537,11 +1547,11 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                                 const cx = mx - (link.target.y - link.source.y) * 0.15
                                 const cy = my + (link.target.x - link.source.x) * 0.15
 
-                                const pathData = link.target.isForeign || link.target.isBroken
+                                const pathData = link.target.isForeign || link.target.isBroken || link.target.isAmbiguous
                                     ? `M ${link.source.x} ${link.source.y} L ${link.target.x} ${link.target.y}`
                                     : `M ${link.source.x} ${link.source.y} Q ${cx} ${cy} ${link.target.x} ${link.target.y}`
 
-                                const strokeColor = link.target.isBroken ? '#ff5555' : link.target.isForeign ? '#ff4081' : '#40c4ff'
+                                const strokeColor = link.target.isBroken ? '#ff5555' : link.target.isAmbiguous ? '#ffb300' : link.target.isForeign ? '#ff4081' : '#40c4ff'
 
                                 return (
                                     <g
@@ -1582,7 +1592,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                                             stroke={strokeColor}
                                             strokeWidth={strokeWidth}
                                             strokeLinecap="round"
-                                            strokeDasharray={link.target.isBroken ? '4 4' : 'none'}
+                                            strokeDasharray={link.target.isBroken || link.target.isAmbiguous ? '4 4' : 'none'}
                                             style={{ transition: 'stroke-width 0.2s ease', pointerEvents: 'none' }}
                                             className={`voronoi-trade-route ${link.target.isForeign ? 'voronoi-trade-route--jump' : ''}`}
                                         />
@@ -1662,7 +1672,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                         left: linkHoverPos.x + 15,
                         top: linkHoverPos.y + 15,
                         background: 'rgba(10, 15, 30, 0.9)',
-                        border: `1px solid ${localLinks[hoveredLinkIdx].target.isBroken ? 'rgba(255, 85, 85, 0.5)' : localLinks[hoveredLinkIdx].target.isForeign ? 'rgba(255, 64, 129, 0.5)' : 'rgba(64, 196, 255, 0.5)'}`,
+                        border: `1px solid ${localLinks[hoveredLinkIdx].target.isBroken ? 'rgba(255, 85, 85, 0.5)' : localLinks[hoveredLinkIdx].target.isAmbiguous ? 'rgba(255, 179, 0, 0.5)' : localLinks[hoveredLinkIdx].target.isForeign ? 'rgba(255, 64, 129, 0.5)' : 'rgba(64, 196, 255, 0.5)'}`,
                         padding: '12px',
                         borderRadius: '8px',
                         color: '#fff',
@@ -1679,13 +1689,15 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                         paddingBottom: '8px',
                         borderBottom: '1px solid rgba(255,255,255,0.1)',
                         fontWeight: 600,
-                        color: localLinks[hoveredLinkIdx].target.isBroken ? '#ff5555' : localLinks[hoveredLinkIdx].target.isForeign ? '#ff4081' : '#40c4ff',
+                        color: localLinks[hoveredLinkIdx].target.isBroken ? '#ff5555' : localLinks[hoveredLinkIdx].target.isAmbiguous ? '#ffb300' : localLinks[hoveredLinkIdx].target.isForeign ? '#ff4081' : '#40c4ff',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '6px'
                     }}>
                         {localLinks[hoveredLinkIdx].target.isBroken ? (
                             <>⚠️ {translations[useMapStore.getState().language].brokenLink || 'Kırık Bağlantı'}</>
+                        ) : localLinks[hoveredLinkIdx].target.isAmbiguous ? (
+                            <>❓ {translations[useMapStore.getState().language].ambiguousLink || 'Belirsiz Bağlantı'}</>
                         ) : localLinks[hoveredLinkIdx].target.isForeign ? (
                             <>🚀 {translations[useMapStore.getState().language].foreignLink || 'Yabancı Gezegen Rotası'}</>
                         ) : (
@@ -1706,7 +1718,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
                             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
                                 <span style={{ color: 'rgba(255,255,255,0.9)' }}>{d.sourceName}</span>
                                 <span style={{ color: 'rgba(255,255,255,0.3)' }}>→</span>
-                                <span style={{ color: d.isBroken ? '#ff8a8a' : localLinks[hoveredLinkIdx].target.isForeign ? '#ff80ab' : '#80d8ff', textDecoration: d.isBroken ? 'line-through' : 'none' }}>
+                                <span style={{ color: d.isBroken ? '#ff8a8a' : d.isAmbiguous ? '#ffe57f' : localLinks[hoveredLinkIdx].target.isForeign ? '#ff80ab' : '#80d8ff', textDecoration: d.isBroken || d.isAmbiguous ? 'line-through' : 'none' }}>
                                     {d.targetPlanetName ? `[${d.targetPlanetName}] ` : ''}{d.targetName}
                                 </span>
                             </div>
