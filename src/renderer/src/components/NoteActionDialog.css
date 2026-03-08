@@ -59,6 +59,22 @@
     background: rgba(255, 255, 255, 0.1);
 }
 
+.btn-learn-engine {
+    background: linear-gradient(135deg, rgba(120, 80, 220, 0.25), rgba(80, 140, 255, 0.25));
+    border: 1px solid rgba(120, 80, 220, 0.4);
+    color: #e8eaf6;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.btn-learn-engine:hover {
+    background: linear-gradient(135deg, rgba(120, 80, 220, 0.45), rgba(80, 140, 255, 0.45));
+    border-color: rgba(120, 80, 220, 0.7);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(120, 80, 220, 0.3);
+}
+
 @keyframes dialogPopIn {
     0% {
         opacity: 0;

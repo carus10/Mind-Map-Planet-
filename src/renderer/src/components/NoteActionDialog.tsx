@@ -8,9 +8,10 @@ interface Props {
     onClose: () => void
     onOpenObsidian: () => void
     onOpenApp: () => void
+    onOpenLearnEngine: () => void
 }
 
-export function NoteActionDialog({ noteName, onClose, onOpenObsidian, onOpenApp }: Props): React.ReactElement {
+export function NoteActionDialog({ noteName, onClose, onOpenObsidian, onOpenApp, onOpenLearnEngine }: Props): React.ReactElement {
     const { language } = useMapStore(s => ({ language: s.language }))
     const t = translations[language]
 
@@ -49,6 +50,13 @@ export function NoteActionDialog({ noteName, onClose, onOpenObsidian, onOpenApp 
                             <circle cx="12" cy="12" r="3"></circle>
                         </svg>
                         {t.actionOpenApp}
+                    </button>
+                    <button className="btn-learn-engine" onClick={onOpenLearnEngine}>
+                        <svg viewBox="0 0 24 24" width="16" height="16" style={{ marginRight: '8px' }} stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                        </svg>
+                        {t.actionLearnEngine}
                     </button>
                 </div>
             </div>

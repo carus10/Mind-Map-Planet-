@@ -1,0 +1,597 @@
+/* ── Learn Engine – Full-screen modal ── */
+
+.le-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: rgba(4, 4, 16, 0.95);
+    backdrop-filter: blur(16px);
+    display: flex;
+    animation: le-fade-in 0.3s ease forwards;
+}
+
+@keyframes le-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.le-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+/* ── Top bar ── */
+.le-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 52px;
+    padding: 0 16px;
+    background: rgba(15, 15, 30, 0.85);
+    border-bottom: 1px solid rgba(120, 80, 220, 0.2);
+    flex-shrink: 0;
+}
+
+.le-topbar-back,
+.le-topbar-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.le-topbar-back:hover,
+.le-topbar-close:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.le-topbar-note {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #e8eaf6;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.le-topbar-mode {
+    font-size: 0.82rem;
+    color: rgba(160, 140, 255, 0.8);
+    background: rgba(120, 80, 220, 0.15);
+    padding: 3px 10px;
+    border-radius: 12px;
+}
+
+.le-topbar-saved {
+    font-size: 0.78rem;
+    color: #66bb6a;
+    animation: le-saved-pop 0.3s ease;
+}
+
+@keyframes le-saved-pop {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.le-topbar-spacer {
+    flex: 1;
+}
+
+/* ── Body ── */
+.le-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* ── Sidebar ── */
+.le-sidebar {
+    width: 200px;
+    min-width: 200px;
+    background: rgba(12, 12, 25, 0.9);
+    border-right: 1px solid rgba(120, 80, 220, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 8px;
+    overflow-y: auto;
+}
+
+.le-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: rgba(232, 234, 246, 0.7);
+    font-size: 0.85rem;
+    text-align: left;
+    transition: all 0.2s ease;
+}
+
+.le-sidebar-item:hover {
+    background: rgba(120, 80, 220, 0.12);
+    color: #e8eaf6;
+}
+
+.le-sidebar-item.active {
+    background: rgba(120, 80, 220, 0.25);
+    color: #fff;
+    font-weight: 500;
+    box-shadow: inset 3px 0 0 rgba(120, 80, 220, 0.8);
+}
+
+.le-sidebar-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.le-sidebar-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Content area ── */
+.le-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+}
+
+.le-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-size: 1rem;
+    color: rgba(232, 234, 246, 0.5);
+}
+
+/* ══════════════════════════════════════════
+   Shared Learn Engine sub-component styles
+   ══════════════════════════════════════════ */
+
+/* Card container used by all modes */
+.le-section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #e8eaf6;
+}
+
+.le-card {
+    background: rgba(20, 20, 40, 0.7);
+    border: 1px solid rgba(120, 80, 220, 0.18);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s ease;
+}
+
+.le-card:hover {
+    border-color: rgba(120, 80, 220, 0.35);
+}
+
+.le-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.le-card-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #e8eaf6;
+}
+
+.le-card-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.le-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border: 1px solid rgba(120, 80, 220, 0.3);
+    background: rgba(120, 80, 220, 0.12);
+    color: #c5b8ff;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.le-btn:hover {
+    background: rgba(120, 80, 220, 0.28);
+    border-color: rgba(120, 80, 220, 0.5);
+}
+
+.le-btn-primary {
+    background: rgba(120, 80, 220, 0.35);
+    border-color: rgba(120, 80, 220, 0.5);
+    color: #fff;
+}
+
+.le-btn-primary:hover {
+    background: rgba(120, 80, 220, 0.55);
+}
+
+.le-btn-danger {
+    background: rgba(220, 50, 50, 0.12);
+    border-color: rgba(220, 50, 50, 0.3);
+    color: #ff8a80;
+}
+
+.le-btn-danger:hover {
+    background: rgba(220, 50, 50, 0.28);
+}
+
+.le-btn-success {
+    background: rgba(50, 180, 80, 0.12);
+    border-color: rgba(50, 180, 80, 0.3);
+    color: #69f0ae;
+}
+
+.le-btn-success:hover {
+    background: rgba(50, 180, 80, 0.28);
+}
+
+.le-btn-sm {
+    padding: 4px 10px;
+    font-size: 0.78rem;
+}
+
+/* Form elements */
+.le-input,
+.le-textarea,
+.le-select {
+    width: 100%;
+    padding: 9px 12px;
+    background: rgba(10, 10, 25, 0.8);
+    border: 1px solid rgba(120, 80, 220, 0.2);
+    border-radius: 8px;
+    color: #e8eaf6;
+    font-size: 0.88rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.le-input:focus,
+.le-textarea:focus,
+.le-select:focus {
+    border-color: rgba(120, 80, 220, 0.5);
+}
+
+.le-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.le-label {
+    display: block;
+    font-size: 0.8rem;
+    color: rgba(200, 190, 255, 0.7);
+    margin-bottom: 4px;
+    margin-top: 12px;
+}
+
+.le-label:first-child {
+    margin-top: 0;
+}
+
+.le-empty {
+    text-align: center;
+    padding: 48px 20px;
+    color: rgba(232, 234, 246, 0.4);
+    font-size: 0.92rem;
+}
+
+.le-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+/* Study mode result badges */
+.le-badge-correct {
+    color: #69f0ae;
+    font-weight: 600;
+}
+
+.le-badge-incorrect {
+    color: #ff8a80;
+    font-weight: 600;
+}
+
+/* Flip card */
+.le-flip-card {
+    perspective: 800px;
+    cursor: pointer;
+}
+
+.le-flip-inner {
+    position: relative;
+    transition: transform 0.5s ease;
+    transform-style: preserve-3d;
+}
+
+.le-flip-inner.flipped {
+    transform: rotateY(180deg);
+}
+
+.le-flip-front,
+.le-flip-back {
+    backface-visibility: hidden;
+}
+
+.le-flip-back {
+    position: absolute;
+    inset: 0;
+    transform: rotateY(180deg);
+}
+
+/* Overview dashboard */
+.le-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.le-overview-stat {
+    background: rgba(20, 20, 40, 0.7);
+    border: 1px solid rgba(120, 80, 220, 0.18);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    transition: border-color 0.2s ease;
+}
+
+.le-overview-stat:hover {
+    border-color: rgba(120, 80, 220, 0.3);
+}
+
+.le-overview-stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #c5b8ff;
+    margin-bottom: 4px;
+}
+
+.le-overview-stat-label {
+    font-size: 0.78rem;
+    color: rgba(232, 234, 246, 0.5);
+}
+
+.le-distribution-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+}
+
+.le-distribution-icon {
+    font-size: 1.1rem;
+    width: 28px;
+    text-align: center;
+}
+
+.le-distribution-name {
+    flex: 1;
+    font-size: 0.85rem;
+    color: #e8eaf6;
+}
+
+.le-distribution-count {
+    font-size: 0.85rem;
+    color: rgba(200, 190, 255, 0.7);
+    font-weight: 500;
+}
+
+.le-distribution-bar {
+    width: 80px;
+    height: 6px;
+    background: rgba(120, 80, 220, 0.12);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.le-distribution-fill {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(120, 80, 220, 0.6), rgba(80, 140, 255, 0.6));
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+
+.le-quick-start-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+}
+
+.le-quick-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    background: rgba(120, 80, 220, 0.08);
+    border: 1px solid rgba(120, 80, 220, 0.2);
+    border-radius: 10px;
+    color: #c5b8ff;
+    font-size: 0.83rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.le-quick-btn:hover {
+    background: rgba(120, 80, 220, 0.22);
+    border-color: rgba(120, 80, 220, 0.4);
+    transform: translateY(-1px);
+}
+
+/* Code block in Output Prediction */
+.le-code-block {
+    background: rgba(5, 5, 15, 0.9);
+    border: 1px solid rgba(120, 80, 220, 0.15);
+    border-radius: 8px;
+    padding: 14px;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.85rem;
+    color: #e8eaf6;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.le-code-lang {
+    font-size: 0.72rem;
+    color: rgba(160, 140, 255, 0.6);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Image Occlusion canvas */
+.le-io-canvas-wrapper {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(120, 80, 220, 0.2);
+}
+
+.le-io-canvas-wrapper img {
+    display: block;
+    max-width: 100%;
+    max-height: 500px;
+}
+
+.le-io-mask {
+    position: absolute;
+    background: rgba(120, 80, 220, 0.7);
+    border: 2px solid rgba(180, 150, 255, 0.5);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: #fff;
+    transition: background 0.2s ease;
+}
+
+.le-io-mask.revealed {
+    background: rgba(50, 180, 80, 0.3);
+    border-color: rgba(50, 180, 80, 0.5);
+}
+
+.le-io-mask:hover {
+    background: rgba(120, 80, 220, 0.5);
+}
+
+/* Concept Match game */
+.le-cm-game {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.le-cm-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.le-cm-left {
+    flex: 1;
+    padding: 10px 14px;
+    background: rgba(20, 20, 40, 0.7);
+    border: 1px solid rgba(120, 80, 220, 0.18);
+    border-radius: 8px;
+    color: #e8eaf6;
+    font-size: 0.88rem;
+}
+
+.le-cm-arrow {
+    color: rgba(160, 140, 255, 0.5);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.le-cm-select {
+    flex: 1;
+}
+
+.le-cm-matched {
+    color: #69f0ae;
+    font-weight: 500;
+}
+
+/* Difficulty badge */
+.le-diff-easy {
+    color: #69f0ae;
+}
+
+.le-diff-medium {
+    color: #ffd54f;
+}
+
+.le-diff-hard {
+    color: #ff8a80;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+    .le-sidebar {
+        width: 52px;
+        min-width: 52px;
+        padding: 8px 4px;
+    }
+
+    .le-sidebar-label {
+        display: none;
+    }
+
+    .le-sidebar-item {
+        justify-content: center;
+        padding: 10px;
+    }
+
+    .le-content {
+        padding: 16px;
+    }
+}

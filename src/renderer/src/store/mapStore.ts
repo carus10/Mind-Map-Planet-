@@ -61,6 +61,12 @@ interface MapStore {
   editingNoteTarget: HierarchyNode | null
   setEditingNoteTarget: (node: HierarchyNode | null) => void
 
+  // --- Learn Engine ---
+  learnEngineTarget: HierarchyNode | null
+  isLearnEngineOpen: boolean
+  setLearnEngineTarget: (node: HierarchyNode | null) => void
+  setIsLearnEngineOpen: (open: boolean) => void
+
   backgroundTheme: BackgroundTheme
   setBackgroundTheme: (theme: BackgroundTheme) => void
 
@@ -127,6 +133,10 @@ export const useMapStore = create<MapStore>((set) => ({
 
   actionNoteTarget: null,
   editingNoteTarget: null,
+
+  // --- Learn Engine ---
+  learnEngineTarget: null,
+  isLearnEngineOpen: false,
 
   backgroundTheme: loadBackgroundTheme(),
   setBackgroundTheme: (theme) => set(() => {
@@ -305,6 +315,10 @@ export const useMapStore = create<MapStore>((set) => ({
   setSuccessMessage: (msg) => set({ successMessage: msg }),
   setActionNoteTarget: (node) => set({ actionNoteTarget: node }),
   setEditingNoteTarget: (node) => set({ editingNoteTarget: node }),
+
+  // --- Learn Engine ---
+  setLearnEngineTarget: (node) => set({ learnEngineTarget: node }),
+  setIsLearnEngineOpen: (open) => set({ isLearnEngineOpen: open }),
 
   // --- Drag & Drop (Cargo Hold) ---
   setActiveDraggedNode: (node) => set({ activeDraggedNode: node }),

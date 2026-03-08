@@ -20,12 +20,13 @@ import { UserGuideModal } from './components/UserGuideModal'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { NoteActionDialog } from './components/NoteActionDialog'
 import { NoteEditor } from './components/NoteEditor'
+import { LearnEngineModal } from './components/LearnEngineModal'
 import { buildObsidianUrl } from './utils/obsidianUrl'
 import type { VaultHierarchy } from './types/hierarchy'
 import './index.css'
 
 export function App(): React.ReactElement {
-  const { hierarchy, setHierarchy, setError, contextMenuTarget, setContextMenuTarget, setRenameTarget, backgroundTheme, actionNoteTarget, setActionNoteTarget, editingNoteTarget, setEditingNoteTarget } = useMapStore((s) => ({
+  const { hierarchy, setHierarchy, setError, contextMenuTarget, setContextMenuTarget, setRenameTarget, backgroundTheme, actionNoteTarget, setActionNoteTarget, editingNoteTarget, setEditingNoteTarget, learnEngineTarget, isLearnEngineOpen, setLearnEngineTarget, setIsLearnEngineOpen } = useMapStore((s) => ({
     hierarchy: s.hierarchy,
     setHierarchy: s.setHierarchy,
     setError: s.setError,
@@ -37,6 +38,10 @@ export function App(): React.ReactElement {
     setActionNoteTarget: s.setActionNoteTarget,
     editingNoteTarget: s.editingNoteTarget,
     setEditingNoteTarget: s.setEditingNoteTarget,
+    learnEngineTarget: s.learnEngineTarget,
+    isLearnEngineOpen: s.isLearnEngineOpen,
+    setLearnEngineTarget: s.setLearnEngineTarget,
+    setIsLearnEngineOpen: s.setIsLearnEngineOpen,
   }))
   const [showSettings, setShowSettings] = useState(false)
   const [showCreateNote, setShowCreateNote] = useState(false)
@@ -241,6 +246,11 @@ export function App(): React.ReactElement {
               setEditingNoteTarget(actionNoteTarget)
               setActionNoteTarget(null)
             }}
+            onOpenLearnEngine={() => {
+              setLearnEngineTarget(actionNoteTarget)
+              setIsLearnEngineOpen(true)
+              setActionNoteTarget(null)
+            }}
           />
         )}
         {editingNoteTarget && (
@@ -248,6 +258,15 @@ export function App(): React.ReactElement {
             filePath={editingNoteTarget.absolutePath}
             noteName={editingNoteTarget.name}
             onClose={() => setEditingNoteTarget(null)}
+          />
+        )}
+        {isLearnEngineOpen && learnEngineTarget && (
+          <LearnEngineModal
+            noteNode={learnEngineTarget}
+            onClose={() => {
+              setIsLearnEngineOpen(false)
+              setLearnEngineTarget(null)
+            }}
           />
         )}
       </div>
