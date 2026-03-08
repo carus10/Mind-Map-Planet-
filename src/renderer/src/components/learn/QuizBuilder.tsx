@@ -156,7 +156,7 @@ export function QuizBuilder({ data, t, onSave }: Props): React.ReactElement {
                     <textarea className="le-textarea" value={explanation} onChange={(e) => setExplanation(e.target.value)} />
 
                     <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
-                        <button className="le-btn le-btn-primary" onClick={handleSubmit}>{t.learnSave}</button>
+                        <button className="le-btn le-btn-primary" onClick={handleSubmit} disabled={!question.trim() || options.filter(o => o.trim()).length < 2}>{t.learnSave}</button>
                         <button className="le-btn" onClick={() => { resetForm(); setView('list') }}>{t.learnCancel}</button>
                     </div>
                 </div>

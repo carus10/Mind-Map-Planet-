@@ -173,7 +173,7 @@ export function ClozeBuilder({ data, t, onSave }: Props): React.ReactElement {
                     )}
 
                     <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
-                        <button className="le-btn le-btn-primary" onClick={handleSubmit}>
+                        <button className="le-btn le-btn-primary" onClick={handleSubmit} disabled={!sourceText.trim() || !hiddenText.trim() || !sourceText.includes(hiddenText)}>
                             {t.learnSave}
                         </button>
                         <button className="le-btn" onClick={() => { resetForm(); setView('list') }}>

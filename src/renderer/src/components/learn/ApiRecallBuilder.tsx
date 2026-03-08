@@ -141,7 +141,7 @@ export function ApiRecallBuilder({ data, t, onSave }: Props): React.ReactElement
                     <input className="le-input" value={returnInfo} onChange={(e) => setReturnInfo(e.target.value)} />
 
                     <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
-                        <button className="le-btn le-btn-primary" onClick={handleSubmit}>{t.learnSave}</button>
+                        <button className="le-btn le-btn-primary" onClick={handleSubmit} disabled={!apiName.trim() || !usageDescription.trim()}>{t.learnSave}</button>
                         <button className="le-btn" onClick={() => { resetForm(); setView('list') }}>{t.learnCancel}</button>
                     </div>
                 </div>

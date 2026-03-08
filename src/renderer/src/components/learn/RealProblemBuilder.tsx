@@ -191,7 +191,7 @@ export function RealProblemBuilder({ data, t, onSave }: Props): React.ReactEleme
                     </select>
 
                     <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
-                        <button className="le-btn le-btn-primary" onClick={handleSubmit}>{t.learnSave}</button>
+                        <button className="le-btn le-btn-primary" onClick={handleSubmit} disabled={!title.trim() || !problemStatement.trim() || !expectedApproach.trim()}>{t.learnSave}</button>
                         <button className="le-btn" onClick={() => { resetForm(); setView('list') }}>{t.learnCancel}</button>
                     </div>
                 </div>
