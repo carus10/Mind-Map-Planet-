@@ -2,7 +2,7 @@ import { ipcMain, dialog, shell, app } from 'electron'
 import { existsSync, readFileSync } from 'fs'
 import { join, basename } from 'path'
 import { scanVault } from './vaultScanner'
-import { renameNode, createNote, moveNode, createFolder, deleteNode } from './fileSystem'
+import { renameNode, createNote, moveNode, createFolder, deleteNode, readNote, writeNote } from './fileSystem'
 import { store } from './store'
 
 interface ObsidianVaultInfo {
@@ -71,6 +71,16 @@ export function registerIpcHandlers(): void {
   // Yeni Not Oluştur
   ipcMain.handle('file:create', (_e, folderPath: string, noteName: string) => {
     return createNote(folderPath, noteName)
+  })
+
+  // Dosya Oku
+  ipcMain.handle('file:read', (_e, filePath: string) => {
+    return readNote(filePath)
+  })
+
+  // Dosya Yaz
+  ipcMain.handle('file:write', (_e, filePath: string, content: string) => {
+    return writeNote(filePath, content)
   })
 
   // Klasör Taşıma (Sürükle & Bırak)

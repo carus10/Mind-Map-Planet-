@@ -56,6 +56,11 @@ interface MapStore {
   error: string | null
   successMessage: string | null
 
+  actionNoteTarget: HierarchyNode | null
+  setActionNoteTarget: (node: HierarchyNode | null) => void
+  editingNoteTarget: HierarchyNode | null
+  setEditingNoteTarget: (node: HierarchyNode | null) => void
+
   backgroundTheme: BackgroundTheme
   setBackgroundTheme: (theme: BackgroundTheme) => void
 
@@ -119,6 +124,9 @@ export const useMapStore = create<MapStore>((set) => ({
   contextMenuTarget: null,
   error: null,
   successMessage: null,
+
+  actionNoteTarget: null,
+  editingNoteTarget: null,
 
   backgroundTheme: loadBackgroundTheme(),
   setBackgroundTheme: (theme) => set(() => {
@@ -295,6 +303,8 @@ export const useMapStore = create<MapStore>((set) => ({
   setContextMenuTarget: (target) => set({ contextMenuTarget: target }),
   setError: (msg) => set({ error: msg }),
   setSuccessMessage: (msg) => set({ successMessage: msg }),
+  setActionNoteTarget: (node) => set({ actionNoteTarget: node }),
+  setEditingNoteTarget: (node) => set({ editingNoteTarget: node }),
 
   // --- Drag & Drop (Cargo Hold) ---
   setActiveDraggedNode: (node) => set({ activeDraggedNode: node }),

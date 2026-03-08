@@ -223,10 +223,7 @@ export function MapCanvas(): React.ReactElement {
 
     if (hit.node.type === 'home') {
       if (!hierarchy) return
-      const url = buildObsidianUrl(hierarchy.vaultName, hit.node.relativePath)
-      window.api.openObsidian(url).catch(() => {
-        setError(language === 'tr' ? 'Obsidian açılamadı.' : 'Could not open Obsidian.')
-      })
+      useMapStore.getState().setActionNoteTarget(hit.node)
     } else {
       drillDown(hit.node)
     }

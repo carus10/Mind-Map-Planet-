@@ -850,10 +850,7 @@ export function VoronoiMap({ hierarchy }: VoronoiMapProps): React.ReactElement {
 
     const drillDown = useCallback((cell: VoronoiCell) => {
         if (!cell.node.children || cell.node.children.length === 0) {
-            if (cell.node.relativePath && hierarchy.vaultName) {
-                const url = buildObsidianUrl(hierarchy.vaultName, cell.node.relativePath)
-                window.api.openObsidian(url)
-            }
+            useMapStore.getState().setActionNoteTarget(cell.node)
             return
         }
         setTransitioning(true)

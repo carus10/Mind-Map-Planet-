@@ -10,6 +10,8 @@ declare global {
       deleteNode: (targetPath: string) => Promise<{ success: boolean; error?: string }>
       moveNode: (sourcePath: string, targetFolderPath: string) => Promise<{ success: boolean; error?: string }>
       openObsidian: (url: string) => Promise<{ success: boolean; error?: string }>
+      readNote: (filePath: string) => Promise<{ success: boolean; content?: string; error?: string }>
+      writeNote: (filePath: string, content: string) => Promise<{ success: boolean; error?: string }>
       detectObsidianVaults: () => Promise<{ path: string; name: string }[]>
       storeGet: (key: string) => Promise<unknown>
       storeSet: (key: string, value: unknown) => Promise<void>

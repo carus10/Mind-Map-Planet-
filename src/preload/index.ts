@@ -10,6 +10,8 @@ contextBridge.exposeInMainWorld('api', {
   deleteNode: (targetPath: string) => ipcRenderer.invoke('file:delete', targetPath),
   moveNode: (sourcePath: string, targetFolderPath: string) => ipcRenderer.invoke('file:move', sourcePath, targetFolderPath),
   openObsidian: (url: string) => ipcRenderer.invoke('obsidian:open', url),
+  readNote: (filePath: string) => ipcRenderer.invoke('file:read', filePath),
+  writeNote: (filePath: string, content: string) => ipcRenderer.invoke('file:write', filePath, content),
   detectObsidianVaults: () => ipcRenderer.invoke('vault:detectObsidianVaults'),
   storeGet: (key: string) => ipcRenderer.invoke('store:get', key),
   storeSet: (key: string, value: unknown) => ipcRenderer.invoke('store:set', key, value),

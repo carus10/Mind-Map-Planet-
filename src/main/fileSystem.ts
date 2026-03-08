@@ -1,9 +1,35 @@
-import { renameSync, writeFileSync, mkdirSync, rmSync, unlinkSync, statSync } from 'fs'
+import { renameSync, writeFileSync, readFileSync, mkdirSync, rmSync, unlinkSync, statSync } from 'fs'
 import { join, dirname, basename } from 'path'
 
 export interface RenameResult {
   success: boolean
   error?: string
+}
+
+export interface ReadResult {
+  success: boolean
+  content?: string
+  error?: string
+}
+
+export function readNote(filePath: string): ReadResult {
+  try {
+    const content = readFileSync(filePath, 'utf-8')
+    return { success: true, content }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    return { success: false, error: msg }
+  }
+}
+
+export function writeNote(filePath: string, content: string): RenameResult {
+  try {
+    writeFileSync(filePath, content, 'utf-8')
+    return { success: true }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    return { success: false, error: msg }
+  }
 }
 
 export function renameNode(oldPath: string, newName: string): RenameResult {

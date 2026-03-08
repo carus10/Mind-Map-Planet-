@@ -18,11 +18,14 @@ import { OmniSearch } from './components/OmniSearch'
 import { CargoHold } from './components/CargoHold'
 import { UserGuideModal } from './components/UserGuideModal'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { NoteActionDialog } from './components/NoteActionDialog'
+import { NoteEditor } from './components/NoteEditor'
+import { buildObsidianUrl } from './utils/obsidianUrl'
 import type { VaultHierarchy } from './types/hierarchy'
 import './index.css'
 
 export function App(): React.ReactElement {
-  const { hierarchy, setHierarchy, setError, contextMenuTarget, setContextMenuTarget, setRenameTarget, backgroundTheme } = useMapStore((s) => ({
+  const { hierarchy, setHierarchy, setError, contextMenuTarget, setContextMenuTarget, setRenameTarget, backgroundTheme, actionNoteTarget, setActionNoteTarget, editingNoteTarget, setEditingNoteTarget } = useMapStore((s) => ({
     hierarchy: s.hierarchy,
     setHierarchy: s.setHierarchy,
     setError: s.setError,
@@ -30,6 +33,10 @@ export function App(): React.ReactElement {
     setContextMenuTarget: s.setContextMenuTarget,
     setRenameTarget: s.setRenameTarget,
     backgroundTheme: s.backgroundTheme,
+    actionNoteTarget: s.actionNoteTarget,
+    setActionNoteTarget: s.setActionNoteTarget,
+    editingNoteTarget: s.editingNoteTarget,
+    setEditingNoteTarget: s.setEditingNoteTarget,
   }))
   const [showSettings, setShowSettings] = useState(false)
   const [showCreateNote, setShowCreateNote] = useState(false)
@@ -219,6 +226,28 @@ export function App(): React.ReactElement {
           <VaultSwitcher
             onVaultSelected={handleVaultSelected}
             onClose={() => setShowVaultSwitcher(false)}
+          />
+        )}
+        {actionNoteTarget && hierarchy && (
+          <NoteActionDialog
+            noteName={actionNoteTarget.name}
+            onClose={() => setActionNoteTarget(null)}
+            onOpenObsidian={() => {
+              const url = buildObsidianUrl(hierarchy.vaultName, actionNoteTarget.relativePath)
+              window.api.openObsidian(url).catch(() => setError('Could not open Obsidian.'))
+              setActionNoteTarget(null)
+            }}
+            onOpenApp={() => {
+              setEditingNoteTarget(actionNoteTarget)
+              setActionNoteTarget(null)
+            }}
+          />
+        )}
+        {editingNoteTarget && (
+          <NoteEditor
+            filePath={editingNoteTarget.absolutePath}
+            noteName={editingNoteTarget.name}
+            onClose={() => setEditingNoteTarget(null)}
           />
         )}
       </div>

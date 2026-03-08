@@ -598,8 +598,7 @@ export function WorldMap(): React.ReactElement {
     if (!hit) return
     if (hit.type === 'home') {
       if (!hierarchy) return
-      const url = buildObsidianUrl(hierarchy.vaultName, hit.relativePath)
-      window.api.openObsidian(url).catch(() => setError(language === 'tr' ? 'Obsidian açılamadı.' : 'Could not open Obsidian.'))
+      useMapStore.getState().setActionNoteTarget(hit) // Intercept left click to show dialog
     } else { drillDown(hit) }
   }, [hitWorld, hitSub, navigation.level, hierarchy, drillDown, setError, language])
 
