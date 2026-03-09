@@ -30,7 +30,7 @@ export class ErrorBoundary extends Component<Props, State> {
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                     height: '100vh', background: '#0a0a14', color: '#e0e0ff', fontFamily: 'Inter, sans-serif', padding: 40
                 }}>
-                    <h2 style={{ marginBottom: 16, color: '#ef5350' }}>⚠️ Bir hata oluştu</h2>
+                    <h2 style={{ marginBottom: 16, color: '#ef5350' }}>⚠️ An error occurred / Bir hata oluştu</h2>
                     <pre style={{
                         background: '#1a1a2e', padding: 20, borderRadius: 12, maxWidth: 600, overflow: 'auto',
                         fontSize: 13, color: '#f87171', border: '1px solid rgba(239,83,80,0.2)', whiteSpace: 'pre-wrap'
@@ -46,7 +46,7 @@ export class ErrorBoundary extends Component<Props, State> {
                             color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer'
                         }}
                     >
-                        Yeniden Yükle
+                        Reload / Yeniden Yükle
                     </button>
                 </div>
             )

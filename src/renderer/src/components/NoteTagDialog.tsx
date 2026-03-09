@@ -46,7 +46,7 @@ export function NoteTagDialog({ node, onClose }: Props): React.ReactElement {
 
     const handleSave = async () => {
         await saveNoteTags(node.absolutePath, tags)
-        setSuccessMessage(t.toastAppearanceUpdated)
+        setSuccessMessage(t.toastTagsSaved)
         onClose()
     }
 
@@ -82,7 +82,7 @@ export function NoteTagDialog({ node, onClose }: Props): React.ReactElement {
                             </div>
                             {tags.filter(t => !PREDEFINED_TAGS.includes(t)).length > 0 && (
                                 <div className="nt-custom-tags-container">
-                                    <h4 className="nt-custom-title">Custom:</h4>
+                                    <h4 className="nt-custom-title">{t.customTags}</h4>
                                     <div className="nt-tags-container">
                                         {tags.filter(t => !PREDEFINED_TAGS.includes(t)).map(tag => (
                                             <label key={tag} className="nt-tag-chip custom-chip">

@@ -60,7 +60,6 @@ export function CodeCompletionBuilder({ data, t, onSave }: Props): React.ReactEl
         const blanks = answersText.split('\n').map(b => b.trim()).filter(Boolean)
 
         if (blanks.length !== codeLines.length - 1) {
-            alert(`The number of blanks (___ or ____) in your code (${codeLines.length - 1}) must match the number of answers provided (${blanks.length}).`)
             return
         }
 
@@ -111,10 +110,7 @@ export function CodeCompletionBuilder({ data, t, onSave }: Props): React.ReactEl
 
         const handleCheck = (): void => {
             const isAllFilled = guesses.every(g => g.trim().length > 0)
-            if (!isAllFilled) {
-                alert(t.learnPleaseFillAll)
-                return
-            }
+            if (!isAllFilled) return
             setChecked(true)
             const isAllCorrect = guesses.every((g, i) => g.trim() === current.blanks[i].trim())
             onSave(updateItemProgress(data, current.id, isAllCorrect))

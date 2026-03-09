@@ -103,19 +103,19 @@ export function LearnOverview({ data, t, modeLabel, onSelectMode }: Props): Reac
             </div>
 
             {/* Mastery Stats */}
-            <h3 className="le-section-title">Mastery Status</h3>
+            <h3 className="le-section-title">{t.masteryStatus}</h3>
             <div className="le-overview-grid" style={{ marginBottom: 24, gridTemplateColumns: 'repeat(3, 1fr)' }}>
                 <div className="le-overview-stat" style={{ background: 'rgba(50, 200, 255, 0.1)', border: '1px solid rgba(50, 200, 255, 0.2)' }}>
                     <div className="le-overview-stat-value" style={{ color: '#80d8ff' }}>{newItems}</div>
-                    <div className="le-overview-stat-label">New Items</div>
+                    <div className="le-overview-stat-label">{t.newItems}</div>
                 </div>
                 <div className="le-overview-stat" style={{ background: 'rgba(255, 138, 128, 0.1)', border: '1px solid rgba(255, 138, 128, 0.2)' }}>
                     <div className="le-overview-stat-value" style={{ color: '#ff8a80' }}>{weakItems}</div>
-                    <div className="le-overview-stat-label">Weak Items (&lt;75%)</div>
+                    <div className="le-overview-stat-label">{t.weakItems}</div>
                 </div>
                 <div className="le-overview-stat" style={{ background: 'rgba(105, 240, 174, 0.1)', border: '1px solid rgba(105, 240, 174, 0.2)' }}>
                     <div className="le-overview-stat-value" style={{ color: '#69f0ae' }}>{strongItems}</div>
-                    <div className="le-overview-stat-label">Strong Items</div>
+                    <div className="le-overview-stat-label">{t.strongItems}</div>
                 </div>
             </div>
 

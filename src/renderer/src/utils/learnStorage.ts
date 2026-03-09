@@ -37,14 +37,14 @@ export function emptyLearnData(noteId: string, notePath: string): LearnEngineDat
 /** Recompute stats based on item arrays */
 export function recomputeStats(data: LearnEngineData): LearnEngineStats {
     const totalItems =
-        data.clozeItems.length +
-        data.imageOcclusionItems.length +
-        data.conceptMatchItems.length +
-        data.quizItems.length +
-        data.outputPredictionItems.length +
-        data.apiRecallItems.length +
-        data.realProblemItems.length +
-        data.codeCompletionItems.length +
+        (data.clozeItems || []).length +
+        (data.imageOcclusionItems || []).length +
+        (data.conceptMatchItems || []).length +
+        (data.quizItems || []).length +
+        (data.outputPredictionItems || []).length +
+        (data.apiRecallItems || []).length +
+        (data.realProblemItems || []).length +
+        (data.codeCompletionItems || []).length +
         (data.bugHuntItems || []).length +
         (data.refactorRecallItems || []).length
 

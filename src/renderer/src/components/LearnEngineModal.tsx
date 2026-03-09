@@ -92,7 +92,7 @@ export function LearnEngineModal({ noteNode, onClose }: Props): React.ReactEleme
                 bugHunt: t.learnBugHunt || 'Bug Hunt',
                 refactorRecall: t.learnRefactorRecall || 'Refactor Recall',
                 linkedLearning: t.learnLinkedLearning || 'Linked Learning',
-                mixedPractice: 'Mixed Practice',
+                mixedPractice: t.learnMixedPractice || 'Mixed Practice',
             }
             return map[mode]
         },

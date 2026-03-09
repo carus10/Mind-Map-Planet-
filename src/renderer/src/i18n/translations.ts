@@ -413,10 +413,6 @@ export const translations = {
     learnSessionComplete: 'Session Complete!',
     learnTotalAnswered: 'Total Answered',
     // Mixed Practice extra strings
-    normalMode: 'Normal',
-    onlyNewMode: 'Only New',
-    onlyWeakMode: 'Only Weak',
-    quickReviewMode: 'Quick Review',
     learnMPEndSession: 'End Session',
     learnMPNext: 'Next',
     learnMPTest: 'Test',
@@ -447,6 +443,22 @@ export const translations = {
     learnYourSolution: 'Your Solution',
     learnUntitled: 'Untitled',
     learnMasks: 'masks',
+    // Overview mastery
+    masteryStatus: 'Mastery Status',
+    newItems: 'New Items',
+    weakItems: 'Weak Items (<75%)',
+    strongItems: 'Strong Items',
+    // Tags & misc
+    customTags: 'Custom:',
+    toastTagsSaved: 'Tags saved',
+    expectedOutputLabel: 'Expected:',
+    modeNotAvailableInLinked: 'This mode is not available in linked sessions.',
+    skipBtn: 'Skip',
+    learnMixedPractice: 'Mixed Practice',
+    learnCCBlanksMismatch: 'The number of blanks in your code must match the number of answers provided.',
+    // Error boundary
+    errorBoundaryTitle: 'An error occurred',
+    errorBoundaryReload: 'Reload',
     // Help system
     learnHelpTitle: 'How to Use',
     learnHelp_overview: 'The **Overview** shows your learning statistics at a glance.\n\n• Total items across all modes\n• Distribution chart per mode\n• Recent items added\n\nUse the sidebar to switch between modes.',
@@ -875,10 +887,6 @@ export const translations = {
     learnSessionComplete: 'Oturum Tamamlandı!',
     learnTotalAnswered: 'Toplam Cevaplanan',
     // Mixed Practice extra strings
-    normalMode: 'Normal',
-    onlyNewMode: 'Sadece Yeni',
-    onlyWeakMode: 'Sadece Zayıf',
-    quickReviewMode: 'Hızlı Tekrar',
     learnMPEndSession: 'Oturumu Bitir',
     learnMPNext: 'Sonraki',
     learnMPTest: 'Test',
@@ -909,6 +917,22 @@ export const translations = {
     learnYourSolution: 'Çözümünüz',
     learnUntitled: 'Başlıksız',
     learnMasks: 'maske',
+    // Overview mastery
+    masteryStatus: 'Ustalık Durumu',
+    newItems: 'Yeni Öğeler',
+    weakItems: 'Zayıf Öğeler (<%75)',
+    strongItems: 'Güçlü Öğeler',
+    // Tags & misc
+    customTags: 'Özel:',
+    toastTagsSaved: 'Etiketler kaydedildi',
+    expectedOutputLabel: 'Beklenen:',
+    modeNotAvailableInLinked: 'Bu mod bağlantılı oturumlarda kullanılamaz.',
+    skipBtn: 'Atla',
+    learnMixedPractice: 'Karışık Çalışma',
+    learnCCBlanksMismatch: 'Koddaki boşluk sayısı ile sağlanan cevap sayısı eşleşmelidir.',
+    // Error boundary
+    errorBoundaryTitle: 'Bir hata oluştu',
+    errorBoundaryReload: 'Yeniden Yükle',
     // Help system
     learnHelpTitle: 'Nasıl Kullanılır',
     learnHelp_overview: '**Genel Bakış** öğrenme istatistiklerinizi bir bakışta gösterir.\n\n• Tüm modlardaki toplam öğe sayısı\n• Mod başına dağılım grafiği\n• Son eklenen öğeler\n\nModlar arasında geçiş yapmak için kenar çubuğunu kullanın.',

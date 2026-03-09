@@ -263,7 +263,7 @@ export function MixedPracticeBuilder({ data, t, onSave, availableModes }: Props)
                     <div style={{ marginTop: 12 }}>
                         <p className={isMatch ? 'le-badge-correct' : 'le-badge-incorrect'}>{isMatch ? `✓ ${t.learnCorrect}` : `✗ ${t.learnIncorrect}`}</p>
                         <div style={{ marginTop: 8 }}>
-                            <span style={{ fontSize: '0.82rem', color: 'rgba(200,190,255,0.5)' }}>Expected:</span>
+                            <span style={{ fontSize: '0.82rem', color: 'rgba(200,190,255,0.5)' }}>{t.expectedOutputLabel}</span>
                             <pre className="le-code-block" style={{ marginTop: 4 }}>{item.expectedOutput}</pre>
                         </div>
                         {item.explanation && <p style={{ fontSize: '0.85rem', color: 'rgba(200,190,255,0.6)', marginTop: 8 }}>{item.explanation}</p>}
@@ -412,10 +412,7 @@ export function MixedPracticeBuilder({ data, t, onSave, availableModes }: Props)
                 {!checked && !revealed && (
                     <button className="le-btn le-btn-primary" style={{ marginTop: 16 }} onClick={() => {
                         const isAllFilled = ccGuesses.every(g => g && g.trim().length > 0)
-                        if (!isAllFilled) {
-                            alert(t.learnMPFillBlanks)
-                            return
-                        }
+                        if (!isAllFilled) return
                         setChecked(true)
                         const allCorrect = ccGuesses.every((g, i) => g.trim() === item.blanks[i].trim())
                         onSave(updateItemProgress(data, item.id, allCorrect))

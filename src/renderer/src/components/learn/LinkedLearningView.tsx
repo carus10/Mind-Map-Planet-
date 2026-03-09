@@ -105,7 +105,7 @@ function getResolvedLinkedNotes(noteNode: HierarchyNode, hierarchy: HierarchyNod
                     if (link.isBroken || link.isAmbiguous) continue
                     const pointsHere =
                         (link.resolvedId && link.resolvedId === noteNode.id) ||
-                        (link.resolvedPath && link.resolvedPath === noteNode.absolutePath)
+                        (link.resolvedPath && (link.resolvedPath === noteNode.absolutePath || link.resolvedPath === noteNode.relativePath))
                     if (pointsHere) {
                         seen.add(node.id)
                         results.push({ node, linkRaw: `← ${node.name}`, isBroken: false, isAmbiguous: false })
@@ -717,9 +717,9 @@ function renderSessionItem(
             return (
                 <div className="le-card" style={{ textAlign: 'center' }}>
                     <p style={{ color: 'rgba(200,190,255,0.6)', padding: '40px 0' }}>
-                        <i>{mixedItem.mode}</i> mode is not available in linked sessions.
+                        <i>{mixedItem.mode}</i> {t.modeNotAvailableInLinked}
                     </p>
-                    <button className="le-btn le-btn-primary" onClick={() => onNext(false)}>Skip</button>
+                    <button className="le-btn le-btn-primary" onClick={() => onNext(false)}>{t.skipBtn}</button>
                 </div>
             )
     }

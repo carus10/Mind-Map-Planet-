@@ -1,18 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react'
 
-// Error catcher for debugging black screens
+// Error catcher for debugging black screens — reuses a single overlay
+const getOrCreateErrorOverlay = (): HTMLDivElement => {
+  let div = document.getElementById('__fatal_error_overlay') as HTMLDivElement | null;
+  if (!div) {
+    div = document.createElement('div');
+    div.id = '__fatal_error_overlay';
+    div.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(20,0,0,0.9);color:#ff8a80;z-index:999999;font-family:monospace;padding:2rem;overflow:auto;white-space:pre-wrap;';
+    document.body.appendChild(div);
+  }
+  return div;
+};
+
 window.addEventListener('error', (event) => {
-  const div = document.createElement('div');
-  div.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(20,0,0,0.9);color:#ff8a80;z-index:999999;font-family:monospace;padding:2rem;overflow:auto;white-space:pre-wrap;';
+  const div = getOrCreateErrorOverlay();
   div.innerHTML = `<h1>Fatal Error</h1><p>${event.error?.message}</p><pre>${event.error?.stack}</pre>`;
-  document.body.appendChild(div);
 });
 
 window.addEventListener('unhandledrejection', (event) => {
-  const div = document.createElement('div');
-  div.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(20,0,0,0.9);color:#ff8a80;z-index:999999;font-family:monospace;padding:2rem;overflow:auto;white-space:pre-wrap;';
+  const div = getOrCreateErrorOverlay();
   div.innerHTML = `<h1>Unhandled Promise Rejection</h1><p>${event.reason}</p><pre>${event.reason?.stack}</pre>`;
-  document.body.appendChild(div);
 });
 import { useMapStore } from './store/mapStore'
 import { WelcomeScreen } from './components/WelcomeScreen'
