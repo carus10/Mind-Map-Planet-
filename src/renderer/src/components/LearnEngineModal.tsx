@@ -13,7 +13,11 @@ import { OutputPredictionBuilder } from './learn/OutputPredictionBuilder'
 import { ApiRecallBuilder } from './learn/ApiRecallBuilder'
 import { RealProblemBuilder } from './learn/RealProblemBuilder'
 import { CodeCompletionBuilder } from './learn/CodeCompletionBuilder'
+import { BugHuntBuilder } from './learn/BugHuntBuilder'
+import { RefactorRecallBuilder } from './learn/RefactorRecallBuilder'
+import { LinkedLearningView } from './learn/LinkedLearningView'
 import { MixedPracticeBuilder } from './learn/MixedPracticeBuilder'
+import { ConfirmProvider } from './learn/ConfirmDialog'
 import './LearnEngineModal.css'
 
 interface Props {
@@ -31,6 +35,9 @@ const MODES: LearnMode[] = [
     'apiRecall',
     'realProblem',
     'codeCompletion',
+    'bugHunt',
+    'refactorRecall',
+    'linkedLearning',
     'mixedPractice',
 ]
 
@@ -44,15 +51,19 @@ const MODE_ICONS: Record<LearnMode, string> = {
     apiRecall: '📚',
     realProblem: '🧩',
     codeCompletion: '📝',
+    bugHunt: '🐛',
+    refactorRecall: '♻️',
+    linkedLearning: '📖',
     mixedPractice: '🔀',
 }
 
 export function LearnEngineModal({ noteNode, onClose }: Props): React.ReactElement {
-    const { language } = useMapStore((s) => ({ language: s.language }))
+    const { language, hierarchy } = useMapStore((s) => ({ language: s.language, hierarchy: s.hierarchy }))
     const t = translations[language] as any
 
     const [activeMode, setActiveMode] = useState<LearnMode>('overview')
     const [data, setData] = useState<LearnEngineData>(emptyLearnData(noteNode.id, noteNode.absolutePath))
+    const [showHelp, setShowHelp] = useState(false)
     const [tags, setTags] = useState<string[]>([])
     const [loading, setLoading] = useState(true)
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saved'>('idle')
@@ -61,7 +72,8 @@ export function LearnEngineModal({ noteNode, onClose }: Props): React.ReactEleme
     const availableModes = React.useMemo(() => {
         const isCodeRelated = tags.some(t => ['code', 'backend', 'frontend', 'algorithm', 'api'].includes(t.toLowerCase()))
         if (isCodeRelated) return MODES
-        return MODES.filter(m => !['outputPrediction', 'apiRecall', 'realProblem', 'codeCompletion'].includes(m))
+        // Hide code-specific modes but keep linkedLearning always visible
+        return MODES.filter(m => !['outputPrediction', 'apiRecall', 'realProblem', 'codeCompletion', 'bugHunt', 'refactorRecall'].includes(m))
     }, [tags])
 
     // Mode label lookup
@@ -77,6 +89,9 @@ export function LearnEngineModal({ noteNode, onClose }: Props): React.ReactEleme
                 apiRecall: t.learnApiRecall || 'API Recall',
                 realProblem: t.learnRealProblem || 'Real Problem',
                 codeCompletion: t.learnCodeCompletion || 'Code Completion',
+                bugHunt: t.learnBugHunt || 'Bug Hunt',
+                refactorRecall: t.learnRefactorRecall || 'Refactor Recall',
+                linkedLearning: t.learnLinkedLearning || 'Linked Learning',
                 mixedPractice: 'Mixed Practice',
             }
             return map[mode]
@@ -98,7 +113,7 @@ export function LearnEngineModal({ noteNode, onClose }: Props): React.ReactEleme
 
                 // If the current active mode is not available in the filtered modes, fallback to overview
                 const isCodeRelated = loadedTags.some(t => ['code', 'backend', 'frontend', 'algorithm', 'api'].includes(t.toLowerCase()))
-                const currentRestricted = ['outputPrediction', 'apiRecall', 'realProblem', 'codeCompletion'].includes(activeMode)
+                const currentRestricted = ['outputPrediction', 'apiRecall', 'realProblem', 'codeCompletion', 'bugHunt', 'refactorRecall'].includes(activeMode)
                 if (currentRestricted && !isCodeRelated) {
                     setActiveMode('overview')
                 }
@@ -111,14 +126,26 @@ export function LearnEngineModal({ noteNode, onClose }: Props): React.ReactEleme
         }
     }, [noteNode.id, noteNode.absolutePath])
 
-    // Escape to close
+    // Escape to close (skip if typing in input/textarea)
     useEffect(() => {
         const handler = (e: KeyboardEvent): void => {
-            if (e.key === 'Escape') onClose()
+            if (e.key === 'Escape') {
+                const tag = (e.target as HTMLElement)?.tagName
+                if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable) {
+                    // Blur the field instead of closing modal
+                    ; (e.target as HTMLElement).blur()
+                    return
+                }
+                if (showHelp) {
+                    setShowHelp(false)
+                    return
+                }
+                onClose()
+            }
         }
         window.addEventListener('keydown', handler)
         return () => window.removeEventListener('keydown', handler)
-    }, [onClose])
+    }, [onClose, showHelp])
 
     // Save handler (used by child components)
     const handleSave = useCallback(
@@ -159,6 +186,12 @@ export function LearnEngineModal({ noteNode, onClose }: Props): React.ReactEleme
                 return <RealProblemBuilder data={data} t={t} onSave={handleSave} />
             case 'codeCompletion':
                 return <CodeCompletionBuilder data={data} t={t} onSave={handleSave} />
+            case 'bugHunt':
+                return <BugHuntBuilder data={data} t={t} onSave={handleSave} />
+            case 'refactorRecall':
+                return <RefactorRecallBuilder data={data} t={t} onSave={handleSave} />
+            case 'linkedLearning':
+                return <LinkedLearningView data={data} t={t} onSave={handleSave} noteNode={noteNode} hierarchy={hierarchy?.countries || []} />
             case 'mixedPractice':
                 return <MixedPracticeBuilder data={data} t={t} onSave={handleSave} availableModes={availableModes} />
             default:
@@ -169,48 +202,86 @@ export function LearnEngineModal({ noteNode, onClose }: Props): React.ReactEleme
     // Sidebar collapsed on narrow viewport is handled via CSS
 
     return (
-        <div className="le-overlay">
-            <div className="le-container">
-                {/* ── Top Bar ── */}
-                <header className="le-topbar">
-                    <button className="le-topbar-back" onClick={onClose} title={t.learnClose}>
-                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="19" y1="12" x2="5" y2="12" />
-                            <polyline points="12 19 5 12 12 5" />
-                        </svg>
-                    </button>
-                    <span className="le-topbar-note">{noteNode.name}</span>
-                    <span className="le-topbar-mode">{modeLabel(activeMode)}</span>
-                    {saveStatus === 'saved' && <span className="le-topbar-saved">✓ {t.learnSaved}</span>}
-                    <div className="le-topbar-spacer" />
-                    <button className="le-topbar-close" onClick={onClose} title={t.learnClose}>
-                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                    </button>
-                </header>
+        <ConfirmProvider>
+            <div className="le-overlay" onPointerDown={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+                <div className="le-container">
+                    {/* ── Top Bar ── */}
+                    <header className="le-topbar">
+                        <button className="le-topbar-back" onClick={onClose} title={t.learnClose}>
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="19" y1="12" x2="5" y2="12" />
+                                <polyline points="12 19 5 12 12 5" />
+                            </svg>
+                        </button>
+                        <span className="le-topbar-note">{noteNode.name}</span>
+                        <span className="le-topbar-mode">{modeLabel(activeMode)}</span>
+                        {saveStatus === 'saved' && <span className="le-topbar-saved">✓ {t.learnSaved}</span>}
+                        <button
+                            className="le-help-btn"
+                            onClick={() => setShowHelp(!showHelp)}
+                            title={t.learnHelpTitle}
+                        >
+                            ?
+                        </button>
+                        <div className="le-topbar-spacer" />
+                        <button className="le-topbar-close" onClick={onClose} title={t.learnClose}>
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </button>
+                    </header>
 
-                <div className="le-body">
-                    {/* ── Sidebar ── */}
-                    <nav className="le-sidebar">
-                        {availableModes.map((mode) => (
-                            <button
-                                key={mode}
-                                className={`le-sidebar-item ${activeMode === mode ? 'active' : ''}`}
-                                onClick={() => setActiveMode(mode)}
-                                title={modeLabel(mode)}
-                            >
-                                <span className="le-sidebar-icon">{MODE_ICONS[mode]}</span>
-                                <span className="le-sidebar-label">{modeLabel(mode)}</span>
-                            </button>
-                        ))}
-                    </nav>
+                    <div className="le-body">
+                        {/* ── Sidebar ── */}
+                        <nav className="le-sidebar">
+                            {availableModes.map((mode) => (
+                                <button
+                                    key={mode}
+                                    className={`le-sidebar-item ${activeMode === mode ? 'active' : ''}`}
+                                    onClick={() => setActiveMode(mode)}
+                                    title={modeLabel(mode)}
+                                >
+                                    <span className="le-sidebar-icon">{MODE_ICONS[mode]}</span>
+                                    <span className="le-sidebar-label">{modeLabel(mode)}</span>
+                                </button>
+                            ))}
+                        </nav>
 
-                    {/* ── Content ── */}
-                    <main className="le-content">{renderContent()}</main>
+                        {/* ── Content ── */}
+                        <main className="le-content">{renderContent()}</main>
+                    </div>
+
+                    {/* ── Help popup ── */}
+                    {showHelp && (
+                        <div className="le-help-overlay" onClick={() => setShowHelp(false)}>
+                            <div className="le-help-popup" onClick={(e) => e.stopPropagation()}>
+                                <div className="le-help-popup-header">
+                                    <span className="le-help-popup-icon">{MODE_ICONS[activeMode]}</span>
+                                    <h3>{t.learnHelpTitle}: {modeLabel(activeMode)}</h3>
+                                    <button className="le-help-popup-close" onClick={() => setShowHelp(false)}>✕</button>
+                                </div>
+                                <div className="le-help-popup-body">
+                                    {(t[`learnHelp_${activeMode}`] || '').split('\\n').map((line: string, i: number) => {
+                                        if (!line.trim()) return <br key={i} />
+                                        // Simple markdown bold rendering
+                                        const parts = line.split(/\*\*(.*?)\*\*/g)
+                                        return (
+                                            <p key={i} style={{ margin: '4px 0', lineHeight: 1.7 }}>
+                                                {parts.map((part, j) =>
+                                                    j % 2 === 1
+                                                        ? <strong key={j} style={{ color: '#c5b8ff' }}>{part}</strong>
+                                                        : <span key={j}>{part}</span>
+                                                )}
+                                            </p>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
-        </div>
+        </ConfirmProvider>
     )
 }

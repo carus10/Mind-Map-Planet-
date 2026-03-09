@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import type { LearnEngineData, CodeCompletionItem } from '../../types/learn'
 import type { translations } from '../../i18n/translations'
 import { generateId, updateItemProgress } from '../../utils/learnStorage'
+import { useConfirm } from './ConfirmDialog'
 
 interface Props {
     data: LearnEngineData
@@ -27,6 +28,7 @@ export function CodeCompletionBuilder({ data, t, onSave }: Props): React.ReactEl
     const [answersText, setAnswersText] = useState('')
     const [explanation, setExplanation] = useState('')
 
+    const confirmAsync = useConfirm()
     const items = data.codeCompletionItems || []
 
     const resetForm = (): void => {
@@ -90,7 +92,7 @@ export function CodeCompletionBuilder({ data, t, onSave }: Props): React.ReactEl
     }
 
     const handleDelete = async (id: string): Promise<void> => {
-        if (!confirm(t.learnDeleteConfirm)) return
+        if (!(await confirmAsync(t.learnDeleteConfirm))) return
         await onSave({ ...data, codeCompletionItems: data.codeCompletionItems.filter((i) => i.id !== id) })
     }
 

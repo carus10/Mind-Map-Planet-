@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react'
 import type { LearnEngineData, ConceptMatchItem, ConceptMatchPair } from '../../types/learn'
 import type { translations } from '../../i18n/translations'
 import { generateId } from '../../utils/learnStorage'
+import { useConfirm } from './ConfirmDialog'
 
 interface Props {
     data: LearnEngineData
@@ -24,7 +25,8 @@ export function ConceptMatchBuilder({ data, t, onSave }: Props): React.ReactElem
     const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({})
     const [checked, setChecked] = useState(false)
 
-    const items = data.conceptMatchItems
+    const confirmAsync = useConfirm()
+    const items = data.conceptMatchItems || []
 
     const currentStudyItem = items.length > 0 ? items[studyIdx % items.length] : null
     // Shuffle right-side options deterministically per card
@@ -83,7 +85,7 @@ export function ConceptMatchBuilder({ data, t, onSave }: Props): React.ReactElem
     }
 
     const handleDelete = async (id: string): Promise<void> => {
-        if (!confirm(t.learnDeleteConfirm)) return
+        if (!(await confirmAsync(t.learnDeleteConfirm))) return
         await onSave({ ...data, conceptMatchItems: data.conceptMatchItems.filter((i) => i.id !== id) })
     }
 

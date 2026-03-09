@@ -19,6 +19,8 @@ type MixedItemType =
     | { mode: 'apiRecall', item: any }
     | { mode: 'realProblem', item: any }
     | { mode: 'codeCompletion', item: any }
+    | { mode: 'bugHunt', item: any }
+    | { mode: 'refactorRecall', item: any }
 
 export function MixedPracticeBuilder({ data, t, onSave, availableModes }: Props): React.ReactElement {
     const [isStudying, setIsStudying] = useState(false)
@@ -60,6 +62,12 @@ export function MixedPracticeBuilder({ data, t, onSave, availableModes }: Props)
         }
         if (availableModes.includes('codeCompletion')) {
             (data.codeCompletionItems || []).forEach(i => items.push({ mode: 'codeCompletion', item: i }))
+        }
+        if (availableModes.includes('bugHunt')) {
+            (data.bugHuntItems || []).forEach(i => items.push({ mode: 'bugHunt', item: i }))
+        }
+        if (availableModes.includes('refactorRecall')) {
+            (data.refactorRecallItems || []).forEach(i => items.push({ mode: 'refactorRecall', item: i }))
         }
 
         // Filter based on study mode
@@ -115,12 +123,12 @@ export function MixedPracticeBuilder({ data, t, onSave, availableModes }: Props)
             <div className="le-builder">
                 <div className="le-builder-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                        <h2>Mixed Practice</h2>
+                        <h2>{t.mixedPracticeMode}</h2>
                         <select className="le-input" style={{ width: 140, padding: '4px 8px' }} value={studyMode} onChange={(e) => setStudyMode(e.target.value as any)}>
-                            <option value="normal">{t.normalMode || 'Normal'}</option>
-                            <option value="onlyNew">{t.onlyNewMode || 'Only New'}</option>
-                            <option value="onlyWeak">{t.onlyWeakMode || 'Only Weak'}</option>
-                            <option value="quickReview">{t.quickReviewMode || 'Quick Review'}</option>
+                            <option value="normal">{t.normalMode}</option>
+                            <option value="onlyNew">{t.onlyNewMode}</option>
+                            <option value="onlyWeak">{t.onlyWeakMode}</option>
+                            <option value="quickReview">{t.quickReviewMode}</option>
                         </select>
                     </div>
                     <div className="le-builder-actions">
@@ -179,7 +187,7 @@ export function MixedPracticeBuilder({ data, t, onSave, availableModes }: Props)
                 {item.hint && <p style={{ fontSize: '0.85rem', color: 'rgba(200,190,255,0.6)', marginTop: 8 }}>{t.learnHint}: {item.hint}</p>}
 
                 <div style={{ marginTop: 24 }}>
-                    <label className="le-label">Your Answer</label>
+                    <label className="le-label">{t.learnYourAnswer}</label>
                     <input className="le-input" style={{ fontSize: '1.1rem', padding: '12px 16px' }} value={guess} onChange={(e) => setGuess(e.target.value)} disabled={revealed} autoFocus onKeyDown={(e) => { if (e.key === 'Enter' && !revealed && guess.trim()) setRevealed(true) }} />
                 </div>
 
@@ -189,12 +197,12 @@ export function MixedPracticeBuilder({ data, t, onSave, availableModes }: Props)
                             setRevealed(true)
                             const isCorrect = guess.trim().toLowerCase() === item.answer.trim().toLowerCase()
                             onSave(updateItemProgress(data, item.id, isCorrect))
-                        }} disabled={!guess.trim()}>Check Answer</button>
+                        }} disabled={!guess.trim()}>{t.learnMPCheckAnswer}</button>
                     ) : (
                         <div>
                             <p className={isMatch ? 'le-badge-correct' : 'le-badge-incorrect'}>{isMatch ? `✓ ${t.learnCorrect}` : `✗ ${t.learnIncorrect}`}</p>
-                            {!isMatch && <p style={{ marginTop: 8, color: '#e8eaf6' }}>Correct Answer: <span style={{ color: '#69f0ae', fontWeight: 600 }}>{item.answer}</span></p>}
-                            <button className="le-btn le-btn-success" style={{ marginTop: 16 }} onClick={handleNext}>Next Item</button>
+                            {!isMatch && <p style={{ marginTop: 8, color: '#e8eaf6' }}>{t.learnMPCorrectAnswer}: <span style={{ color: '#69f0ae', fontWeight: 600 }}>{item.answer}</span></p>}
+                            <button className="le-btn le-btn-success" style={{ marginTop: 16 }} onClick={handleNext}>{t.learnMPNextItem}</button>
                         </div>
                     )}
                 </div>
@@ -250,7 +258,7 @@ export function MixedPracticeBuilder({ data, t, onSave, availableModes }: Props)
                         setRevealed(true)
                         const isCorrect = guess.trim() === item.expectedOutput.trim()
                         onSave(updateItemProgress(data, item.id, isCorrect))
-                    }} disabled={!guess.trim()}>Check Answer</button>
+                    }} disabled={!guess.trim()}>{t.learnMPCheckAnswer}</button>
                 ) : (
                     <div style={{ marginTop: 12 }}>
                         <p className={isMatch ? 'le-badge-correct' : 'le-badge-incorrect'}>{isMatch ? `✓ ${t.learnCorrect}` : `✗ ${t.learnIncorrect}`}</p>
@@ -259,7 +267,7 @@ export function MixedPracticeBuilder({ data, t, onSave, availableModes }: Props)
                             <pre className="le-code-block" style={{ marginTop: 4 }}>{item.expectedOutput}</pre>
                         </div>
                         {item.explanation && <p style={{ fontSize: '0.85rem', color: 'rgba(200,190,255,0.6)', marginTop: 8 }}>{item.explanation}</p>}
-                        <button className="le-btn le-btn-success" style={{ marginTop: 12 }} onClick={handleNext}>Next Item</button>
+                        <button className="le-btn le-btn-success" style={{ marginTop: 12 }} onClick={handleNext}>{t.learnMPNextItem}</button>
                     </div>
                 )}
             </div>
@@ -271,24 +279,24 @@ export function MixedPracticeBuilder({ data, t, onSave, availableModes }: Props)
             <div className="le-card">
                 <p style={{ fontSize: '1.05rem', fontWeight: 500, color: '#e8eaf6', marginBottom: 8 }}>{item.usageDescription}</p>
                 {!revealed ? (
-                    <button className="le-btn le-btn-primary" style={{ marginTop: 16 }} onClick={() => setRevealed(true)}>Reveal API</button>
+                    <button className="le-btn le-btn-primary" style={{ marginTop: 16 }} onClick={() => setRevealed(true)}>{t.learnMPRevealApi}</button>
                 ) : (
                     <div style={{ marginTop: 16 }}>
-                        <div className="le-code-lang">API Name</div>
+                        <div className="le-code-lang">{t.learnMPApiName}</div>
                         <pre className="le-code-block" style={{ fontSize: '1.2rem', color: '#69f0ae' }}>{item.apiName}</pre>
-                        {item.signature && <div style={{ marginTop: 12 }}><div className="le-code-lang">Signature</div><pre className="le-code-block">{item.signature}</pre></div>}
-                        {item.example && <div style={{ marginTop: 12 }}><div className="le-code-lang">Example</div><pre className="le-code-block">{item.example}</pre></div>}
+                        {item.signature && <div style={{ marginTop: 12 }}><div className="le-code-lang">{t.learnMPSignature}</div><pre className="le-code-block">{item.signature}</pre></div>}
+                        {item.example && <div style={{ marginTop: 12 }}><div className="le-code-lang">{t.learnMPExample}</div><pre className="le-code-block">{item.example}</pre></div>}
                         {item.returnInfo && <p style={{ fontSize: '0.85rem', color: 'rgba(200,190,255,0.7)', marginTop: 12 }}>{t.learnARReturn}: {item.returnInfo}</p>}
                         <div style={{ marginTop: 24, display: 'flex', gap: 8, alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.85rem', color: 'rgba(200,190,255,0.5)' }}>Did you remember it?</span>
+                            <span style={{ fontSize: '0.85rem', color: 'rgba(200,190,255,0.5)' }}>{t.learnMPDidRemember}</span>
                             <button className="le-btn le-btn-success" onClick={() => {
                                 onSave(updateItemProgress(data, item.id, true))
                                 handleNext()
-                            }}>Yes</button>
+                            }}>{t.learnMPYes}</button>
                             <button className="le-btn le-btn-danger" onClick={() => {
                                 onSave(updateItemProgress(data, item.id, false))
                                 handleNext()
-                            }}>No</button>
+                            }}>{t.learnMPNo}</button>
                         </div>
                     </div>
                 )}
@@ -308,7 +316,7 @@ export function MixedPracticeBuilder({ data, t, onSave, availableModes }: Props)
                 {item.hints && item.hints.length > 0 && (
                     <div style={{ marginTop: 24 }}>
                         <button className="le-btn le-btn-sm" onClick={() => setSelectedOption(selectedOption === null ? 0 : selectedOption + 1)} disabled={selectedOption !== null && selectedOption >= item.hints.length - 1}>
-                            Show Hint ({selectedOption === null ? 0 : selectedOption + 1}/{item.hints.length})
+                            {t.learnMPShowHint} ({selectedOption === null ? 0 : selectedOption + 1}/{item.hints.length})
                         </button>
                         {selectedOption !== null && (
                             <div style={{ marginTop: 12, padding: 12, borderRadius: 6, background: 'rgba(255,255,0,0.05)', borderLeft: '3px solid rgba(255,210,0,0.5)' }}>
@@ -320,10 +328,10 @@ export function MixedPracticeBuilder({ data, t, onSave, availableModes }: Props)
 
                 <div style={{ marginTop: 24, padding: 16, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                     {!revealed ? (
-                        <button className="le-btn le-btn-primary" onClick={() => setRevealed(true)}>Reveal Expected Approach</button>
+                        <button className="le-btn le-btn-primary" onClick={() => setRevealed(true)}>{t.learnMPRevealApproach}</button>
                     ) : (
                         <div>
-                            <span style={{ fontSize: '0.8rem', color: 'rgba(200,190,255,0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>Expected Approach</span>
+                            <span style={{ fontSize: '0.8rem', color: 'rgba(200,190,255,0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>{t.learnMPExpectedApproach}</span>
                             <p style={{ fontSize: '0.95rem', color: '#69f0ae', marginTop: 8, whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{item.expectedApproach}</p>
                             {item.solutionNotes && (
                                 <div style={{ marginTop: 16, padding: '12px 14px', borderRadius: 8, background: 'rgba(100,150,255,0.1)', color: '#b3e5fc', fontSize: '0.85rem' }}>
@@ -334,11 +342,11 @@ export function MixedPracticeBuilder({ data, t, onSave, availableModes }: Props)
                                 <button className="le-btn le-btn-success" onClick={() => {
                                     onSave(updateItemProgress(data, item.id, true))
                                     handleNext()
-                                }}>Solved Internally (Correct)</button>
+                                }}>{t.learnMPSolvedCorrect}</button>
                                 <button className="le-btn le-btn-danger" onClick={() => {
                                     onSave(updateItemProgress(data, item.id, false))
                                     handleNext()
-                                }}>Failed / Needed Hint</button>
+                                }}>{t.learnMPFailedHint}</button>
                             </div>
                         </div>
                     )}
@@ -395,7 +403,7 @@ export function MixedPracticeBuilder({ data, t, onSave, availableModes }: Props)
                             </p>
                         ) : (
                             <p className="le-badge-incorrect" style={{ fontSize: '1.1rem', marginBottom: 12 }}>
-                                ✗ Some answers are incorrect. Try again!
+                                ✗ {t.learnMPSomeIncorrect}
                             </p>
                         )}
                     </div>
@@ -405,14 +413,14 @@ export function MixedPracticeBuilder({ data, t, onSave, availableModes }: Props)
                     <button className="le-btn le-btn-primary" style={{ marginTop: 16 }} onClick={() => {
                         const isAllFilled = ccGuesses.every(g => g && g.trim().length > 0)
                         if (!isAllFilled) {
-                            alert('Please fill in all blanks before checking.')
+                            alert(t.learnMPFillBlanks)
                             return
                         }
                         setChecked(true)
                         const allCorrect = ccGuesses.every((g, i) => g.trim() === item.blanks[i].trim())
                         onSave(updateItemProgress(data, item.id, allCorrect))
                     }} disabled={ccGuesses.some(g => !g || !g.trim())}>
-                        Check Code
+                        {t.learnMPCheckCode}
                     </button>
                 )}
 
@@ -422,10 +430,10 @@ export function MixedPracticeBuilder({ data, t, onSave, availableModes }: Props)
                             setChecked(false)
                             setCcGuesses(Array(item.blanks.length).fill(''))
                         }}>
-                            Try Again
+                            {t.learnMPTryAgain}
                         </button>
                         <button className="le-btn le-btn-danger" onClick={() => setRevealed(true)}>
-                            Show Answers
+                            {t.learnMPShowAnswers}
                         </button>
                     </div>
                 )}
@@ -438,8 +446,88 @@ export function MixedPracticeBuilder({ data, t, onSave, availableModes }: Props)
                             </p>
                         )}
                         <button className="le-btn le-btn-success" onClick={handleNext}>
-                            Next Item
+                            {t.learnMPNextItem}
                         </button>
+                    </div>
+                )}
+            </div>
+        )
+    }
+
+    const renderBugHunt = (item: any) => {
+        return (
+            <div className="le-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#b39ddb' }}>{item.title}</h3>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <span className="le-code-lang">{item.language}</span>
+                        {item.difficulty && <span style={{ fontSize: '0.75rem', padding: '2px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.1)' }}>{item.difficulty}</span>}
+                    </div>
+                </div>
+                <label className="le-label" style={{ color: '#ff8a80' }}>{t.learnBHWhatsWrong}</label>
+                <pre className="le-code-block" style={{ whiteSpace: 'pre-wrap' }}>{item.buggyCode}</pre>
+                {!revealed ? (
+                    <button className="le-btn le-btn-primary" style={{ marginTop: 12 }} onClick={() => setRevealed(true)}>{t.learnReveal}</button>
+                ) : (
+                    <div style={{ marginTop: 16 }}>
+                        <div style={{ padding: 16, borderRadius: 8, background: 'rgba(255, 138, 128, 0.1)', border: '1px solid rgba(255, 138, 128, 0.3)', marginBottom: 16 }}>
+                            <label className="le-label" style={{ color: '#ff8a80' }}>{t.learnExpectedIssue}</label>
+                            <p style={{ color: '#e8eaf6', whiteSpace: 'pre-wrap', margin: 0 }}>{item.expectedIssue}</p>
+                        </div>
+                        {item.explanation && <p style={{ fontSize: '0.85rem', color: 'rgba(200,190,255,0.6)', marginBottom: 16 }}>{item.explanation}</p>}
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                            <button className="le-btn le-btn-success" onClick={() => {
+                                onSave(updateItemProgress(data, item.id, true))
+                                handleNext()
+                            }}>{t.learnIssueFound}</button>
+                            <button className="le-btn le-btn-danger" onClick={() => {
+                                onSave(updateItemProgress(data, item.id, false))
+                                handleNext()
+                            }}>{t.learnIssueMissed}</button>
+                        </div>
+                    </div>
+                )}
+            </div>
+        )
+    }
+
+    const renderRefactorRecall = (item: any) => {
+        return (
+            <div className="le-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#b39ddb' }}>{item.title}</h3>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <span className="le-code-lang">{item.language}</span>
+                        {item.difficulty && <span style={{ fontSize: '0.75rem', padding: '2px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.1)' }}>{item.difficulty}</span>}
+                    </div>
+                </div>
+                <label className="le-label" style={{ color: '#ffab40' }}>{t.learnRRHowImprove}</label>
+                <pre className="le-code-block" style={{ whiteSpace: 'pre-wrap' }}>{item.originalCode}</pre>
+                {!revealed ? (
+                    <button className="le-btn le-btn-primary" style={{ marginTop: 12 }} onClick={() => setRevealed(true)}>{t.learnRRShowRefactored}</button>
+                ) : (
+                    <div style={{ marginTop: 16 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+                            <div>
+                                <label className="le-label" style={{ color: '#ff8a80' }}>{t.learnOriginalCode}</label>
+                                <pre className="le-code-block" style={{ whiteSpace: 'pre-wrap', borderLeft: '3px solid rgba(255, 138, 128, 0.5)' }}>{item.originalCode}</pre>
+                            </div>
+                            <div>
+                                <label className="le-label" style={{ color: '#69f0ae' }}>{t.learnExpectedRefactor}</label>
+                                <pre className="le-code-block" style={{ whiteSpace: 'pre-wrap', borderLeft: '3px solid rgba(105, 240, 174, 0.5)' }}>{item.expectedRefactor}</pre>
+                            </div>
+                        </div>
+                        {item.explanation && <p style={{ fontSize: '0.85rem', color: 'rgba(200,190,255,0.6)', marginBottom: 16 }}>{item.explanation}</p>}
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                            <button className="le-btn le-btn-success" onClick={() => {
+                                onSave(updateItemProgress(data, item.id, true))
+                                handleNext()
+                            }}>{t.learnIssueFound}</button>
+                            <button className="le-btn le-btn-danger" onClick={() => {
+                                onSave(updateItemProgress(data, item.id, false))
+                                handleNext()
+                            }}>{t.learnIssueMissed || 'I Missed It'}</button>
+                        </div>
                     </div>
                 )}
             </div>
@@ -457,17 +545,19 @@ export function MixedPracticeBuilder({ data, t, onSave, availableModes }: Props)
             case 'apiRecall': return renderApiRecall(item)
             case 'realProblem': return renderRealProblem(item)
             case 'codeCompletion': return renderCodeCompletion(item)
+            case 'bugHunt': return renderBugHunt(item)
+            case 'refactorRecall': return renderRefactorRecall(item)
             case 'conceptMatch':
             case 'imageOcclusion':
                 return (
                     <div className="le-card" style={{ textAlign: 'center' }}>
                         <p style={{ color: 'rgba(200,190,255,0.6)', padding: '40px 0' }}>
-                            <i>{type}</i> mode is too complex to inline here for now. Please test it in its respective normal mode!
+                            {t.learnMPSkipMode}
                         </p>
-                        <button className="le-btn le-btn-primary" onClick={handleNext}>Skip</button>
+                        <button className="le-btn le-btn-primary" onClick={handleNext}>{t.learnMPSkip}</button>
                     </div>
                 )
-            default: return <div>Unknown item type</div>
+            default: return <div>{t.learnMPUnknown}</div>
         }
     }
 
@@ -476,20 +566,20 @@ export function MixedPracticeBuilder({ data, t, onSave, availableModes }: Props)
     return (
         <div className="le-builder">
             <div className="le-builder-header">
-                <h2>Mixed Practice ({currentIndex + 1} / {allItems.length})</h2>
+                <h2>{t.mixedPracticeMode} ({currentIndex + 1} / {allItems.length})</h2>
                 <div className="le-builder-actions">
                     <button className="le-btn le-btn-secondary" onClick={() => setIsStudying(false)}>
-                        {'End Session'}
+                        {t.learnMPEndSession}
                     </button>
                     <button className="le-btn le-btn-primary" onClick={handleNext}>
-                        {'Next'}
+                        {t.learnMPNext}
                     </button>
                 </div>
             </div>
             <div className="le-editor-section">
                 <div style={{ marginBottom: 16 }}>
                     <span className="le-badge" style={{ background: 'rgba(120,80,220,0.3)', color: '#b39ddb', padding: '4px 8px', borderRadius: 4, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: 1 }}>
-                        {currentMixedItem.mode} Test
+                        {currentMixedItem.mode} {t.learnMPTest}
                     </span>
                 </div>
                 {renderStudyItem()}

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import type { LearnEngineData, RealProblemItem } from '../../types/learn'
 import type { translations } from '../../i18n/translations'
 import { generateId } from '../../utils/learnStorage'
+import { useConfirm } from './ConfirmDialog'
 
 interface Props {
     data: LearnEngineData
@@ -27,7 +28,8 @@ export function RealProblemBuilder({ data, t, onSave }: Props): React.ReactEleme
     const [solutionNotes, setSolutionNotes] = useState('')
     const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium')
 
-    const items = data.realProblemItems
+    const confirmAsync = useConfirm()
+    const items = data.realProblemItems || []
 
     const resetForm = (): void => {
         setTitle('')
@@ -67,7 +69,7 @@ export function RealProblemBuilder({ data, t, onSave }: Props): React.ReactEleme
     }
 
     const handleDelete = async (id: string): Promise<void> => {
-        if (!confirm(t.learnDeleteConfirm)) return
+        if (!(await confirmAsync(t.learnDeleteConfirm))) return
         await onSave({ ...data, realProblemItems: data.realProblemItems.filter((i) => i.id !== id) })
     }
 
@@ -148,7 +150,7 @@ export function RealProblemBuilder({ data, t, onSave }: Props): React.ReactEleme
                         <div style={{ marginTop: 16 }}>
                             {userSolution.trim() && (
                                 <div style={{ marginBottom: 16 }}>
-                                    <h4 style={{ fontSize: '0.88rem', color: '#c5b8ff', marginBottom: 8 }}>Your Solution</h4>
+                                    <h4 style={{ fontSize: '0.88rem', color: '#c5b8ff', marginBottom: 8 }}>{t.learnYourSolution}</h4>
                                     <div style={{ padding: 14, background: 'rgba(20,20,40,0.6)', borderRadius: 8, whiteSpace: 'pre-wrap', color: '#e8eaf6', fontSize: '0.88rem', lineHeight: 1.6 }}>
                                         {userSolution}
                                     </div>

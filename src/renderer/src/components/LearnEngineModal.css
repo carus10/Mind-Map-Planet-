@@ -602,3 +602,215 @@
         padding: 16px;
     }
 }
+
+/* ── Help button ── */
+.le-help-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid rgba(120, 80, 220, 0.4);
+    background: rgba(120, 80, 220, 0.15);
+    color: #c5b8ff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-left: 8px;
+    flex-shrink: 0;
+}
+
+.le-help-btn:hover {
+    background: rgba(120, 80, 220, 0.35);
+    border-color: rgba(120, 80, 220, 0.7);
+    transform: scale(1.1);
+    box-shadow: 0 0 12px rgba(120, 80, 220, 0.3);
+}
+
+/* ── Help overlay ── */
+.le-help-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    animation: leHelpFadeIn 0.2s ease;
+}
+
+@keyframes leHelpFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ── Help popup ── */
+.le-help-popup {
+    background: linear-gradient(135deg, rgba(18, 14, 40, 0.97), rgba(28, 22, 60, 0.97));
+    border: 1px solid rgba(120, 80, 220, 0.35);
+    border-radius: 16px;
+    width: 480px;
+    max-width: 90vw;
+    max-height: 70vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(120, 80, 220, 0.15);
+    animation: leHelpPopIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes leHelpPopIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.le-help-popup-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(120, 80, 220, 0.2);
+}
+
+.le-help-popup-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: #e8eaf6;
+    flex: 1;
+    font-weight: 600;
+}
+
+.le-help-popup-icon {
+    font-size: 1.3rem;
+}
+
+.le-help-popup-close {
+    background: none;
+    border: none;
+    color: rgba(200, 190, 255, 0.5);
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+}
+
+.le-help-popup-close:hover {
+    color: #ff8a80;
+    background: rgba(255, 138, 128, 0.1);
+}
+
+.le-help-popup-body {
+    padding: 20px;
+    color: rgba(200, 190, 255, 0.8);
+    font-size: 0.88rem;
+    line-height: 1.7;
+}
+
+.le-help-popup-body p {
+    margin: 4px 0;
+}
+
+.le-help-popup-body code {
+    background: rgba(120, 80, 220, 0.15);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.82rem;
+    color: #c5b8ff;
+}
+
+/* ── Themed Confirm Dialog ── */
+.le-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: leHelpFadeIn 0.15s ease;
+}
+
+.le-confirm-dialog {
+    background: linear-gradient(135deg, rgba(22, 17, 48, 0.98), rgba(32, 24, 64, 0.98));
+    border: 1px solid rgba(120, 80, 220, 0.4);
+    border-radius: 18px;
+    padding: 28px 32px;
+    min-width: 320px;
+    max-width: 420px;
+    text-align: center;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6), 0 0 50px rgba(120, 80, 220, 0.12);
+    animation: leHelpPopIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.le-confirm-icon {
+    font-size: 2.2rem;
+    margin-bottom: 12px;
+    filter: drop-shadow(0 2px 6px rgba(255, 200, 0, 0.3));
+}
+
+.le-confirm-message {
+    color: rgba(200, 190, 255, 0.85);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0 0 24px 0;
+}
+
+.le-confirm-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.le-confirm-btn {
+    width: 52px;
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.le-confirm-btn-cancel {
+    background: rgba(255, 138, 128, 0.12);
+    border-color: rgba(255, 138, 128, 0.3);
+    color: #ff8a80;
+}
+
+.le-confirm-btn-cancel:hover {
+    background: rgba(255, 138, 128, 0.25);
+    border-color: rgba(255, 138, 128, 0.6);
+    transform: scale(1.05);
+    box-shadow: 0 0 16px rgba(255, 138, 128, 0.2);
+}
+
+.le-confirm-btn-ok {
+    background: rgba(105, 240, 174, 0.12);
+    border-color: rgba(105, 240, 174, 0.3);
+    color: #69f0ae;
+}
+
+.le-confirm-btn-ok:hover {
+    background: rgba(105, 240, 174, 0.25);
+    border-color: rgba(105, 240, 174, 0.6);
+    transform: scale(1.05);
+    box-shadow: 0 0 16px rgba(105, 240, 174, 0.2);
+}

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import type { LearnEngineData, OutputPredictionItem } from '../../types/learn'
 import type { translations } from '../../i18n/translations'
 import { generateId } from '../../utils/learnStorage'
+import { useConfirm } from './ConfirmDialog'
 
 interface Props {
     data: LearnEngineData
@@ -24,7 +25,8 @@ export function OutputPredictionBuilder({ data, t, onSave }: Props): React.React
     const [expectedOutput, setExpectedOutput] = useState('')
     const [explanation, setExplanation] = useState('')
 
-    const items = data.outputPredictionItems
+    const confirmAsync = useConfirm()
+    const items = data.outputPredictionItems || []
 
     const resetForm = (): void => {
         setLanguage('javascript')
@@ -59,7 +61,7 @@ export function OutputPredictionBuilder({ data, t, onSave }: Props): React.React
     }
 
     const handleDelete = async (id: string): Promise<void> => {
-        if (!confirm(t.learnDeleteConfirm)) return
+        if (!(await confirmAsync(t.learnDeleteConfirm))) return
         await onSave({ ...data, outputPredictionItems: data.outputPredictionItems.filter((i) => i.id !== id) })
     }
 

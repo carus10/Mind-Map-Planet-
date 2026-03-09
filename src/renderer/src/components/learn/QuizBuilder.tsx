@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import type { LearnEngineData, QuizItem } from '../../types/learn'
 import type { translations } from '../../i18n/translations'
 import { generateId } from '../../utils/learnStorage'
+import { useConfirm } from './ConfirmDialog'
 
 interface Props {
     data: LearnEngineData
@@ -24,7 +25,8 @@ export function QuizBuilder({ data, t, onSave }: Props): React.ReactElement {
     const [correctIndex, setCorrectIndex] = useState(0)
     const [explanation, setExplanation] = useState('')
 
-    const items = data.quizItems
+    const confirmAsync = useConfirm()
+    const items = data.quizItems || []
 
     const resetForm = (): void => {
         setQuestion('')
@@ -77,7 +79,7 @@ export function QuizBuilder({ data, t, onSave }: Props): React.ReactElement {
     }
 
     const handleDelete = async (id: string): Promise<void> => {
-        if (!confirm(t.learnDeleteConfirm)) return
+        if (!(await confirmAsync(t.learnDeleteConfirm))) return
         await onSave({ ...data, quizItems: data.quizItems.filter((i) => i.id !== id) })
     }
 

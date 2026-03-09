@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import type { LearnEngineData, ApiRecallItem } from '../../types/learn'
 import type { translations } from '../../i18n/translations'
 import { generateId } from '../../utils/learnStorage'
+import { useConfirm } from './ConfirmDialog'
 
 interface Props {
     data: LearnEngineData
@@ -24,7 +25,8 @@ export function ApiRecallBuilder({ data, t, onSave }: Props): React.ReactElement
     const [example, setExample] = useState('')
     const [returnInfo, setReturnInfo] = useState('')
 
-    const items = data.apiRecallItems
+    const confirmAsync = useConfirm()
+    const items = data.apiRecallItems || []
 
     const resetForm = (): void => {
         setApiName('')
@@ -61,7 +63,7 @@ export function ApiRecallBuilder({ data, t, onSave }: Props): React.ReactElement
     }
 
     const handleDelete = async (id: string): Promise<void> => {
-        if (!confirm(t.learnDeleteConfirm)) return
+        if (!(await confirmAsync(t.learnDeleteConfirm))) return
         await onSave({ ...data, apiRecallItems: data.apiRecallItems.filter((i) => i.id !== id) })
     }
 
@@ -97,7 +99,7 @@ export function ApiRecallBuilder({ data, t, onSave }: Props): React.ReactElement
                                 <p style={{ fontSize: '0.95rem', color: '#e8eaf6', marginBottom: 12 }}>{current.usageDescription}</p>
                                 {current.example && (
                                     <>
-                                        <span style={{ fontSize: '0.78rem', color: 'rgba(200,190,255,0.5)' }}>Example:</span>
+                                        <span style={{ fontSize: '0.78rem', color: 'rgba(200,190,255,0.5)' }}>{t.learnARExample}:</span>
                                         <pre className="le-code-block" style={{ marginTop: 4, marginBottom: 8 }}>{current.example}</pre>
                                     </>
                                 )}

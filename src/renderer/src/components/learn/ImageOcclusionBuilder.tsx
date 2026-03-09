@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback } from 'react'
 import type { LearnEngineData, ImageOcclusionItem, OcclusionMask } from '../../types/learn'
 import type { translations } from '../../i18n/translations'
 import { generateId } from '../../utils/learnStorage'
+import { useConfirm } from './ConfirmDialog'
 
 interface Props {
     data: LearnEngineData
@@ -26,7 +27,8 @@ export function ImageOcclusionBuilder({ data, t, onSave }: Props): React.ReactEl
     const imgRef = useRef<HTMLImageElement>(null)
     const tempMaskRef = useRef<HTMLDivElement>(null)
 
-    const items = data.imageOcclusionItems
+    const confirmAsync = useConfirm()
+    const items = data.imageOcclusionItems || []
 
     const resetForm = (): void => {
         setTitle('')
@@ -134,7 +136,7 @@ export function ImageOcclusionBuilder({ data, t, onSave }: Props): React.ReactEl
         } else {
             const newItem: ImageOcclusionItem = {
                 id: generateId(),
-                title: title || 'Untitled',
+                title: title || t.learnUntitled,
                 imageDataUrl,
                 masks,
                 createdAt: Date.now(),
@@ -146,7 +148,7 @@ export function ImageOcclusionBuilder({ data, t, onSave }: Props): React.ReactEl
     }
 
     const handleDelete = async (id: string): Promise<void> => {
-        if (!confirm(t.learnDeleteConfirm)) return
+        if (!(await confirmAsync(t.learnDeleteConfirm))) return
         await onSave({ ...data, imageOcclusionItems: data.imageOcclusionItems.filter((i) => i.id !== id) })
     }
 
@@ -288,7 +290,7 @@ export function ImageOcclusionBuilder({ data, t, onSave }: Props): React.ReactEl
                 items.map((item) => (
                     <div className="le-card" key={item.id}>
                         <div className="le-card-header">
-                            <span className="le-card-title">{item.title} ({item.masks.length} masks)</span>
+                            <span className="le-card-title">{item.title} ({item.masks.length} {t.learnMasks})</span>
                             <div className="le-card-actions">
                                 <button className="le-btn le-btn-sm" onClick={() => openEdit(item)}>{t.learnEditMode}</button>
                                 <button className="le-btn le-btn-sm le-btn-danger" onClick={() => handleDelete(item.id)}>✕</button>

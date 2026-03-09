@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import type { LearnEngineData, ClozeItem } from '../../types/learn'
 import type { translations } from '../../i18n/translations'
 import { generateId } from '../../utils/learnStorage'
+import { useConfirm } from './ConfirmDialog'
 
 interface Props {
     data: LearnEngineData
@@ -26,7 +27,8 @@ export function ClozeBuilder({ data, t, onSave }: Props): React.ReactElement {
     const [hint, setHint] = useState('')
     const [tags, setTags] = useState('')
 
-    const items = data.clozeItems
+    const confirmAsync = useConfirm()
+    const items = data.clozeItems || []
 
     const resetForm = (): void => {
         setSourceText('')
@@ -90,7 +92,7 @@ export function ClozeBuilder({ data, t, onSave }: Props): React.ReactElement {
     }
 
     const handleDelete = async (id: string): Promise<void> => {
-        if (!confirm(t.learnDeleteConfirm)) return
+        if (!(await confirmAsync(t.learnDeleteConfirm))) return
         await onSave({ ...data, clozeItems: data.clozeItems.filter((i) => i.id !== id) })
     }
 

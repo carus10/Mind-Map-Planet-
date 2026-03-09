@@ -18,6 +18,8 @@ const MODE_ICONS: Record<string, string> = {
     apiRecall: '📚',
     realProblem: '🧩',
     codeCompletion: '📝',
+    bugHunt: '🐛',
+    refactorRecall: '♻️',
 }
 
 export function LearnOverview({ data, t, modeLabel, onSelectMode }: Props): React.ReactElement {
@@ -29,7 +31,9 @@ export function LearnOverview({ data, t, modeLabel, onSelectMode }: Props): Reac
         (data.outputPredictionItems || []).length +
         (data.apiRecallItems || []).length +
         (data.realProblemItems || []).length +
-        (data.codeCompletionItems || []).length
+        (data.codeCompletionItems || []).length +
+        (data.bugHuntItems || []).length +
+        (data.refactorRecallItems || []).length
 
     const distribution: { mode: LearnMode; count: number }[] = [
         { mode: 'cloze', count: (data.clozeItems || []).length },
@@ -40,6 +44,8 @@ export function LearnOverview({ data, t, modeLabel, onSelectMode }: Props): Reac
         { mode: 'apiRecall', count: (data.apiRecallItems || []).length },
         { mode: 'realProblem', count: (data.realProblemItems || []).length },
         { mode: 'codeCompletion', count: (data.codeCompletionItems || []).length },
+        { mode: 'bugHunt', count: (data.bugHuntItems || []).length },
+        { mode: 'refactorRecall', count: (data.refactorRecallItems || []).length },
     ]
 
     const maxCount = Math.max(1, ...distribution.map((d) => d.count))
@@ -74,6 +80,8 @@ export function LearnOverview({ data, t, modeLabel, onSelectMode }: Props): Reac
         ...(data.apiRecallItems || []).map((i) => ({ type: 'apiRecall' as const, label: i.apiName, createdAt: i.createdAt })),
         ...(data.realProblemItems || []).map((i) => ({ type: 'realProblem' as const, label: i.title, createdAt: i.createdAt })),
         ...(data.codeCompletionItems || []).map((i) => ({ type: 'codeCompletion' as const, label: i.codeLines[0]?.slice(0, 50), createdAt: i.createdAt })),
+        ...(data.bugHuntItems || []).map((i) => ({ type: 'bugHunt' as const, label: i.title, createdAt: i.createdAt })),
+        ...(data.refactorRecallItems || []).map((i) => ({ type: 'refactorRecall' as const, label: i.title, createdAt: i.createdAt })),
     ].sort((a, b) => b.createdAt - a.createdAt).slice(0, 5)
 
     return (

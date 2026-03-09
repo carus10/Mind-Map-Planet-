@@ -27,6 +27,9 @@ export function emptyLearnData(noteId: string, notePath: string): LearnEngineDat
         apiRecallItems: [],
         realProblemItems: [],
         codeCompletionItems: [],
+        bugHuntItems: [],
+        refactorRecallItems: [],
+        linkedLearningSets: [],
         progress: {},
     }
 }
@@ -41,7 +44,9 @@ export function recomputeStats(data: LearnEngineData): LearnEngineStats {
         data.outputPredictionItems.length +
         data.apiRecallItems.length +
         data.realProblemItems.length +
-        data.codeCompletionItems.length
+        data.codeCompletionItems.length +
+        (data.bugHuntItems || []).length +
+        (data.refactorRecallItems || []).length
 
     return {
         ...data.stats,
@@ -69,6 +74,9 @@ export async function loadLearnData(noteId: string, notePath: string): Promise<L
                 apiRecallItems: parsed.apiRecallItems ?? [],
                 realProblemItems: parsed.realProblemItems ?? [],
                 codeCompletionItems: parsed.codeCompletionItems ?? [],
+                bugHuntItems: parsed.bugHuntItems ?? [],
+                refactorRecallItems: parsed.refactorRecallItems ?? [],
+                linkedLearningSets: parsed.linkedLearningSets ?? [],
                 progress: parsed.progress ?? {},
             }
         }

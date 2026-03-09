@@ -100,6 +100,41 @@ export interface RealProblemItem {
     createdAt: number
 }
 
+/** Bug hunt item – find the bug in code */
+export interface BugHuntItem {
+    id: string
+    title: string
+    language: string
+    buggyCode: string
+    expectedIssue: string
+    explanation?: string
+    difficulty?: 'easy' | 'medium' | 'hard'
+    createdAt: number
+}
+
+/** Refactor recall item – improve the code */
+export interface RefactorRecallItem {
+    id: string
+    title: string
+    language: string
+    originalCode: string
+    expectedRefactor: string
+    explanation?: string
+    difficulty?: 'easy' | 'medium' | 'hard'
+    createdAt: number
+}
+
+/** Linked learning set – study across connected notes */
+export interface LinkedLearningSet {
+    id: string
+    title: string
+    notePaths: string[]
+    noteIds?: string[]
+    description?: string
+    includedModes: LearnMode[]
+    createdAt: number
+}
+
 /** Aggregate stats kept with each note */
 export interface LearnEngineStats {
     totalItems: number
@@ -131,6 +166,9 @@ export interface LearnEngineData {
     apiRecallItems: ApiRecallItem[]
     realProblemItems: RealProblemItem[]
     codeCompletionItems: CodeCompletionItem[]
+    bugHuntItems: BugHuntItem[]
+    refactorRecallItems: RefactorRecallItem[]
+    linkedLearningSets: LinkedLearningSet[]
     progress?: LearnProgressMap
 }
 
@@ -145,4 +183,7 @@ export type LearnMode =
     | 'apiRecall'
     | 'realProblem'
     | 'codeCompletion'
+    | 'bugHunt'
+    | 'refactorRecall'
+    | 'linkedLearning'
     | 'mixedPractice'
