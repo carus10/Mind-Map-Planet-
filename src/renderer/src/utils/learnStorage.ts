@@ -26,6 +26,8 @@ export function emptyLearnData(noteId: string, notePath: string): LearnEngineDat
         outputPredictionItems: [],
         apiRecallItems: [],
         realProblemItems: [],
+        codeCompletionItems: [],
+        progress: {},
     }
 }
 
@@ -38,7 +40,8 @@ export function recomputeStats(data: LearnEngineData): LearnEngineStats {
         data.quizItems.length +
         data.outputPredictionItems.length +
         data.apiRecallItems.length +
-        data.realProblemItems.length
+        data.realProblemItems.length +
+        data.codeCompletionItems.length
 
     return {
         ...data.stats,
@@ -65,6 +68,8 @@ export async function loadLearnData(noteId: string, notePath: string): Promise<L
                 outputPredictionItems: parsed.outputPredictionItems ?? [],
                 apiRecallItems: parsed.apiRecallItems ?? [],
                 realProblemItems: parsed.realProblemItems ?? [],
+                codeCompletionItems: parsed.codeCompletionItems ?? [],
+                progress: parsed.progress ?? {},
             }
         }
     } catch {
@@ -86,4 +91,45 @@ export async function saveLearnData(data: LearnEngineData): Promise<void> {
 /** Generate a unique id for items */
 export function generateId(): string {
     return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+/** Load tags for a note */
+export async function loadNoteTags(notePath: string): Promise<string[]> {
+    try {
+        const raw = await window.api.storeGet(`note-tags:${notePath}`)
+        if (Array.isArray(raw)) {
+            return raw as string[]
+        }
+    } catch {
+        // Fall through
+    }
+    return []
+}
+
+/** Save tags for a note */
+export async function saveNoteTags(notePath: string, tags: string[]): Promise<void> {
+    await window.api.storeSet(`note-tags:${notePath}`, tags)
+}
+
+/** Helper to update progress for a specific item */
+export function updateItemProgress(data: LearnEngineData, itemId: string, isCorrect: boolean): LearnEngineData {
+    const now = Date.now()
+    const currentProgress = data.progress?.[itemId] || { correctCount: 0, wrongCount: 0 }
+
+    return {
+        ...data,
+        stats: {
+            ...data.stats,
+            lastStudiedAt: now,
+        },
+        progress: {
+            ...data.progress,
+            [itemId]: {
+                ...currentProgress,
+                correctCount: currentProgress.correctCount + (isCorrect ? 1 : 0),
+                wrongCount: currentProgress.wrongCount + (isCorrect ? 0 : 1),
+                lastStudiedAt: now,
+            }
+        }
+    }
 }

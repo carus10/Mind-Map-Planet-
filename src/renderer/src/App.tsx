@@ -1,4 +1,19 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+
+// Error catcher for debugging black screens
+window.addEventListener('error', (event) => {
+  const div = document.createElement('div');
+  div.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(20,0,0,0.9);color:#ff8a80;z-index:999999;font-family:monospace;padding:2rem;overflow:auto;white-space:pre-wrap;';
+  div.innerHTML = `<h1>Fatal Error</h1><p>${event.error?.message}</p><pre>${event.error?.stack}</pre>`;
+  document.body.appendChild(div);
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  const div = document.createElement('div');
+  div.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(20,0,0,0.9);color:#ff8a80;z-index:999999;font-family:monospace;padding:2rem;overflow:auto;white-space:pre-wrap;';
+  div.innerHTML = `<h1>Unhandled Promise Rejection</h1><p>${event.reason}</p><pre>${event.reason?.stack}</pre>`;
+  document.body.appendChild(div);
+});
 import { useMapStore } from './store/mapStore'
 import { WelcomeScreen } from './components/WelcomeScreen'
 import { VaultSwitcher } from './components/VaultSwitcher'
@@ -21,12 +36,13 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { NoteActionDialog } from './components/NoteActionDialog'
 import { NoteEditor } from './components/NoteEditor'
 import { LearnEngineModal } from './components/LearnEngineModal'
+import { NoteTagDialog } from './components/NoteTagDialog'
 import { buildObsidianUrl } from './utils/obsidianUrl'
 import type { VaultHierarchy } from './types/hierarchy'
 import './index.css'
 
 export function App(): React.ReactElement {
-  const { hierarchy, setHierarchy, setError, contextMenuTarget, setContextMenuTarget, setRenameTarget, backgroundTheme, actionNoteTarget, setActionNoteTarget, editingNoteTarget, setEditingNoteTarget, learnEngineTarget, isLearnEngineOpen, setLearnEngineTarget, setIsLearnEngineOpen } = useMapStore((s) => ({
+  const { hierarchy, setHierarchy, setError, contextMenuTarget, setContextMenuTarget, setRenameTarget, backgroundTheme, actionNoteTarget, setActionNoteTarget, editingNoteTarget, setEditingNoteTarget, learnEngineTarget, isLearnEngineOpen, setLearnEngineTarget, setIsLearnEngineOpen, tagNodeTarget, setTagNodeTarget } = useMapStore((s) => ({
     hierarchy: s.hierarchy,
     setHierarchy: s.setHierarchy,
     setError: s.setError,
@@ -42,6 +58,8 @@ export function App(): React.ReactElement {
     isLearnEngineOpen: s.isLearnEngineOpen,
     setLearnEngineTarget: s.setLearnEngineTarget,
     setIsLearnEngineOpen: s.setIsLearnEngineOpen,
+    tagNodeTarget: s.tagNodeTarget,
+    setTagNodeTarget: s.setTagNodeTarget,
   }))
   const [showSettings, setShowSettings] = useState(false)
   const [showCreateNote, setShowCreateNote] = useState(false)
@@ -216,6 +234,7 @@ export function App(): React.ReactElement {
             onDelete={() => setShowDelete(true)}
             onCreateFolder={() => setShowCreateFolder(true)}
             onAppearance={contextMenuTarget.isPlanet ? () => setShowAppearance(true) : undefined}
+            onTag={contextMenuTarget.node.type === 'home' ? () => setTagNodeTarget(contextMenuTarget.node) : undefined}
           />
         )}
         {showAppearance && contextMenuTarget?.isPlanet && (
@@ -267,6 +286,12 @@ export function App(): React.ReactElement {
               setIsLearnEngineOpen(false)
               setLearnEngineTarget(null)
             }}
+          />
+        )}
+        {tagNodeTarget && (
+          <NoteTagDialog
+            node={tagNodeTarget}
+            onClose={() => setTagNodeTarget(null)}
           />
         )}
       </div>

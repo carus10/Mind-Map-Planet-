@@ -13,10 +13,11 @@ interface Props {
     onDelete: () => void
     onCreateFolder: () => void
     onAppearance?: () => void
+    onTag?: () => void
     isPlanet?: boolean
 }
 
-export function NodeContextMenu({ node, x, y, onClose, onRename, onDelete, onCreateFolder, onAppearance, isPlanet }: Props): React.ReactElement {
+export function NodeContextMenu({ node, x, y, onClose, onRename, onDelete, onCreateFolder, onAppearance, onTag, isPlanet }: Props): React.ReactElement {
     const isFolder = node.type !== 'home'
     const language = useMapStore(s => s.language)
     const t = translations[language]
@@ -55,6 +56,19 @@ export function NodeContextMenu({ node, x, y, onClose, onRename, onDelete, onCre
                             {t.contextMenuAppearance}
                         </button>
                         <div className="ctx-divider" />
+                    </>
+                )}
+
+                {/* Tag Note — sadece notlarda görünür (isFolder false iken) ve root olmayanlarda */}
+                {!isFolder && onTag && (
+                    <>
+                        <button className="ctx-item ctx-item-tag" onClick={() => { onTag(); onClose() }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                                <line x1="7" y1="7" x2="7.01" y2="7" />
+                            </svg>
+                            {t.tagNote}
+                        </button>
                     </>
                 )}
 

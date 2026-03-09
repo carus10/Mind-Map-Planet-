@@ -67,6 +67,16 @@ export interface OutputPredictionItem {
     createdAt: number
 }
 
+/** Code completion item */
+export interface CodeCompletionItem {
+    id: string
+    language: string
+    codeLines: string[] // Code split by blanks
+    blanks: string[] // The expected answers for the blanks
+    explanation?: string
+    createdAt: number
+}
+
 /** API recall card */
 export interface ApiRecallItem {
     id: string
@@ -97,6 +107,16 @@ export interface LearnEngineStats {
     lastStudiedAt?: number
 }
 
+/** Per-item study progress */
+export interface LearnItemProgress {
+    correctCount: number
+    wrongCount: number
+    lastStudiedAt?: number
+    nextStudyAt?: number
+}
+
+export type LearnProgressMap = Record<string, LearnItemProgress>
+
 /** Root data structure for one note */
 export interface LearnEngineData {
     noteId: string
@@ -110,6 +130,8 @@ export interface LearnEngineData {
     outputPredictionItems: OutputPredictionItem[]
     apiRecallItems: ApiRecallItem[]
     realProblemItems: RealProblemItem[]
+    codeCompletionItems: CodeCompletionItem[]
+    progress?: LearnProgressMap
 }
 
 /** Available learning modes */
@@ -122,3 +144,5 @@ export type LearnMode =
     | 'outputPrediction'
     | 'apiRecall'
     | 'realProblem'
+    | 'codeCompletion'
+    | 'mixedPractice'

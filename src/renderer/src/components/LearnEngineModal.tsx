@@ -3,7 +3,7 @@ import { useMapStore } from '../store/mapStore'
 import { translations } from '../i18n/translations'
 import type { HierarchyNode } from '../types/hierarchy'
 import type { LearnEngineData, LearnMode } from '../types/learn'
-import { loadLearnData, saveLearnData, emptyLearnData } from '../utils/learnStorage'
+import { loadLearnData, saveLearnData, emptyLearnData, loadNoteTags } from '../utils/learnStorage'
 import { LearnOverview } from './learn/LearnOverview'
 import { ClozeBuilder } from './learn/ClozeBuilder'
 import { ImageOcclusionBuilder } from './learn/ImageOcclusionBuilder'
@@ -12,6 +12,8 @@ import { QuizBuilder } from './learn/QuizBuilder'
 import { OutputPredictionBuilder } from './learn/OutputPredictionBuilder'
 import { ApiRecallBuilder } from './learn/ApiRecallBuilder'
 import { RealProblemBuilder } from './learn/RealProblemBuilder'
+import { CodeCompletionBuilder } from './learn/CodeCompletionBuilder'
+import { MixedPracticeBuilder } from './learn/MixedPracticeBuilder'
 import './LearnEngineModal.css'
 
 interface Props {
@@ -28,6 +30,8 @@ const MODES: LearnMode[] = [
     'outputPrediction',
     'apiRecall',
     'realProblem',
+    'codeCompletion',
+    'mixedPractice',
 ]
 
 const MODE_ICONS: Record<LearnMode, string> = {
@@ -39,16 +43,26 @@ const MODE_ICONS: Record<LearnMode, string> = {
     outputPrediction: '💻',
     apiRecall: '📚',
     realProblem: '🧩',
+    codeCompletion: '📝',
+    mixedPractice: '🔀',
 }
 
 export function LearnEngineModal({ noteNode, onClose }: Props): React.ReactElement {
     const { language } = useMapStore((s) => ({ language: s.language }))
-    const t = translations[language]
+    const t = translations[language] as any
 
     const [activeMode, setActiveMode] = useState<LearnMode>('overview')
     const [data, setData] = useState<LearnEngineData>(emptyLearnData(noteNode.id, noteNode.absolutePath))
+    const [tags, setTags] = useState<string[]>([])
     const [loading, setLoading] = useState(true)
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saved'>('idle')
+
+    // Filter modes based on tags
+    const availableModes = React.useMemo(() => {
+        const isCodeRelated = tags.some(t => ['code', 'backend', 'frontend', 'algorithm', 'api'].includes(t.toLowerCase()))
+        if (isCodeRelated) return MODES
+        return MODES.filter(m => !['outputPrediction', 'apiRecall', 'realProblem', 'codeCompletion'].includes(m))
+    }, [tags])
 
     // Mode label lookup
     const modeLabel = useCallback(
@@ -60,28 +74,38 @@ export function LearnEngineModal({ noteNode, onClose }: Props): React.ReactEleme
                 conceptMatch: t.learnConceptMatch,
                 quiz: t.learnQuiz,
                 outputPrediction: t.learnOutputPrediction,
-                apiRecall: t.learnApiRecall,
-                realProblem: t.learnRealProblem,
+                apiRecall: t.learnApiRecall || 'API Recall',
+                realProblem: t.learnRealProblem || 'Real Problem',
+                codeCompletion: t.learnCodeCompletion || 'Code Completion',
+                mixedPractice: 'Mixed Practice',
             }
             return map[mode]
         },
         [t],
     )
 
-    // Load data on mount
+    // Load data and tags on mount
     useEffect(() => {
         let cancelled = false
         setLoading(true)
-        loadLearnData(noteNode.id, noteNode.absolutePath)
-            .then((loaded) => {
-                if (!cancelled) setData(loaded)
-            })
-            .catch(() => {
-                if (!cancelled) setData(emptyLearnData(noteNode.id, noteNode.absolutePath))
-            })
-            .finally(() => {
-                if (!cancelled) setLoading(false)
-            })
+        Promise.all([
+            loadLearnData(noteNode.id, noteNode.absolutePath).catch(() => emptyLearnData(noteNode.id, noteNode.absolutePath)),
+            loadNoteTags(noteNode.absolutePath).catch(() => [])
+        ]).then(([loadedData, loadedTags]) => {
+            if (!cancelled) {
+                setData(loadedData)
+                setTags(loadedTags)
+
+                // If the current active mode is not available in the filtered modes, fallback to overview
+                const isCodeRelated = loadedTags.some(t => ['code', 'backend', 'frontend', 'algorithm', 'api'].includes(t.toLowerCase()))
+                const currentRestricted = ['outputPrediction', 'apiRecall', 'realProblem', 'codeCompletion'].includes(activeMode)
+                if (currentRestricted && !isCodeRelated) {
+                    setActiveMode('overview')
+                }
+            }
+        }).finally(() => {
+            if (!cancelled) setLoading(false)
+        })
         return () => {
             cancelled = true
         }
@@ -133,6 +157,10 @@ export function LearnEngineModal({ noteNode, onClose }: Props): React.ReactEleme
                 return <ApiRecallBuilder data={data} t={t} onSave={handleSave} />
             case 'realProblem':
                 return <RealProblemBuilder data={data} t={t} onSave={handleSave} />
+            case 'codeCompletion':
+                return <CodeCompletionBuilder data={data} t={t} onSave={handleSave} />
+            case 'mixedPractice':
+                return <MixedPracticeBuilder data={data} t={t} onSave={handleSave} availableModes={availableModes} />
             default:
                 return <LearnOverview data={data} t={t} modeLabel={modeLabel} onSelectMode={setActiveMode} />
         }
@@ -166,7 +194,7 @@ export function LearnEngineModal({ noteNode, onClose }: Props): React.ReactEleme
                 <div className="le-body">
                     {/* ── Sidebar ── */}
                     <nav className="le-sidebar">
-                        {MODES.map((mode) => (
+                        {availableModes.map((mode) => (
                             <button
                                 key={mode}
                                 className={`le-sidebar-item ${activeMode === mode ? 'active' : ''}`}
